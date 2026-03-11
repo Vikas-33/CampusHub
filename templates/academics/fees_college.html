@@ -2,8 +2,8 @@
 {% block title %}Fees{% endblock %}
 {% block page_title %}Fee Management{% endblock %}
 {% block topbar_actions %}
-  <a href="{% url 'add_fee_structure' %}" class="btn btn-outline">+ Fee Structure</a>
-  <a href="{% url 'record_payment' %}" class="btn btn-accent">+ Record Payment</a>
+  <a href="{% url 'add_fee_structure' college_slug=college_slug %}" class="btn btn-outline">+ Fee Structure</a>
+  <a href="{% url 'record_payment' college_slug=college_slug %}" class="btn btn-accent">+ Record Payment</a>
 {% endblock %}
 {% block content %}
 <div class="stats-grid">

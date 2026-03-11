@@ -31,7 +31,7 @@
   <div class="card mb-20">
     <div class="card-header">
       <span class="card-title">📢 Recent Notices</span>
-      <a href="{% url 'add_notice' %}" class="btn btn-sm btn-primary">+ Post Notice</a>
+      <a href="{% url 'add_notice' college_slug=college_slug %}" class="btn btn-sm btn-primary">+ Post Notice</a>
     </div>
     <div class="card-body">
       {% if recent_notices %}
@@ -55,7 +55,7 @@
   <div class="card mb-20">
     <div class="card-header">
       <span class="card-title">📝 Upcoming Exams</span>
-      <a href="{% url 'add_exam' %}" class="btn btn-sm btn-primary">+ Schedule</a>
+      <a href="{% url 'add_exam' college_slug=college_slug %}" class="btn btn-sm btn-primary">+ Schedule</a>
     </div>
     <div class="card-body">
       {% if upcoming_exams %}
@@ -85,21 +85,21 @@
 </div>
 
 <div class="grid-3">
-  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'manage_teachers' %}'">
+  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'manage_teachers' college_slug=college_slug %}'">
     <div class="card-body" style="text-align:center; padding:32px;">
       <div style="font-size:40px; margin-bottom:12px;">👨‍🏫</div>
       <h3 style="font-size:16px;">Manage Teachers</h3>
       <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Add, edit, remove faculty</p>
     </div>
   </div>
-  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'manage_students' %}'">
+  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'manage_students' college_slug=college_slug %}'">
     <div class="card-body" style="text-align:center; padding:32px;">
       <div style="font-size:40px; margin-bottom:12px;">🎓</div>
       <h3 style="font-size:16px;">Manage Students</h3>
       <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Enroll and track students</p>
     </div>
   </div>
-  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'fees' %}'">
+  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'fees' college_slug=college_slug %}'">
     <div class="card-body" style="text-align:center; padding:32px;">
       <div style="font-size:40px; margin-bottom:12px;">💰</div>
       <h3 style="font-size:16px;">Fee Management</h3>

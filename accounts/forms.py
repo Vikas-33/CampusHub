@@ -26,6 +26,15 @@ class CollegeRegistrationForm(forms.ModelForm):
         max_length=200,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+    slug = forms.SlugField(
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g. ACE',
+            'style': 'text-transform:uppercase; letter-spacing:2px;'
+        }),
+        help_text='Short code used in your URL. Letters and numbers only.'
+    )
     address = forms.CharField(
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2})
     )
@@ -71,6 +80,12 @@ class CollegeRegistrationForm(forms.ModelForm):
             raise forms.ValidationError('This username is already taken.')
         return username
 
+    def clean_slug(self):
+        slug = self.cleaned_data.get('slug', '').upper()
+        if CollegeProfile.objects.filter(slug=slug).exists():
+            raise forms.ValidationError('This short code is already taken. Choose another.')
+        return slug
+
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         if phone:
@@ -91,6 +106,7 @@ class CollegeRegistrationForm(forms.ModelForm):
             CollegeProfile.objects.create(
                 user=user,
                 college_name=self.cleaned_data['college_name'],
+                slug=self.cleaned_data['slug'].upper(),
                 address=self.cleaned_data['address'],
                 established_year=self.cleaned_data.get('established_year'),
                 website=self.cleaned_data.get('website', ''),

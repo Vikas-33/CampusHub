@@ -10,16 +10,40 @@ from django.core.paginator import Paginator
 from academics.utils import send_teacher_credentials, send_student_credentials
 
 
+# ─── Helpers ────────────────────────────────────────────────────────────────
+
+def _get_user_slug(user):
+    """Return the college slug for any user role."""
+    try:
+        if user.role == 'college':
+            return user.college_profile.slug
+        elif user.role == 'teacher':
+            return user.teacher_profile.college.slug
+        elif user.role == 'student':
+            return user.student_profile.college.slug
+    except Exception:
+        return None
+    return None
+
+
+def _redirect_dashboard(user):
+    slug = _get_user_slug(user)
+    if slug:
+        return redirect('dashboard', college_slug=slug)
+    return redirect('login')
+
+
+# ─── Auth ────────────────────────────────────────────────────────────────────
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return _redirect_dashboard(request.user)
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('dashboard')
+            return _redirect_dashboard(user)
         else:
             messages.error(request, 'Invalid username or password.')
     else:
@@ -34,7 +58,7 @@ def register_college(request):
             user = form.save()
             login(request, user)
             messages.success(request, 'College registered successfully!')
-            return redirect('dashboard')
+            return _redirect_dashboard(user)
     else:
         form = CollegeRegistrationForm()
     return render(request, 'accounts/register_college.html', {'form': form})
@@ -45,9 +69,10 @@ def logout_view(request):
     return redirect('login')
 
 
+# ─── Dashboard ───────────────────────────────────────────────────────────────
+
 @login_required
-def dashboard(request):
-    print(f"DEBUG DASHBOARD CALLED: user={request.user.username} role={request.user.role}")
+def dashboard(request, college_slug):
     user = request.user
     context = {'user': user}
 
@@ -55,7 +80,7 @@ def dashboard(request):
         try:
             college = user.college_profile
         except CollegeProfile.DoesNotExist:
-            messages.error(request, 'College profile not found. Please contact support.')
+            messages.error(request, 'College profile not found.')
             return redirect('login')
         context.update({
             'college': college,
@@ -63,12 +88,9 @@ def dashboard(request):
             'total_teachers': TeacherProfile.objects.filter(college=college).count(),
             'total_courses': Course.objects.filter(college=college).count(),
             'recent_notices': Notice.objects.filter(
-                college=college,
-                is_active=True
+                college=college, is_active=True
             ).order_by('-created_at')[:5],
-            'upcoming_exams': Exam.objects.filter(
-                college=college
-            ).order_by('date')[:5],
+            'upcoming_exams': Exam.objects.filter(college=college).order_by('date')[:5],
             'pending_fees': FeePayment.objects.filter(
                 student__college=college, status='pending'
             ).count(),
@@ -79,7 +101,7 @@ def dashboard(request):
         try:
             teacher = user.teacher_profile
         except TeacherProfile.DoesNotExist:
-            messages.error(request, 'Teacher profile not found. Please contact support.')
+            messages.error(request, 'Teacher profile not found.')
             return redirect('login')
         courses = Course.objects.filter(teacher=teacher)
         context.update({
@@ -88,8 +110,7 @@ def dashboard(request):
             'total_students': StudentProfile.objects.filter(college=teacher.college).count(),
             'assignments': Assignment.objects.filter(course__teacher=teacher).count(),
             'recent_notices': Notice.objects.filter(
-                college=teacher.college,
-                is_active=True,
+                college=teacher.college, is_active=True,
                 target_audience__in=['all', 'teachers']
             ).order_by('-created_at')[:5],
             'upcoming_exams': Exam.objects.filter(
@@ -102,19 +123,8 @@ def dashboard(request):
         try:
             student = user.student_profile
         except StudentProfile.DoesNotExist:
-            messages.error(request, 'Student profile not found. Please contact support.')
+            messages.error(request, 'Student profile not found.')
             return redirect('login')
-
-        # DEBUG
-        test_notices = Notice.objects.filter(
-            college=student.college,
-            is_active=True,
-            target_audience__in=['all', 'students']
-        )
-        print(f"DEBUG STUDENT: username={user.username} college_id={student.college_id}")
-        print(f"DEBUG NOTICES COUNT: {test_notices.count()}")
-        for n in test_notices:
-            print(f"  - {n.title} | audience={n.target_audience} | active={n.is_active} | college_id={n.college_id}")
 
         courses = Course.objects.filter(
             department=student.department,
@@ -126,22 +136,16 @@ def dashboard(request):
         present = attendance.filter(status='present').count()
         att_percent = round((present / total * 100), 1) if total > 0 else 0
 
-        if courses.exists():
-            upcoming_exams = Exam.objects.filter(
-                course__in=courses
-            ).order_by('date')[:5]
-        else:
-            upcoming_exams = Exam.objects.filter(
-                college=student.college
-            ).order_by('date')[:5]
+        upcoming_exams = Exam.objects.filter(
+            course__in=courses
+        ).order_by('date')[:5] if courses.exists() else Exam.objects.filter(
+            college=student.college
+        ).order_by('date')[:5]
 
         recent_notices = Notice.objects.filter(
-            college=student.college,
-            is_active=True,
+            college=student.college, is_active=True,
             target_audience__in=['all', 'students']
         ).order_by('-created_at')[:5]
-
-        print(f"DEBUG RECENT_NOTICES QUERYSET: {recent_notices.query}")
 
         context.update({
             'student': student,
@@ -152,32 +156,33 @@ def dashboard(request):
             'recent_notices': recent_notices,
             'upcoming_exams': upcoming_exams,
         })
-
-        print(f"DEBUG CONTEXT NOTICES: {context['recent_notices'].count()}")
-
         return render(request, 'dashboards/student_dashboard.html', context)
 
     return redirect('login')
 
 
+# ─── Profile ─────────────────────────────────────────────────────────────────
+
 @login_required
-def profile(request):
+def profile(request, college_slug):
     if request.method == 'POST':
         form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
-            return redirect('profile')
+            return redirect('profile', college_slug=college_slug)
     else:
         form = ProfileUpdateForm(instance=request.user)
     return render(request, 'accounts/profile.html', {'form': form})
 
 
+# ─── Teachers ────────────────────────────────────────────────────────────────
+
 @login_required
-def manage_teachers(request):
+def manage_teachers(request, college_slug):
     if not request.user.is_college():
         messages.error(request, 'Access denied.')
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
     teachers = TeacherProfile.objects.filter(college=college).select_related('user')
 
@@ -200,9 +205,8 @@ def manage_teachers(request):
     from academics.models import Department
     departments = Department.objects.filter(college=college)
 
-    paginator = Paginator(teachers, 20)  # 20 per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    paginator = Paginator(teachers, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'college/manage_teachers.html', {
         'page_obj': page_obj,
@@ -214,10 +218,10 @@ def manage_teachers(request):
 
 
 @login_required
-def add_teacher(request):
+def add_teacher(request, college_slug):
     if not request.user.is_college():
         messages.error(request, 'Access denied.')
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
 
     if request.method == 'POST':
@@ -235,8 +239,6 @@ def add_teacher(request):
             messages.error(request, 'Please fill in all required fields.')
             return render(request, 'college/add_teacher.html')
 
-        # Create user with a temp username — will be updated by TeacherProfile.save()
-        from accounts.models import User
         user = User.objects.create_user(
             username=f'temp_{email}',
             email=email,
@@ -244,8 +246,6 @@ def add_teacher(request):
             last_name=last_name,
             role='teacher',
         )
-
-        # Create profile — auto-generates employee_id and sets username + password
         profile = TeacherProfile.objects.create(
             user=user,
             college=college,
@@ -256,27 +256,22 @@ def add_teacher(request):
             joining_date=joining_date,
             salary=salary,
         )
-
-        # Set password to employee_id
         user.set_password(profile.employee_id)
         user.save()
-
-        send_teacher_credentials(profile) 
-
+        send_teacher_credentials(profile)
         messages.success(
             request,
             f'Teacher added! Employee ID: {profile.employee_id} | Username & Password: {profile.employee_id}'
         )
-        return redirect('manage_teachers')
+        return redirect('manage_teachers', college_slug=college_slug)
 
     return render(request, 'college/add_teacher.html')
 
 
-
 @login_required
-def edit_teacher(request, pk):
+def edit_teacher(request, college_slug, pk):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     teacher = get_object_or_404(TeacherProfile, pk=pk, college=request.user.college_profile)
     if request.method == 'POST':
         form = TeacherForm(request.POST, instance=teacher)
@@ -288,33 +283,34 @@ def edit_teacher(request, pk):
             teacher.user.save()
             form.save()
             messages.success(request, 'Teacher updated successfully!')
-            return redirect('manage_teachers')
+            return redirect('manage_teachers', college_slug=college_slug)
     else:
         form = TeacherForm(instance=teacher, initial={
             'first_name': teacher.user.first_name,
             'last_name': teacher.user.last_name,
             'email': teacher.user.email,
-            'username': teacher.user.username,
         })
     return render(request, 'college/edit_teacher.html', {'form': form, 'teacher': teacher})
 
 
 @login_required
-def delete_teacher(request, pk):
+def delete_teacher(request, college_slug, pk):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     teacher = get_object_or_404(TeacherProfile, pk=pk, college=request.user.college_profile)
     if request.method == 'POST':
         teacher.user.delete()
         messages.success(request, 'Teacher deleted.')
-        return redirect('manage_teachers')
+        return redirect('manage_teachers', college_slug=college_slug)
     return render(request, 'college/confirm_delete.html', {'object': teacher, 'type': 'Teacher'})
 
 
+# ─── Students ────────────────────────────────────────────────────────────────
+
 @login_required
-def manage_students(request):
+def manage_students(request, college_slug):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
     students = StudentProfile.objects.filter(college=college).select_related('user', 'department')
 
@@ -339,9 +335,8 @@ def manage_students(request):
     from academics.models import Department
     departments = Department.objects.filter(college=college)
 
-    paginator = Paginator(students, 20)  # 20 per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    paginator = Paginator(students, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'college/manage_students.html', {
         'page_obj': page_obj,
@@ -354,61 +349,42 @@ def manage_students(request):
 
 
 @login_required
-def add_student(request):
+def add_student(request, college_slug):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
 
-    from .forms import StudentForm
     if request.method == 'POST':
         form = StudentForm(request.POST, college=college)
         if form.is_valid():
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            email = form.cleaned_data['email']
-            department = form.cleaned_data.get('department')
-            semester = form.cleaned_data['semester']
-            batch_year = form.cleaned_data['batch_year']
-            date_of_birth = form.cleaned_data.get('date_of_birth')
-            address = form.cleaned_data.get('address', '')
-            guardian_name = form.cleaned_data.get('guardian_name', '')
-            guardian_phone = form.cleaned_data.get('guardian_phone', '')
-            phone = form.cleaned_data.get('phone', '')
-
-            from accounts.models import User
+            cd = form.cleaned_data
             user = User.objects.create_user(
-                username=f'temp_{email}',
-                email=email,
-                first_name=first_name,
-                last_name=last_name,
+                username=f'temp_{cd["email"]}',
+                email=cd['email'],
+                first_name=cd['first_name'],
+                last_name=cd['last_name'],
                 role='student',
-                phone=phone,
+                phone=cd.get('phone', ''),
             )
-
-            # Create profile — auto-generates roll_number, enrollment_number, sets username
             profile = StudentProfile.objects.create(
                 user=user,
                 college=college,
-                department=department,
-                semester=semester,
-                batch_year=batch_year,
-                date_of_birth=date_of_birth,
-                address=address,
-                guardian_name=guardian_name,
-                guardian_phone=guardian_phone,
+                department=cd.get('department'),
+                semester=cd['semester'],
+                batch_year=cd['batch_year'],
+                date_of_birth=cd.get('date_of_birth'),
+                address=cd.get('address', ''),
+                guardian_name=cd.get('guardian_name', ''),
+                guardian_phone=cd.get('guardian_phone', ''),
             )
-
-            # Set password to roll_number
             user.set_password(profile.roll_number)
             user.save()
-            
             send_student_credentials(profile)
-
             messages.success(
                 request,
                 f'Student enrolled! Roll No: {profile.roll_number} | Username & Password: {profile.roll_number}'
             )
-            return redirect('manage_students')
+            return redirect('manage_students', college_slug=college_slug)
     else:
         form = StudentForm(college=college)
 
@@ -416,9 +392,9 @@ def add_student(request):
 
 
 @login_required
-def edit_student(request, pk):
+def edit_student(request, college_slug, pk):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
     student = get_object_or_404(StudentProfile, pk=pk, college=college)
     if request.method == 'POST':
@@ -431,24 +407,23 @@ def edit_student(request, pk):
             student.user.save()
             form.save()
             messages.success(request, 'Student updated successfully!')
-            return redirect('manage_students')
+            return redirect('manage_students', college_slug=college_slug)
     else:
         form = StudentForm(instance=student, college=college, initial={
             'first_name': student.user.first_name,
             'last_name': student.user.last_name,
             'email': student.user.email,
-            'username': student.user.username,
         })
     return render(request, 'college/edit_student.html', {'form': form, 'student': student})
 
 
 @login_required
-def delete_student(request, pk):
+def delete_student(request, college_slug, pk):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     student = get_object_or_404(StudentProfile, pk=pk, college=request.user.college_profile)
     if request.method == 'POST':
         student.user.delete()
         messages.success(request, 'Student deleted.')
-        return redirect('manage_students')
+        return redirect('manage_students', college_slug=college_slug)
     return render(request, 'college/confirm_delete.html', {'object': student, 'type': 'Student'})

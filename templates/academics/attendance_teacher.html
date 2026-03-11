@@ -3,7 +3,7 @@
 {% block page_title %}Attendance Management{% endblock %}
 {% block topbar_actions %}
   {% if selected_course %}
-    <a href="{% url 'export_attendance_teacher' selected_course.pk %}" class="btn btn-outline">📥 Export CSV</a>
+    <a href="{% url 'export_attendance_teacher' college_slug=college_slug course_id=selected_course.pk %}" class="btn btn-outline">📥 Export CSV</a>
   {% endif %}
 {% endblock %}
 
@@ -19,7 +19,7 @@
           <div style="font-size:12px; color:var(--text-secondary);">{{ course.code }} &bull; Sem {{ course.semester }}</div>
         </div>
         <div style="display:flex; gap:8px;">
-          <a href="{% url 'mark_attendance' course.pk %}" class="btn btn-sm btn-success">Mark Today</a>
+          <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-sm btn-success">Mark Today</a>
           <a href="?course={{ course.pk }}" class="btn btn-sm btn-outline">View Records</a>
         </div>
       </div>
@@ -52,6 +52,5 @@
     </div>
   </div>
   {% endif %}
-
 </div>
 {% endblock %}

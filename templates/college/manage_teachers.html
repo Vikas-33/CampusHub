@@ -2,7 +2,7 @@
 {% block title %}Teachers{% endblock %}
 {% block page_title %}Faculty Management{% endblock %}
 {% block page_subtitle %}{{ page_obj.paginator.count }} teachers registered{% endblock %}
-{% block topbar_actions %}<a href="{% url 'add_teacher' %}" class="btn btn-accent">+ Add Teacher</a>{% endblock %}
+{% block topbar_actions %}<a href="{% url 'add_teacher' college_slug=college_slug %}" class="btn btn-accent">+ Add Teacher</a>{% endblock %}
 {% block content %}
 <div class="card">
   <div class="filter-bar">
@@ -20,7 +20,7 @@
         {% endfor %}
       </select>
       <button type="submit" class="btn btn-sm btn-primary">Apply</button>
-      <a href="{% url 'manage_teachers' %}" class="btn btn-sm btn-outline">Clear</a>
+      <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="btn btn-sm btn-outline">Clear</a>
     </form>
   </div>
 
@@ -54,8 +54,8 @@
           <td>{{ teacher.joining_date|date:"M d, Y"|default:"—" }}</td>
           <td>
             <div style="display:flex; gap:6px;">
-              <a href="{% url 'edit_teacher' teacher.pk %}" class="btn btn-xs btn-outline">Edit</a>
-              <a href="{% url 'delete_teacher' teacher.pk %}" class="btn btn-xs btn-danger">Delete</a>
+              <a href="{% url 'edit_teacher' college_slug=college_slug pk=teacher.pk %}" class="btn btn-xs btn-outline">Edit</a>
+              <a href="{% url 'delete_teacher' college_slug=college_slug pk=teacher.pk %}" class="btn btn-xs btn-danger">Delete</a>
             </div>
           </td>
         </tr>
@@ -65,7 +65,7 @@
             <div class="empty-state">
               <div class="icon">👨‍🏫</div>
               <h3>{% if search_query %}No teachers match "{{ search_query }}"{% else %}No teachers yet{% endif %}</h3>
-              <p>{% if search_query %}<a href="{% url 'manage_teachers' %}">Clear search</a>{% else %}Add your first faculty member{% endif %}</p>
+              <p>{% if search_query %}<a href="{% url 'manage_teachers' college_slug=college_slug %}">Clear search</a>{% else %}Add your first faculty member{% endif %}</p>
             </div>
           </td>
         </tr>

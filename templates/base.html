@@ -13,48 +13,47 @@
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="layout">
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="logo-icon">E</div>
       <div class="logo-text">
         <h2>EduCore</h2>
-        <span>Management System</span>
+        <span>{{ request.college.college_name|default:"Management System" }}</span>
       </div>
     </div>
 
     <nav class="sidebar-nav">
       <div class="nav-section-label">Main</div>
-      <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <a href="{% url 'dashboard' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
         <span>🏠</span> Dashboard
       </a>
 
       {% if request.user.is_authenticated %}
         {% if request.user.role == 'college' %}
           <div class="nav-section-label">Management</div>
-          <a href="{% url 'manage_teachers' %}" class="nav-item {% if 'teacher' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="nav-item {% if 'teacher' in request.resolver_match.url_name %}active{% endif %}">
             <span>👨‍🏫</span> Teachers
           </a>
-          <a href="{% url 'manage_students' %}" class="nav-item {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'manage_students' college_slug=college_slug %}" class="nav-item {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
             <span>🎓</span> Students
           </a>
-          <a href="{% url 'departments' %}" class="nav-item {% if request.resolver_match.url_name == 'departments' %}active{% endif %}">
+          <a href="{% url 'departments' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'departments' %}active{% endif %}">
             <span>🏛️</span> Departments
           </a>
-          <a href="{% url 'courses' %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
+          <a href="{% url 'courses' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
             <span>📚</span> Courses
           </a>
           <div class="nav-section-label">Academic</div>
-          <a href="{% url 'exams' %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'exams' college_slug=college_slug %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
             <span>📝</span> Exams
           </a>
-          <a href="{% url 'attendance' %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'attendance' college_slug=college_slug %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
             <span>📋</span> Attendance
           </a>
-          <a href="{% url 'fees' %}" class="nav-item {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fees' college_slug=college_slug %}" class="nav-item {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
             <span>💰</span> Fees
           </a>
-          <a href="{% url 'notices' %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'notices' college_slug=college_slug %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
             <span>📢</span> Notices
             {% if unread_notice_count > 0 %}
               <span class="notif-badge">{{ unread_notice_count }}</span>
@@ -63,19 +62,19 @@
 
         {% elif request.user.role == 'teacher' %}
           <div class="nav-section-label">Teaching</div>
-          <a href="{% url 'courses' %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
+          <a href="{% url 'courses' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
             <span>📚</span> My Courses
           </a>
-          <a href="{% url 'attendance' %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'attendance' college_slug=college_slug %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
             <span>📋</span> Attendance
           </a>
-          <a href="{% url 'assignments' %}" class="nav-item {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'assignments' college_slug=college_slug %}" class="nav-item {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
             <span>📄</span> Assignments
           </a>
-          <a href="{% url 'exams' %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'exams' college_slug=college_slug %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
             <span>📝</span> Exams
           </a>
-          <a href="{% url 'notices' %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'notices' college_slug=college_slug %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
             <span>📢</span> Notices
             {% if unread_notice_count > 0 %}
               <span class="notif-badge">{{ unread_notice_count }}</span>
@@ -84,25 +83,25 @@
 
         {% elif request.user.role == 'student' %}
           <div class="nav-section-label">Academics</div>
-          <a href="{% url 'courses' %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
+          <a href="{% url 'courses' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
             <span>📚</span> My Courses
           </a>
-          <a href="{% url 'attendance' %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'attendance' college_slug=college_slug %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
             <span>📋</span> Attendance
           </a>
-          <a href="{% url 'assignments' %}" class="nav-item {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'assignments' college_slug=college_slug %}" class="nav-item {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
             <span>📄</span> Assignments
           </a>
-          <a href="{% url 'exams' %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'exams' college_slug=college_slug %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
             <span>📝</span> Exams
           </a>
-          <a href="{% url 'student_results' %}" class="nav-item {% if 'result' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'student_results' college_slug=college_slug %}" class="nav-item {% if 'result' in request.resolver_match.url_name %}active{% endif %}">
             <span>📊</span> My Results
           </a>
-          <a href="{% url 'fees' %}" class="nav-item {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fees' college_slug=college_slug %}" class="nav-item {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
             <span>💰</span> Fees
           </a>
-          <a href="{% url 'notices' %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'notices' college_slug=college_slug %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
             <span>📢</span> Notices
             {% if unread_notice_count > 0 %}
               <span class="notif-badge">{{ unread_notice_count }}</span>
@@ -114,11 +113,11 @@
 
     <div class="sidebar-bottom">
       {% if request.user.is_authenticated %}
-      <a href="{% url 'profile' %}" class="user-card" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+      <a href="{% url 'profile' college_slug=college_slug %}" class="user-card" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
         <div class="user-avatar">{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}</div>
         <div class="user-info">
           <div class="name">{{ request.user.get_full_name|truncatechars:18 }}</div>
-          <div class="role-badge">{{ request.user.role|capfirst }}</div>
+          <div class="role-badge">{{ college_slug|upper }} · {{ request.user.role|capfirst }}</div>
           <a href="{% url 'logout' %}" class="logout-link" onclick="event.stopPropagation()">Sign out</a>
         </div>
       </a>
@@ -126,15 +125,11 @@
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
   <div class="main-content">
     <div class="topbar">
       <div style="display:flex; align-items:center;">
-        <!-- Hamburger button (mobile only) -->
         <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Toggle menu">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </button>
         <div>
           <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
@@ -153,7 +148,6 @@
           {{ message }}
         </div>
       {% endfor %}
-
       {% block content %}{% endblock %}
     </div>
   </div>
@@ -167,7 +161,6 @@
     overlay.classList.toggle('active');
     document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
   }
-
   function closeSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
@@ -175,19 +168,10 @@
     overlay.classList.remove('active');
     document.body.style.overflow = '';
   }
-
-  // Close sidebar when a nav link is clicked on mobile
   document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      if (window.innerWidth <= 768) closeSidebar();
-    });
+    item.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
   });
-
-  // Close sidebar on window resize if desktop
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) closeSidebar();
-  });
+  window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
-
 </body>
 </html>

@@ -25,7 +25,7 @@
       </div>
       <div style="display:flex; gap:12px;">
         <button type="submit" class="btn btn-accent">Schedule Exam</button>
-        <a href="{% url 'exams' %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

@@ -9,25 +9,17 @@
     <span class="card-title" style="color:var(--danger);">🗑️ Confirm Delete</span>
   </div>
   <div class="card-body">
-    <p style="font-size:15px; margin-bottom:16px;">
-      Are you sure you want to delete this notice?
-    </p>
-
+    <p style="font-size:15px; margin-bottom:16px;">Are you sure you want to delete this notice?</p>
     <div style="background:var(--light-bg); border-radius:8px; padding:16px; margin-bottom:24px; border-left:4px solid var(--danger);">
       <div style="font-weight:700; font-size:15px; margin-bottom:4px;">{{ notice.title }}</div>
-      <div style="font-size:13px; color:var(--text-secondary);">
-        {{ notice.get_notice_type_display }} &bull; {{ notice.get_target_audience_display }}
-      </div>
-      <div style="font-size:12px; color:var(--text-muted); margin-top:6px;">
-        Posted {{ notice.created_at|date:"M d, Y" }}
-      </div>
+      <div style="font-size:13px; color:var(--text-secondary);">{{ notice.get_notice_type_display }} &bull; {{ notice.get_target_audience_display }}</div>
+      <div style="font-size:12px; color:var(--text-muted); margin-top:6px;">Posted {{ notice.created_at|date:"M d, Y" }}</div>
     </div>
-
     <form method="post">
       {% csrf_token %}
       <div style="display:flex; gap:12px;">
         <button type="submit" class="btn btn-danger">Yes, Delete</button>
-        <a href="{% url 'notices' %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'notices' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

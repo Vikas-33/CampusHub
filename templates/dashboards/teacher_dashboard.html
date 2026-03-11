@@ -31,7 +31,7 @@
   <div class="card mb-20">
     <div class="card-header">
       <span class="card-title">📚 My Courses</span>
-      <a href="{% url 'courses' %}" class="btn btn-sm btn-outline">View All</a>
+      <a href="{% url 'courses' college_slug=college_slug %}" class="btn btn-sm btn-outline">View All</a>
     </div>
     <div class="card-body">
       {% if courses %}
@@ -42,8 +42,8 @@
               <div style="font-size:12px; color:var(--text-secondary);">{{ course.code }} &bull; Sem {{ course.semester }} &bull; {{ course.credits }} credits</div>
             </div>
             <div style="display:flex; gap:8px;">
-              <a href="{% url 'mark_attendance' course.pk %}" class="btn btn-xs btn-success">Mark Att.</a>
-              <a href="{% url 'add_assignment' %}" class="btn btn-xs btn-info">+ Task</a>
+              <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-xs btn-success">Mark Att.</a>
+              <a href="{% url 'add_assignment' college_slug=college_slug %}" class="btn btn-xs btn-info">+ Task</a>
             </div>
           </div>
         {% endfor %}
@@ -57,7 +57,7 @@
     <div class="card mb-20">
       <div class="card-header">
         <span class="card-title">📢 Notices</span>
-        <a href="{% url 'add_notice' %}" class="btn btn-sm btn-primary">+ Post</a>
+        <a href="{% url 'add_notice' college_slug=college_slug %}" class="btn btn-sm btn-primary">+ Post</a>
       </div>
       <div class="card-body" style="max-height:220px; overflow-y:auto;">
         {% for notice in recent_notices %}
@@ -91,7 +91,7 @@
     <div class="card">
       <div class="card-header">
         <span class="card-title">📝 Upcoming Exams</span>
-        <a href="{% url 'exams' %}" class="btn btn-sm btn-outline">View All</a>
+        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-sm btn-outline">View All</a>
       </div>
       <div class="card-body">
         {% for exam in upcoming_exams %}

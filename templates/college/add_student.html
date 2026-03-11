@@ -29,7 +29,6 @@
 
     <form method="post">
       {% csrf_token %}
-
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">First Name *</label>
@@ -44,24 +43,19 @@
           {% if form.last_name.errors %}<span class="field-error">{{ form.last_name.errors.0 }}</span>{% endif %}
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Email *</label>
         <input type="email" name="email" class="form-input {% if form.email.errors %}input-error{% endif %}"
           value="{{ form.email.value|default:'' }}" required>
         {% if form.email.errors %}<span class="field-error">{{ form.email.errors.0 }}</span>{% endif %}
       </div>
-
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Department *</label>
           <select name="department" class="form-input {% if form.department.errors %}input-error{% endif %}" required>
             <option value="">— Select Department —</option>
             {% for dept in form.department.field.queryset %}
-              <option value="{{ dept.pk }}"
-                {% if form.department.value == dept.pk|stringformat:"s" %}selected{% endif %}>
-                {{ dept.name }}
-              </option>
+              <option value="{{ dept.pk }}" {% if form.department.value == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
             {% endfor %}
           </select>
           {% if form.department.errors %}<span class="field-error">{{ form.department.errors.0 }}</span>{% endif %}
@@ -76,7 +70,6 @@
           {% if form.semester.errors %}<span class="field-error">{{ form.semester.errors.0 }}</span>{% endif %}
         </div>
       </div>
-
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Batch Year *</label>
@@ -86,21 +79,17 @@
         </div>
         <div class="form-group">
           <label class="form-label">Date of Birth</label>
-          <input type="date" name="date_of_birth" class="form-input"
-            value="{{ form.date_of_birth.value|default:'' }}">
+          <input type="date" name="date_of_birth" class="form-input" value="{{ form.date_of_birth.value|default:'' }}">
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Address</label>
         <textarea name="address" class="form-input" rows="2">{{ form.address.value|default:'' }}</textarea>
       </div>
-
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Guardian Name</label>
-          <input type="text" name="guardian_name" class="form-input"
-            value="{{ form.guardian_name.value|default:'' }}">
+          <input type="text" name="guardian_name" class="form-input" value="{{ form.guardian_name.value|default:'' }}">
         </div>
         <div class="form-group">
           <label class="form-label">Guardian Phone</label>
@@ -109,24 +98,19 @@
           {% if form.guardian_phone.errors %}<span class="field-error">{{ form.guardian_phone.errors.0 }}</span>{% endif %}
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Phone</label>
-        <input type="text" name="phone" class="form-input"
-          value="{{ form.phone.value|default:'' }}">
+        <input type="text" name="phone" class="form-input" value="{{ form.phone.value|default:'' }}">
       </div>
-
       <div style="display:flex; gap:12px; margin-top:8px;">
         <button type="submit" class="btn btn-accent">Enroll Student</button>
-        <a href="{% url 'manage_students' %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>
 </div>
-
 <style>
   .input-error { border-color: #e53e3e !important; }
   .field-error { color: #e53e3e; font-size: 12px; margin-top: 4px; display: block; }
 </style>
-
 {% endblock %}

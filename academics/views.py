@@ -16,25 +16,26 @@ from .models import Department, Course, Attendance, Assignment, AssignmentSubmis
 from .forms import DepartmentForm, CourseForm, AttendanceForm, AssignmentForm, AssignmentSubmissionForm, ExamForm, ExamResultForm, NoticeForm, FeeStructureForm, FeePaymentForm
 from .utils import send_notice_email, send_assignment_email, send_result_email
 from accounts.models import StudentProfile, TeacherProfile
-
+import csv
 
 
 # --- DEPARTMENTS ---
+
 @login_required
-def departments(request):
+def departments(request, college_slug):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
     depts = Department.objects.filter(college=college).annotate(
-        course_count=__import__('django.db.models', fromlist=['Count']).Count('courses')
+        course_count=Count('courses')
     )
     return render(request, 'academics/departments.html', {'departments': depts})
 
 
 @login_required
-def add_department(request):
+def add_department(request, college_slug):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
@@ -44,7 +45,7 @@ def add_department(request):
             dept.college = college
             dept.save()
             messages.success(request, 'Department added!')
-            return redirect('departments')
+            return redirect('departments', college_slug=college_slug)
     else:
         form = DepartmentForm()
         form.fields['head_of_department'].queryset = TeacherProfile.objects.filter(college=college)
@@ -52,8 +53,9 @@ def add_department(request):
 
 
 # --- COURSES ---
+
 @login_required
-def courses(request):
+def courses(request, college_slug):
     user = request.user
     if user.is_college():
         college = user.college_profile
@@ -73,9 +75,9 @@ def courses(request):
 
 
 @login_required
-def add_course(request):
+def add_course(request, college_slug):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
     if request.method == 'POST':
         form = CourseForm(request.POST)
@@ -86,7 +88,7 @@ def add_course(request):
             course.college = college
             course.save()
             messages.success(request, 'Course added!')
-            return redirect('courses')
+            return redirect('courses', college_slug=college_slug)
     else:
         form = CourseForm()
         form.fields['department'].queryset = Department.objects.filter(college=college)
@@ -95,8 +97,9 @@ def add_course(request):
 
 
 # --- ATTENDANCE ---
+
 @login_required
-def attendance(request):
+def attendance(request, college_slug):
     user = request.user
     if user.is_teacher():
         teacher = user.teacher_profile
@@ -139,18 +142,16 @@ def attendance(request):
 
 
 @login_required
-def mark_attendance(request, course_id):
+def mark_attendance(request, college_slug, course_id):
     if not request.user.is_teacher():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     teacher = request.user.teacher_profile
     course = get_object_or_404(Course, pk=course_id, teacher=teacher)
-
     students = StudentProfile.objects.filter(
         college=teacher.college,
         department=course.department,
         semester=course.semester
     )
-
     if request.method == 'POST':
         date = request.POST.get('date')
         for student in students:
@@ -160,29 +161,22 @@ def mark_attendance(request, course_id):
                 defaults={'status': status, 'marked_by': teacher}
             )
         messages.success(request, 'Attendance marked!')
-        return redirect('attendance')
-
+        return redirect('attendance', college_slug=college_slug)
     from datetime import date as d
     return render(request, 'academics/mark_attendance.html', {
         'course': course, 'students': students, 'today': d.today()
     })
 
 
-
-
 @login_required
-def export_attendance_student(request):
-    """Student exports their own full attendance as CSV."""
+def export_attendance_student(request, college_slug):
     if not request.user.is_student():
-        from django.shortcuts import redirect
-        return redirect('dashboard')
-
+        return redirect('dashboard', college_slug=college_slug)
     student = request.user.student_profile
     records = Attendance.objects.filter(
         student=student
     ).select_related('course').order_by('course__name', 'date')
 
-    # Summary per course
     course_stats = {}
     for rec in records:
         cname = rec.course.name
@@ -194,10 +188,7 @@ def export_attendance_student(request):
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="attendance_{student.roll_number}.csv"'
-
     writer = csv.writer(response)
-
-    # Header info
     writer.writerow(['ATTENDANCE REPORT'])
     writer.writerow(['Student', student.user.get_full_name()])
     writer.writerow(['Roll Number', student.roll_number])
@@ -205,8 +196,6 @@ def export_attendance_student(request):
     writer.writerow(['Department', str(student.department) if student.department else ''])
     writer.writerow(['Semester', student.semester])
     writer.writerow([])
-
-    # Summary section
     writer.writerow(['COURSE-WISE SUMMARY'])
     writer.writerow(['Course', 'Total Classes', 'Present', 'Absent', 'Percentage'])
     for course_name, stats in course_stats.items():
@@ -214,31 +203,23 @@ def export_attendance_student(request):
         pct = round(stats['present'] / stats['total'] * 100, 1) if stats['total'] > 0 else 0
         writer.writerow([course_name, stats['total'], stats['present'], absent, f"{pct}%"])
     writer.writerow([])
-
-    # Detailed records
     writer.writerow(['DETAILED RECORDS'])
     writer.writerow(['Course', 'Date', 'Status'])
     for rec in records:
         writer.writerow([rec.course.name, rec.date.strftime('%d %b %Y'), rec.status.capitalize()])
-
     return response
 
 
 @login_required
-def export_attendance_teacher(request, course_id):
-    """Teacher exports attendance for a specific course as CSV."""
+def export_attendance_teacher(request, college_slug, course_id):
     if not request.user.is_teacher():
-        from django.shortcuts import redirect
-        return redirect('dashboard')
-
+        return redirect('dashboard', college_slug=college_slug)
     teacher = request.user.teacher_profile
     course = get_object_or_404(Course, pk=course_id, teacher=teacher)
-
     records = Attendance.objects.filter(
         course=course
     ).select_related('student__user').order_by('student__user__first_name', 'date')
 
-    # Per-student summary
     student_stats = {}
     for rec in records:
         sid = rec.student.pk
@@ -254,18 +235,13 @@ def export_attendance_teacher(request, course_id):
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="attendance_{course.code}.csv"'
-
     writer = csv.writer(response)
-
-    # Header info
     writer.writerow(['ATTENDANCE REPORT'])
     writer.writerow(['Course', course.name])
     writer.writerow(['Course Code', course.code])
     writer.writerow(['Semester', course.semester])
     writer.writerow(['Teacher', teacher.user.get_full_name()])
     writer.writerow([])
-
-    # Student summary
     writer.writerow(['STUDENT-WISE SUMMARY'])
     writer.writerow(['Student Name', 'Roll Number', 'Total Classes', 'Present', 'Absent', 'Percentage'])
     for sid, stats in student_stats.items():
@@ -273,8 +249,6 @@ def export_attendance_teacher(request, course_id):
         pct = round(stats['present'] / stats['total'] * 100, 1) if stats['total'] > 0 else 0
         writer.writerow([stats['name'], stats['roll'], stats['total'], stats['present'], absent, f"{pct}%"])
     writer.writerow([])
-
-    # Detailed records
     writer.writerow(['DETAILED RECORDS'])
     writer.writerow(['Student', 'Roll Number', 'Date', 'Status'])
     for rec in records:
@@ -284,19 +258,15 @@ def export_attendance_teacher(request, course_id):
             rec.date.strftime('%d %b %Y'),
             rec.status.capitalize()
         ])
-
     return response
 
 
-
 # --- ASSIGNMENTS ---
-@login_required
-def assignments(request):
-    from django.core.paginator import Paginator
-    user = request.user
 
+@login_required
+def assignments(request, college_slug):
+    user = request.user
     if user.is_teacher():
-        from django.db.models import Count
         assignment_list = Assignment.objects.filter(
             course__teacher=user.teacher_profile
         ).select_related('course').annotate(
@@ -305,7 +275,6 @@ def assignments(request):
         now = timezone.now()
         for a in assignment_list:
             a.is_overdue = a.due_date < now
-
         paginator = Paginator(assignment_list, 15)
         page_obj = paginator.get_page(request.GET.get('page'))
         return render(request, 'academics/assignments.html', {'page_obj': page_obj})
@@ -320,16 +289,13 @@ def assignments(request):
         assignment_list = Assignment.objects.filter(
             course__in=courses
         ).select_related('course').order_by('-created_at')
-
         submissions = AssignmentSubmission.objects.filter(
             student=student, assignment__in=assignment_list
         )
         submitted_ids = set(submissions.values_list('assignment_id', flat=True))
-
         now = timezone.now()
         for a in assignment_list:
             a.is_overdue = a.due_date < now
-
         paginator = Paginator(assignment_list, 15)
         page_obj = paginator.get_page(request.GET.get('page'))
         return render(request, 'academics/assignments.html', {
@@ -339,7 +305,6 @@ def assignments(request):
         })
 
     else:
-        from django.db.models import Count
         college = user.college_profile
         assignment_list = Assignment.objects.filter(
             course__college=college
@@ -349,47 +314,42 @@ def assignments(request):
         now = timezone.now()
         for a in assignment_list:
             a.is_overdue = a.due_date < now
-
         paginator = Paginator(assignment_list, 15)
         page_obj = paginator.get_page(request.GET.get('page'))
         return render(request, 'academics/assignments.html', {'page_obj': page_obj})
 
+
 @login_required
-def add_assignment(request):
+def add_assignment(request, college_slug):
     if not request.user.is_teacher():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     teacher = request.user.teacher_profile
     if request.method == 'POST':
         form = AssignmentForm(request.POST)
         form.fields['course'].queryset = Course.objects.filter(teacher=teacher)
         if form.is_valid():
             assignment = form.save()
-            # Send email notification
             send_assignment_email(assignment)
             messages.success(request, 'Assignment created! Students will be notified by email.')
-            return redirect('assignments')
+            return redirect('assignments', college_slug=college_slug)
     else:
         form = AssignmentForm()
         form.fields['course'].queryset = Course.objects.filter(teacher=teacher)
     return render(request, 'academics/add_assignment.html', {'form': form})
 
 
-
 @login_required
-def submit_assignment(request, pk):
+def submit_assignment(request, college_slug, pk):
     if not request.user.is_student():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     assignment = get_object_or_404(Assignment, pk=pk)
-
-    # Prevent resubmission
     student = request.user.student_profile
     already_submitted = AssignmentSubmission.objects.filter(
         assignment=assignment, student=student
     ).exists()
     if already_submitted:
         messages.warning(request, 'You have already submitted this assignment.')
-        return redirect('assignments')
-
+        return redirect('assignments', college_slug=college_slug)
     if request.method == 'POST':
         form = AssignmentSubmissionForm(request.POST, request.FILES)
         if form.is_valid():
@@ -398,7 +358,7 @@ def submit_assignment(request, pk):
             sub.student = student
             sub.save()
             messages.success(request, 'Assignment submitted!')
-            return redirect('assignments')
+            return redirect('assignments', college_slug=college_slug)
     else:
         form = AssignmentSubmissionForm()
     return render(request, 'academics/submit_assignment.html', {
@@ -407,9 +367,9 @@ def submit_assignment(request, pk):
 
 
 @login_required
-def grade_submissions(request, pk):
+def grade_submissions(request, college_slug, pk):
     if not request.user.is_teacher():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     assignment = get_object_or_404(Assignment, pk=pk, course__teacher=request.user.teacher_profile)
     submissions = AssignmentSubmission.objects.filter(
         assignment=assignment
@@ -422,15 +382,16 @@ def grade_submissions(request, pk):
                 sub.graded_by = request.user.teacher_profile
                 sub.save()
         messages.success(request, 'Grades saved!')
-        return redirect('assignments')
+        return redirect('assignments', college_slug=college_slug)
     return render(request, 'academics/grade_submissions.html', {
         'assignment': assignment, 'submissions': submissions
     })
 
 
 # --- EXAMS ---
+
 @login_required
-def exams(request):
+def exams(request, college_slug):
     user = request.user
     if user.is_college():
         exam_list = Exam.objects.filter(
@@ -455,14 +416,13 @@ def exams(request):
             exam_list = Exam.objects.filter(
                 college=student.college
             ).select_related('course').order_by('date')
-
     return render(request, 'academics/exams.html', {'exams': exam_list})
 
 
 @login_required
-def add_exam(request):
+def add_exam(request, college_slug):
     if not (request.user.is_college() or request.user.is_teacher()):
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     if request.user.is_college():
         college = request.user.college_profile
         course_qs = Course.objects.filter(college=college)
@@ -478,7 +438,7 @@ def add_exam(request):
             exam.college = college
             exam.save()
             messages.success(request, 'Exam scheduled!')
-            return redirect('exams')
+            return redirect('exams', college_slug=college_slug)
     else:
         form = ExamForm()
         form.fields['course'].queryset = course_qs
@@ -486,13 +446,11 @@ def add_exam(request):
 
 
 @login_required
-def exam_results(request, exam_id):
+def exam_results(request, college_slug, exam_id):
     if request.user.is_student():
-        return redirect('student_exam_result', exam_id=exam_id)
-
+        return redirect('student_exam_result', college_slug=college_slug, exam_id=exam_id)
     exam = get_object_or_404(Exam, pk=exam_id)
     results = ExamResult.objects.filter(exam=exam).select_related('student__user')
-
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
         marks = request.POST.get('marks')
@@ -502,11 +460,9 @@ def exam_results(request, exam_id):
             exam=exam, student=student,
             defaults={'marks_obtained': marks, 'grade': grade}
         )
-        # Send email to student when result is saved
         send_result_email(result)
         messages.success(request, f'Result saved! {student.user.get_full_name()} will be notified by email.')
-        return redirect('exam_results', exam_id=exam_id)
-
+        return redirect('exam_results', college_slug=college_slug, exam_id=exam_id)
     students = StudentProfile.objects.filter(
         college=exam.college,
         department=exam.course.department,
@@ -517,25 +473,22 @@ def exam_results(request, exam_id):
     })
 
 
-
 # --- STUDENT RESULTS ---
-@login_required
-def student_results(request):
-    if not request.user.is_student():
-        return redirect('dashboard')
 
+@login_required
+def student_results(request, college_slug):
+    if not request.user.is_student():
+        return redirect('dashboard', college_slug=college_slug)
     student = request.user.student_profile
     results = ExamResult.objects.filter(
         student=student
     ).select_related('exam__course').order_by('-exam__date')
-
     total_exams = results.count()
     passed = sum(1 for r in results if r.marks_obtained >= r.exam.passing_marks)
     failed = total_exams - passed
     average = round(
         sum((r.marks_obtained / r.exam.total_marks * 100) for r in results) / total_exams, 1
     ) if total_exams > 0 else 0
-
     return render(request, 'academics/student_results.html', {
         'student': student,
         'results': results,
@@ -547,29 +500,24 @@ def student_results(request):
 
 
 @login_required
-def student_exam_result(request, exam_id):
+def student_exam_result(request, college_slug, exam_id):
     if not request.user.is_student():
-        return redirect('dashboard')
-
+        return redirect('dashboard', college_slug=college_slug)
     student = request.user.student_profile
     exam = get_object_or_404(Exam, pk=exam_id)
-
     try:
         result = ExamResult.objects.get(exam=exam, student=student)
     except ExamResult.DoesNotExist:
         result = None
-
     return render(request, 'academics/student_exam_result.html', {
-        'exam': exam,
-        'result': result,
-        'student': student,
+        'exam': exam, 'result': result, 'student': student,
     })
 
 
 # --- NOTICES ---
+
 @login_required
-def notices(request):
-    from django.core.paginator import Paginator
+def notices(request, college_slug):
     user = request.user
     if user.is_college():
         notice_list = Notice.objects.filter(
@@ -588,22 +536,18 @@ def notices(request):
             target_audience__in=['all', 'students']
         ).order_by('-created_at')
 
-    # Mark all visible notices as read
     for notice in notice_list:
         notice.read_by.add(user)
 
-    paginator = Paginator(notice_list, 10)  # 10 per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
+    paginator = Paginator(notice_list, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
     return render(request, 'academics/notices.html', {'page_obj': page_obj})
 
 
-
 @login_required
-def add_notice(request):
+def add_notice(request, college_slug):
     if not (request.user.is_college() or request.user.is_teacher()):
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     if request.method == 'POST':
         form = NoticeForm(request.POST)
         if form.is_valid():
@@ -614,74 +558,66 @@ def add_notice(request):
                 notice.college = request.user.teacher_profile.college
             notice.created_by = request.user
             notice.save()
-            # Send email notification
             send_notice_email(notice)
             messages.success(request, 'Notice posted! Students/teachers will be notified by email.')
-            return redirect('notices')
+            return redirect('notices', college_slug=college_slug)
     else:
         form = NoticeForm()
     return render(request, 'academics/add_notice.html', {'form': form})
 
 
 @login_required
-def edit_notice(request, pk):
+def edit_notice(request, college_slug, pk):
     notice = get_object_or_404(Notice, pk=pk)
     user = request.user
-
     if user.is_student():
         messages.error(request, 'Access denied.')
-        return redirect('notices')
-
+        return redirect('notices', college_slug=college_slug)
     if user.is_college():
         if notice.college != user.college_profile:
             messages.error(request, 'Access denied.')
-            return redirect('notices')
+            return redirect('notices', college_slug=college_slug)
     elif user.is_teacher():
         if notice.created_by != user:
             messages.error(request, 'You can only edit notices you created.')
-            return redirect('notices')
-
+            return redirect('notices', college_slug=college_slug)
     if request.method == 'POST':
         form = NoticeForm(request.POST, instance=notice)
         if form.is_valid():
             form.save()
             messages.success(request, 'Notice updated!')
-            return redirect('notices')
+            return redirect('notices', college_slug=college_slug)
     else:
         form = NoticeForm(instance=notice)
-
     return render(request, 'academics/edit_notice.html', {'form': form, 'notice': notice})
 
 
 @login_required
-def delete_notice(request, pk):
+def delete_notice(request, college_slug, pk):
     notice = get_object_or_404(Notice, pk=pk)
     user = request.user
-
     if user.is_student():
         messages.error(request, 'Access denied.')
-        return redirect('notices')
-
+        return redirect('notices', college_slug=college_slug)
     if user.is_college():
         if notice.college != user.college_profile:
             messages.error(request, 'Access denied.')
-            return redirect('notices')
+            return redirect('notices', college_slug=college_slug)
     elif user.is_teacher():
         if notice.created_by != user:
             messages.error(request, 'You can only delete notices you created.')
-            return redirect('notices')
-
+            return redirect('notices', college_slug=college_slug)
     if request.method == 'POST':
         notice.delete()
         messages.success(request, 'Notice deleted.')
-        return redirect('notices')
-
+        return redirect('notices', college_slug=college_slug)
     return render(request, 'academics/delete_notice.html', {'notice': notice})
 
 
 # --- FEES ---
+
 @login_required
-def fees(request):
+def fees(request, college_slug):
     user = request.user
     if user.is_college():
         college = user.college_profile
@@ -701,13 +637,13 @@ def fees(request):
             student=student
         ).select_related('fee_structure').order_by('-payment_date')
         return render(request, 'academics/fees_student.html', {'payments': payments})
-    return redirect('dashboard')
+    return redirect('dashboard', college_slug=college_slug)
 
 
 @login_required
-def add_fee_structure(request):
+def add_fee_structure(request, college_slug):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
     if request.method == 'POST':
         form = FeeStructureForm(request.POST)
@@ -716,16 +652,16 @@ def add_fee_structure(request):
             fs.college = college
             fs.save()
             messages.success(request, 'Fee structure added!')
-            return redirect('fees')
+            return redirect('fees', college_slug=college_slug)
     else:
         form = FeeStructureForm()
     return render(request, 'academics/add_fee_structure.html', {'form': form})
 
 
 @login_required
-def record_payment(request):
+def record_payment(request, college_slug):
     if not request.user.is_college():
-        return redirect('dashboard')
+        return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
     if request.method == 'POST':
         form = FeePaymentForm(request.POST)
@@ -734,7 +670,7 @@ def record_payment(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Payment recorded!')
-            return redirect('fees')
+            return redirect('fees', college_slug=college_slug)
     else:
         form = FeePaymentForm()
         form.fields['student'].queryset = StudentProfile.objects.filter(college=college)
@@ -743,42 +679,30 @@ def record_payment(request):
 
 
 @login_required
-def download_fee_receipt(request, payment_id):
-    # Only the student who owns the payment can download it
+def download_fee_receipt(request, college_slug, payment_id):
     payment = get_object_or_404(FeePayment, pk=payment_id)
-
     if request.user.is_student():
         if payment.student != request.user.student_profile:
-            from django.contrib import messages
             messages.error(request, 'Access denied.')
-            from django.shortcuts import redirect
-            return redirect('fees')
+            return redirect('fees', college_slug=college_slug)
     elif not request.user.is_college():
-        from django.shortcuts import redirect
-        return redirect('fees')
+        return redirect('fees', college_slug=college_slug)
 
-    # Build PDF in memory
     buffer = BytesIO()
     doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        rightMargin=20*mm,
-        leftMargin=20*mm,
-        topMargin=20*mm,
-        bottomMargin=20*mm,
+        buffer, pagesize=A4,
+        rightMargin=20*mm, leftMargin=20*mm,
+        topMargin=20*mm, bottomMargin=20*mm,
     )
-
     styles = getSampleStyleSheet()
     story = []
 
-    # --- Colours ---
     PRIMARY = colors.HexColor('#4F46E5')
     LIGHT = colors.HexColor('#EEF2FF')
     MUTED = colors.HexColor('#6B7280')
     SUCCESS = colors.HexColor('#10B981')
     DANGER = colors.HexColor('#EF4444')
 
-    # --- College Header ---
     college = payment.student.college
     story.append(Paragraph(
         college.college_name.upper(),
@@ -795,42 +719,32 @@ def download_fee_receipt(request, payment_id):
             college.website,
             ParagraphStyle('Website', fontSize=9, textColor=MUTED, alignment=TA_CENTER, spaceAfter=8)
         ))
-
     story.append(HRFlowable(width='100%', thickness=2, color=PRIMARY, spaceAfter=12))
-
-    # --- Receipt Title ---
     story.append(Paragraph(
         'FEE PAYMENT RECEIPT',
         ParagraphStyle('Title', fontSize=14, fontName='Helvetica-Bold',
                        textColor=PRIMARY, alignment=TA_CENTER, spaceAfter=16)
     ))
-
-    # --- Receipt Meta (receipt no + date) ---
-    meta_data = [
-        [
-            Paragraph(f'<b>Receipt No:</b> {payment.receipt_number or "N/A"}',
-                      ParagraphStyle('meta', fontSize=10)),
-            Paragraph(f'<b>Payment Date:</b> {payment.payment_date.strftime("%d %b %Y") if payment.payment_date else "—"}',
-                      ParagraphStyle('metaR', fontSize=10, alignment=TA_RIGHT)),
-        ]
-    ]
+    meta_data = [[
+        Paragraph(f'<b>Receipt No:</b> {payment.receipt_number or "N/A"}',
+                  ParagraphStyle('meta', fontSize=10)),
+        Paragraph(f'<b>Payment Date:</b> {payment.payment_date.strftime("%d %b %Y") if payment.payment_date else "—"}',
+                  ParagraphStyle('metaR', fontSize=10, alignment=TA_RIGHT)),
+    ]]
     meta_table = Table(meta_data, colWidths=['50%', '50%'])
     meta_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), LIGHT),
         ('ROWPADDING', (0, 0), (-1, -1), 8),
-        ('ROUNDEDCORNERS', [6]),
     ]))
     story.append(meta_table)
     story.append(Spacer(1, 14))
 
-    # --- Student Details ---
     student = payment.student
     story.append(Paragraph(
         'Student Information',
         ParagraphStyle('SectionHead', fontSize=11, fontName='Helvetica-Bold',
                        textColor=PRIMARY, spaceAfter=6)
     ))
-
     student_data = [
         ['Name', student.user.get_full_name()],
         ['Roll Number', student.roll_number or '—'],
@@ -846,18 +760,15 @@ def download_fee_receipt(request, payment_id):
         ('ROWBACKGROUNDS', (0, 0), (-1, -1), [colors.white, LIGHT]),
         ('ROWPADDING', (0, 0), (-1, -1), 7),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E5E7EB')),
-        ('ROUNDEDCORNERS', [4]),
     ]))
     story.append(student_table)
     story.append(Spacer(1, 14))
 
-    # --- Payment Details ---
     story.append(Paragraph(
         'Payment Details',
         ParagraphStyle('SectionHead2', fontSize=11, fontName='Helvetica-Bold',
                        textColor=PRIMARY, spaceAfter=6)
     ))
-
     status_color = SUCCESS if payment.status == 'paid' else DANGER
     payment_data = [
         ['Fee Type', payment.fee_structure.name],
@@ -876,15 +787,12 @@ def download_fee_receipt(request, payment_id):
         ('ROWBACKGROUNDS', (0, 0), (-1, -1), [colors.white, LIGHT]),
         ('ROWPADDING', (0, 0), (-1, -1), 7),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E5E7EB')),
-        # Highlight status row
         ('TEXTCOLOR', (1, 6), (1, 6), status_color),
         ('FONTNAME', (1, 6), (1, 6), 'Helvetica-Bold'),
         ('FONTSIZE', (1, 6), (1, 6), 11),
     ]))
     story.append(payment_table)
     story.append(Spacer(1, 24))
-
-    # --- Footer ---
     story.append(HRFlowable(width='100%', thickness=1, color=colors.HexColor('#E5E7EB'), spaceAfter=10))
     story.append(Paragraph(
         'This is a computer-generated receipt and does not require a physical signature.',
@@ -895,10 +803,8 @@ def download_fee_receipt(request, payment_id):
         ParagraphStyle('Footer2', fontSize=8, textColor=MUTED, alignment=TA_CENTER, spaceBefore=4)
     ))
 
-    # Build PDF
     doc.build(story)
     buffer.seek(0)
-
     filename = f"receipt_{payment.receipt_number or payment.pk}.pdf"
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'

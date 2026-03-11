@@ -29,6 +29,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.CollegeSlugMiddleware',  # add at the end
+
 ]
 
 ROOT_URLCONF = 'college_management.urls'

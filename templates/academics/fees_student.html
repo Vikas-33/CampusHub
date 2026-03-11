@@ -6,15 +6,7 @@
   <div class="table-container">
     <table>
       <thead>
-        <tr>
-          <th>Fee Type</th>
-          <th>Total Amount</th>
-          <th>Amount Paid</th>
-          <th>Status</th>
-          <th>Payment Date</th>
-          <th>Receipt No.</th>
-          <th>Download</th>
-        </tr>
+        <tr><th>Fee Type</th><th>Total Amount</th><th>Amount Paid</th><th>Status</th><th>Payment Date</th><th>Receipt No.</th><th>Download</th></tr>
       </thead>
       <tbody>
         {% for payment in payments %}
@@ -37,23 +29,14 @@
           </td>
           <td>
             {% if payment.status == 'paid' %}
-              <a href="{% url 'download_fee_receipt' payment.pk %}" class="btn btn-xs btn-primary" title="Download PDF Receipt">
-                📄 Receipt
-              </a>
+              <a href="{% url 'download_fee_receipt' college_slug=college_slug payment_id=payment.pk %}" class="btn btn-xs btn-primary" title="Download PDF Receipt">📄 Receipt</a>
             {% else %}
               <span style="font-size:12px; color:var(--text-muted);">Not paid</span>
             {% endif %}
           </td>
         </tr>
         {% empty %}
-        <tr>
-          <td colspan="7">
-            <div class="empty-state">
-              <div class="icon">💰</div>
-              <h3>No fee records</h3>
-            </div>
-          </td>
-        </tr>
+        <tr><td colspan="7"><div class="empty-state"><div class="icon">💰</div><h3>No fee records</h3></div></td></tr>
         {% endfor %}
       </tbody>
     </table>

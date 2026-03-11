@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Departments{% endblock %}
 {% block page_title %}Departments{% endblock %}
-{% block topbar_actions %}<a href="{% url 'add_department' %}" class="btn btn-accent">+ Add Department</a>{% endblock %}
+{% block topbar_actions %}<a href="{% url 'add_department' college_slug=college_slug %}" class="btn btn-accent">+ Add Department</a>{% endblock %}
 {% block content %}
 <div class="grid-3">
   {% for dept in departments %}

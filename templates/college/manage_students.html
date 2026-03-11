@@ -2,7 +2,7 @@
 {% block title %}Students{% endblock %}
 {% block page_title %}Student Management{% endblock %}
 {% block page_subtitle %}{{ page_obj.paginator.count }} students enrolled{% endblock %}
-{% block topbar_actions %}<a href="{% url 'add_student' %}" class="btn btn-accent">+ Enroll Student</a>{% endblock %}
+{% block topbar_actions %}<a href="{% url 'add_student' college_slug=college_slug %}" class="btn btn-accent">+ Enroll Student</a>{% endblock %}
 {% block content %}
 <div class="card">
   <div class="filter-bar">
@@ -26,7 +26,7 @@
         {% endfor %}
       </select>
       <button type="submit" class="btn btn-sm btn-primary">Apply</button>
-      <a href="{% url 'manage_students' %}" class="btn btn-sm btn-outline">Clear</a>
+      <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-sm btn-outline">Clear</a>
     </form>
   </div>
 
@@ -60,8 +60,8 @@
           <td>{{ student.batch_year }}</td>
           <td>
             <div style="display:flex; gap:6px;">
-              <a href="{% url 'edit_student' student.pk %}" class="btn btn-xs btn-outline">Edit</a>
-              <a href="{% url 'delete_student' student.pk %}" class="btn btn-xs btn-danger">Delete</a>
+              <a href="{% url 'edit_student' college_slug=college_slug pk=student.pk %}" class="btn btn-xs btn-outline">Edit</a>
+              <a href="{% url 'delete_student' college_slug=college_slug pk=student.pk %}" class="btn btn-xs btn-danger">Delete</a>
             </div>
           </td>
         </tr>
@@ -71,7 +71,7 @@
             <div class="empty-state">
               <div class="icon">🎓</div>
               <h3>{% if search_query %}No students match "{{ search_query }}"{% else %}No students found{% endif %}</h3>
-              <p>{% if search_query %}<a href="{% url 'manage_students' %}">Clear search</a>{% else %}Enroll your first student{% endif %}</p>
+              <p>{% if search_query %}<a href="{% url 'manage_students' college_slug=college_slug %}">Clear search</a>{% else %}Enroll your first student{% endif %}</p>
             </div>
           </td>
         </tr>

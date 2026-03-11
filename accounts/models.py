@@ -18,6 +18,8 @@ class User(AbstractUser):
 class CollegeProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='college_profile')
     college_id = models.CharField(max_length=20, unique=True, blank=True)
+    slug = models.SlugField(max_length=20, unique=True, blank=True,
+                            help_text='Short code for URL e.g. ACE, NIT, DIT')
     college_name = models.CharField(max_length=200)
     address = models.TextField(blank=True)
     established_year = models.IntegerField(null=True, blank=True)
@@ -44,6 +46,9 @@ class CollegeProfile(models.Model):
     def save(self, *args, **kwargs):
         if not self.college_id:
             self.college_id = self._generate_college_id()
+        # Auto-generate slug from initials if not set
+        if not self.slug:
+            self.slug = self.get_initials()
         super().save(*args, **kwargs)
         if self.user.username != self.college_id:
             self.user.username = self.college_id
@@ -95,24 +100,15 @@ class StudentProfile(models.Model):
     def _generate_student_ids(self):
         from datetime import date
         year = self.batch_year or date.today().year
-
         if self.department:
             dept_code = (getattr(self.department, 'code', None) or self.department.name[:4]).upper()
         else:
             dept_code = 'GEN'
-
         initials = self.college.get_initials()
-
         dept_count = StudentProfile.objects.filter(
-            college=self.college,
-            department=self.department,
-            batch_year=year
+            college=self.college, department=self.department, batch_year=year
         ).count() + 1
-
-        total_count = StudentProfile.objects.filter(
-            college=self.college
-        ).count() + 1
-
+        total_count = StudentProfile.objects.filter(college=self.college).count() + 1
         roll_number = f"{dept_code}{year}{dept_count:03d}"
         enrollment_number = f"{initials}{year}S{total_count:04d}"
         return roll_number, enrollment_number

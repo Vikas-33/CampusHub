@@ -20,7 +20,7 @@
       <div class="form-group"><label class="form-label">Remarks</label><textarea name="remarks" class="form-input" rows="3" placeholder="Add any notes..."></textarea></div>
       <div style="display:flex; gap:12px;">
         <button type="submit" class="btn btn-success">Submit Assignment</button>
-        <a href="{% url 'assignments' %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

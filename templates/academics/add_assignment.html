@@ -16,7 +16,7 @@
       </div>
       <div style="display:flex; gap:12px;">
         <button type="submit" class="btn btn-accent">Create Assignment</button>
-        <a href="{% url 'assignments' %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

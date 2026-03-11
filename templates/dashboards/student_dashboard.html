@@ -65,7 +65,7 @@
     <div class="card mb-20">
       <div class="card-header">
         <span class="card-title">📝 Upcoming Exams</span>
-        <a href="{% url 'exams' %}" class="btn btn-sm btn-outline">View All</a>
+        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-sm btn-outline">View All</a>
       </div>
       <div class="card-body">
         {% for exam in upcoming_exams %}
@@ -84,18 +84,17 @@
         {% endfor %}
       </div>
     </div>
-<p style="color:red; font-size:20px;">NOTICE COUNT: {{ recent_notices|length }}</p>
+
     <div class="card">
       <div class="card-header">
         <span class="card-title">📢 Notices</span>
-        <a href="{% url 'notices' %}" class="btn btn-sm btn-outline">View All</a>
+        <a href="{% url 'notices' college_slug=college_slug %}" class="btn btn-sm btn-outline">View All</a>
       </div>
       <div class="card-body" style="max-height:250px; overflow-y:auto;">
         {% for notice in recent_notices %}
           <div style="padding:10px 0; border-bottom:1px solid var(--border);">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
               <div>
-                <!-- Notice type badge -->
                 <span style="
                   display:inline-block;
                   font-size:10px;
@@ -119,7 +118,6 @@
         {% endfor %}
       </div>
     </div>
-
   </div>
 </div>
 {% endblock %}

@@ -22,7 +22,7 @@
       <div class="form-group"><label class="form-label">Receipt Number</label><input type="text" name="receipt_number" class="form-input"></div>
       <div style="display:flex; gap:12px;">
         <button type="submit" class="btn btn-success">Record Payment</button>
-        <a href="{% url 'fees' %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'fees' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

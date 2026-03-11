@@ -3,7 +3,7 @@
 {% block page_title %}Assignments{% endblock %}
 {% block topbar_actions %}
   {% if request.user.role == 'teacher' %}
-    <a href="{% url 'add_assignment' %}" class="btn btn-accent">+ Create Assignment</a>
+    <a href="{% url 'add_assignment' college_slug=college_slug %}" class="btn btn-accent">+ Create Assignment</a>
   {% endif %}
 {% endblock %}
 
@@ -75,12 +75,12 @@
               {% if assignment.pk in submitted_ids %}
                 <span style="font-size:13px; color:var(--text-muted);">Submitted ✓</span>
               {% elif not assignment.is_overdue %}
-                <a href="{% url 'submit_assignment' assignment.pk %}" class="btn btn-xs btn-success">Submit</a>
+                <a href="{% url 'submit_assignment' college_slug=college_slug pk=assignment.pk %}" class="btn btn-xs btn-success">Submit</a>
               {% else %}
                 <span style="font-size:13px; color:var(--danger);">Closed</span>
               {% endif %}
             {% elif request.user.role == 'teacher' %}
-              <a href="{% url 'grade_submissions' assignment.pk %}" class="btn btn-xs btn-info">Grade</a>
+              <a href="{% url 'grade_submissions' college_slug=college_slug pk=assignment.pk %}" class="btn btn-xs btn-info">Grade</a>
             {% endif %}
           </td>
         </tr>
@@ -94,7 +94,6 @@
       </tbody>
     </table>
   </div>
-
   {% include 'includes/pagination.html' %}
 </div>
 {% endblock %}

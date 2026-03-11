@@ -3,7 +3,7 @@
 {% block page_title %}Notice Board{% endblock %}
 {% block topbar_actions %}
   {% if request.user.role != 'student' %}
-    <a href="{% url 'add_notice' %}" class="btn btn-accent">+ Post Notice</a>
+    <a href="{% url 'add_notice' college_slug=college_slug %}" class="btn btn-accent">+ Post Notice</a>
   {% endif %}
 {% endblock %}
 
@@ -23,11 +23,11 @@
           <span class="badge badge-secondary">{{ notice.get_target_audience_display }}</span>
           {% if not notice.is_active %}<span class="badge badge-danger">Inactive</span>{% endif %}
           {% if request.user.role == 'college' %}
-            <a href="{% url 'edit_notice' notice.pk %}" class="btn btn-sm btn-outline">✏️ Edit</a>
-            <a href="{% url 'delete_notice' notice.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+            <a href="{% url 'edit_notice' college_slug=college_slug pk=notice.pk %}" class="btn btn-sm btn-outline">✏️ Edit</a>
+            <a href="{% url 'delete_notice' college_slug=college_slug pk=notice.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
           {% elif request.user.role == 'teacher' and notice.created_by == request.user %}
-            <a href="{% url 'edit_notice' notice.pk %}" class="btn btn-sm btn-outline">✏️ Edit</a>
-            <a href="{% url 'delete_notice' notice.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+            <a href="{% url 'edit_notice' college_slug=college_slug pk=notice.pk %}" class="btn btn-sm btn-outline">✏️ Edit</a>
+            <a href="{% url 'delete_notice' college_slug=college_slug pk=notice.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
           {% endif %}
         </div>
       </div>
@@ -45,7 +45,6 @@
     <p>Check back later for announcements</p>
   </div>
   {% endfor %}
-
   {% include 'includes/pagination.html' %}
 </div>
 {% endblock %}
