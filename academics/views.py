@@ -6,16 +6,16 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from io import BytesIO
-from .models import Department, Course, Attendance, Assignment, AssignmentSubmission, Exam, ExamResult, Notice, FeeStructure, FeePayment
-from .forms import DepartmentForm, CourseForm, AttendanceForm, AssignmentForm, AssignmentSubmissionForm, ExamForm, ExamResultForm, NoticeForm, FeeStructureForm, FeePaymentForm
-from accounts.models import StudentProfile, TeacherProfile
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
-import csv
+from .models import Department, Course, Attendance, Assignment, AssignmentSubmission, Exam, ExamResult, Notice, FeeStructure, FeePayment
+from .forms import DepartmentForm, CourseForm, AttendanceForm, AssignmentForm, AssignmentSubmissionForm, ExamForm, ExamResultForm, NoticeForm, FeeStructureForm, FeePaymentForm
+from .utils import send_notice_email, send_assignment_email, send_result_email
+from accounts.models import StudentProfile, TeacherProfile
 
 
 
@@ -354,7 +354,6 @@ def assignments(request):
         page_obj = paginator.get_page(request.GET.get('page'))
         return render(request, 'academics/assignments.html', {'page_obj': page_obj})
 
-
 @login_required
 def add_assignment(request):
     if not request.user.is_teacher():
@@ -364,13 +363,16 @@ def add_assignment(request):
         form = AssignmentForm(request.POST)
         form.fields['course'].queryset = Course.objects.filter(teacher=teacher)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Assignment created!')
+            assignment = form.save()
+            # Send email notification
+            send_assignment_email(assignment)
+            messages.success(request, 'Assignment created! Students will be notified by email.')
             return redirect('assignments')
     else:
         form = AssignmentForm()
         form.fields['course'].queryset = Course.objects.filter(teacher=teacher)
     return render(request, 'academics/add_assignment.html', {'form': form})
+
 
 
 @login_required
@@ -485,7 +487,6 @@ def add_exam(request):
 
 @login_required
 def exam_results(request, exam_id):
-    # Redirect students to their own result page
     if request.user.is_student():
         return redirect('student_exam_result', exam_id=exam_id)
 
@@ -497,11 +498,13 @@ def exam_results(request, exam_id):
         marks = request.POST.get('marks')
         grade = request.POST.get('grade')
         student = get_object_or_404(StudentProfile, pk=student_id)
-        ExamResult.objects.update_or_create(
+        result, created = ExamResult.objects.update_or_create(
             exam=exam, student=student,
             defaults={'marks_obtained': marks, 'grade': grade}
         )
-        messages.success(request, 'Result saved!')
+        # Send email to student when result is saved
+        send_result_email(result)
+        messages.success(request, f'Result saved! {student.user.get_full_name()} will be notified by email.')
         return redirect('exam_results', exam_id=exam_id)
 
     students = StudentProfile.objects.filter(
@@ -512,6 +515,7 @@ def exam_results(request, exam_id):
     return render(request, 'academics/exam_results.html', {
         'exam': exam, 'results': results, 'students': students
     })
+
 
 
 # --- STUDENT RESULTS ---
@@ -610,7 +614,9 @@ def add_notice(request):
                 notice.college = request.user.teacher_profile.college
             notice.created_by = request.user
             notice.save()
-            messages.success(request, 'Notice posted!')
+            # Send email notification
+            send_notice_email(notice)
+            messages.success(request, 'Notice posted! Students/teachers will be notified by email.')
             return redirect('notices')
     else:
         form = NoticeForm()
