@@ -6,19 +6,20 @@
 <div class="card" style="max-width: 800px;">
   <div class="card-header"><span class="card-title">Teacher Information</span></div>
   <div class="card-body">
+
+    <div class="alert alert-info" style="margin-bottom:20px;">
+      ℹ️ Employee ID and username will be <strong>auto-generated</strong>. Default password will be the same as the Employee ID.
+    </div>
+
     <form method="post">
       {% csrf_token %}
       <div class="form-grid">
         <div class="form-group"><label class="form-label">First Name *</label><input type="text" name="first_name" class="form-input" required></div>
         <div class="form-group"><label class="form-label">Last Name *</label><input type="text" name="last_name" class="form-input" required></div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Username *</label><input type="text" name="username" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-input" required></div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Employee ID *</label><input type="text" name="employee_id" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Password <small>(default: teacher123)</small></label><input type="password" name="password" class="form-input"></div>
+      <div class="form-group">
+        <label class="form-label">Email *</label>
+        <input type="email" name="email" class="form-input" required>
       </div>
       <div class="form-grid">
         <div class="form-group"><label class="form-label">Department *</label><input type="text" name="department" class="form-input" required></div>

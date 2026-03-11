@@ -6,32 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}EduCore{% endblock %} — College Management</title>
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
-<style>
-  .nav-item { position: relative; }
-  .notif-badge {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #ef4444;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 5px;
-    line-height: 1;
-  }
-</style>
 </head>
 <body>
+
+<!-- Sidebar overlay (mobile only) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <div class="layout">
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="logo-icon">E</div>
       <div class="logo-text">
@@ -146,9 +129,17 @@
   <!-- MAIN CONTENT -->
   <div class="main-content">
     <div class="topbar">
-      <div>
-        <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
-        <div class="page-subtitle">{% block page_subtitle %}{% endblock %}</div>
+      <div style="display:flex; align-items:center;">
+        <!-- Hamburger button (mobile only) -->
+        <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div>
+          <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
+          <div class="page-subtitle">{% block page_subtitle %}{% endblock %}</div>
+        </div>
       </div>
       <div class="topbar-actions">
         {% block topbar_actions %}{% endblock %}
@@ -167,5 +158,36 @@
     </div>
   </div>
 </div>
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+  }
+
+  function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Close sidebar when a nav link is clicked on mobile
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+
+  // Close sidebar on window resize if desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) closeSidebar();
+  });
+</script>
+
 </body>
 </html>

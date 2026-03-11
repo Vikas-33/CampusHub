@@ -215,29 +215,59 @@ def manage_teachers(request):
 @login_required
 def add_teacher(request):
     if not request.user.is_college():
+        messages.error(request, 'Access denied.')
         return redirect('dashboard')
     college = request.user.college_profile
+
     if request.method == 'POST':
-        form = TeacherForm(request.POST)
-        if form.is_valid():
-            cd = form.cleaned_data
-            if User.objects.filter(username=cd['username']).exists():
-                messages.error(request, 'Username already exists.')
-            else:
-                user = User.objects.create_user(
-                    username=cd['username'], email=cd['email'],
-                    first_name=cd['first_name'], last_name=cd['last_name'],
-                    password=cd['password'] or 'teacher123', role='teacher'
-                )
-                profile = form.save(commit=False)
-                profile.user = user
-                profile.college = college
-                profile.save()
-                messages.success(request, 'Teacher added successfully!')
-                return redirect('manage_teachers')
-    else:
-        form = TeacherForm()
-    return render(request, 'college/add_teacher.html', {'form': form})
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        department = request.POST.get('department', '').strip()
+        designation = request.POST.get('designation', '').strip()
+        qualification = request.POST.get('qualification', '').strip()
+        specialization = request.POST.get('specialization', '').strip()
+        joining_date = request.POST.get('joining_date') or None
+        salary = request.POST.get('salary') or None
+
+        if not all([first_name, last_name, email, department, designation, qualification]):
+            messages.error(request, 'Please fill in all required fields.')
+            return render(request, 'college/add_teacher.html')
+
+        # Create user with a temp username — will be updated by TeacherProfile.save()
+        from accounts.models import User
+        user = User.objects.create_user(
+            username=f'temp_{email}',
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            role='teacher',
+        )
+
+        # Create profile — auto-generates employee_id and sets username + password
+        profile = TeacherProfile.objects.create(
+            user=user,
+            college=college,
+            department=department,
+            designation=designation,
+            qualification=qualification,
+            specialization=specialization,
+            joining_date=joining_date,
+            salary=salary,
+        )
+
+        # Set password to employee_id
+        user.set_password(profile.employee_id)
+        user.save()
+
+        messages.success(
+            request,
+            f'Teacher added! Employee ID: {profile.employee_id} | Username & Password: {profile.employee_id}'
+        )
+        return redirect('manage_teachers')
+
+    return render(request, 'college/add_teacher.html')
+
 
 
 @login_required
@@ -325,30 +355,58 @@ def add_student(request):
     if not request.user.is_college():
         return redirect('dashboard')
     college = request.user.college_profile
+
+    from .forms import StudentForm
     if request.method == 'POST':
         form = StudentForm(request.POST, college=college)
         if form.is_valid():
-            cd = form.cleaned_data
-            if User.objects.filter(username=cd['username']).exists():
-                form.add_error('username', 'This username is already taken.')
-            else:
-                user = User.objects.create_user(
-                    username=cd['username'],
-                    email=cd['email'],
-                    first_name=cd['first_name'],
-                    last_name=cd['last_name'],
-                    password=cd['password'] or 'student123',
-                    role='student',
-                    phone=cd.get('phone', '')
-                )
-                profile = form.save(commit=False)
-                profile.user = user
-                profile.college = college
-                profile.save()
-                messages.success(request, 'Student added successfully!')
-                return redirect('manage_students')
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
+            email = form.cleaned_data['email']
+            department = form.cleaned_data.get('department')
+            semester = form.cleaned_data['semester']
+            batch_year = form.cleaned_data['batch_year']
+            date_of_birth = form.cleaned_data.get('date_of_birth')
+            address = form.cleaned_data.get('address', '')
+            guardian_name = form.cleaned_data.get('guardian_name', '')
+            guardian_phone = form.cleaned_data.get('guardian_phone', '')
+            phone = form.cleaned_data.get('phone', '')
+
+            from accounts.models import User
+            user = User.objects.create_user(
+                username=f'temp_{email}',
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                role='student',
+                phone=phone,
+            )
+
+            # Create profile — auto-generates roll_number, enrollment_number, sets username
+            profile = StudentProfile.objects.create(
+                user=user,
+                college=college,
+                department=department,
+                semester=semester,
+                batch_year=batch_year,
+                date_of_birth=date_of_birth,
+                address=address,
+                guardian_name=guardian_name,
+                guardian_phone=guardian_phone,
+            )
+
+            # Set password to roll_number
+            user.set_password(profile.roll_number)
+            user.save()
+
+            messages.success(
+                request,
+                f'Student enrolled! Roll No: {profile.roll_number} | Username & Password: {profile.roll_number}'
+            )
+            return redirect('manage_students')
     else:
         form = StudentForm(college=college)
+
     return render(request, 'college/add_student.html', {'form': form})
 
 
