@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}EduCore{% endblock %} — College Management</title>
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+<style>
+  .nav-item { position: relative; }
+  .notif-badge {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">E</div>
+      <div class="logo-text">
+        <h2>EduCore</h2>
+        <span>Management System</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <span>🏠</span> Dashboard
+      </a>
+
+      {% if request.user.is_authenticated %}
+        {% if request.user.role == 'college' %}
+          <div class="nav-section-label">Management</div>
+          <a href="{% url 'manage_teachers' %}" class="nav-item {% if 'teacher' in request.resolver_match.url_name %}active{% endif %}">
+            <span>👨‍🏫</span> Teachers
+          </a>
+          <a href="{% url 'manage_students' %}" class="nav-item {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+            <span>🎓</span> Students
+          </a>
+          <a href="{% url 'departments' %}" class="nav-item {% if request.resolver_match.url_name == 'departments' %}active{% endif %}">
+            <span>🏛️</span> Departments
+          </a>
+          <a href="{% url 'courses' %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
+            <span>📚</span> Courses
+          </a>
+          <div class="nav-section-label">Academic</div>
+          <a href="{% url 'exams' %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📝</span> Exams
+          </a>
+          <a href="{% url 'attendance' %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📋</span> Attendance
+          </a>
+          <a href="{% url 'fees' %}" class="nav-item {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
+            <span>💰</span> Fees
+          </a>
+          <a href="{% url 'notices' %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📢</span> Notices
+            {% if unread_notice_count > 0 %}
+              <span class="notif-badge">{{ unread_notice_count }}</span>
+            {% endif %}
+          </a>
+
+        {% elif request.user.role == 'teacher' %}
+          <div class="nav-section-label">Teaching</div>
+          <a href="{% url 'courses' %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
+            <span>📚</span> My Courses
+          </a>
+          <a href="{% url 'attendance' %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📋</span> Attendance
+          </a>
+          <a href="{% url 'assignments' %}" class="nav-item {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📄</span> Assignments
+          </a>
+          <a href="{% url 'exams' %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📝</span> Exams
+          </a>
+          <a href="{% url 'notices' %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📢</span> Notices
+            {% if unread_notice_count > 0 %}
+              <span class="notif-badge">{{ unread_notice_count }}</span>
+            {% endif %}
+          </a>
+
+        {% elif request.user.role == 'student' %}
+          <div class="nav-section-label">Academics</div>
+          <a href="{% url 'courses' %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
+            <span>📚</span> My Courses
+          </a>
+          <a href="{% url 'attendance' %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📋</span> Attendance
+          </a>
+          <a href="{% url 'assignments' %}" class="nav-item {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📄</span> Assignments
+          </a>
+          <a href="{% url 'exams' %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📝</span> Exams
+          </a>
+          <a href="{% url 'student_results' %}" class="nav-item {% if 'result' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📊</span> My Results
+          </a>
+          <a href="{% url 'fees' %}" class="nav-item {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
+            <span>💰</span> Fees
+          </a>
+          <a href="{% url 'notices' %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
+            <span>📢</span> Notices
+            {% if unread_notice_count > 0 %}
+              <span class="notif-badge">{{ unread_notice_count }}</span>
+            {% endif %}
+          </a>
+        {% endif %}
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-bottom">
+      {% if request.user.is_authenticated %}
+      <a href="{% url 'profile' %}" class="user-card" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+        <div class="user-avatar">{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}</div>
+        <div class="user-info">
+          <div class="name">{{ request.user.get_full_name|truncatechars:18 }}</div>
+          <div class="role-badge">{{ request.user.role|capfirst }}</div>
+          <a href="{% url 'logout' %}" class="logout-link" onclick="event.stopPropagation()">Sign out</a>
+        </div>
+      </a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
+        <div class="page-subtitle">{% block page_subtitle %}{% endblock %}</div>
+      </div>
+      <div class="topbar-actions">
+        {% block topbar_actions %}{% endblock %}
+      </div>
+    </div>
+
+    <div class="content-body">
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+          {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+          {{ message }}
+        </div>
+      {% endfor %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+</body>
+</html>

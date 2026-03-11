@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Confirm Delete{% endblock %}
+{% block page_title %}Confirm Deletion{% endblock %}
+{% block content %}
+<div class="card" style="max-width:480px; margin:0 auto;">
+  <div class="card-body" style="text-align:center; padding:48px;">
+    <div style="font-size:56px; margin-bottom:20px;">🗑️</div>
+    <h3 style="font-size:20px; margin-bottom:12px;">Delete {{ type }}?</h3>
+    <p style="color:var(--text-secondary); margin-bottom:32px;">This action cannot be undone. All data associated with <strong>{{ object }}</strong> will be permanently removed.</p>
+    <form method="post" style="display:flex; gap:12px; justify-content:center;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, Delete</button>
+      <a href="javascript:history.back()" class="btn btn-outline">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

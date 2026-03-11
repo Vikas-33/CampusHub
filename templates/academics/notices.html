@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Notices{% endblock %}
+{% block page_title %}Notice Board{% endblock %}
+{% block topbar_actions %}
+  {% if request.user.role != 'student' %}
+    <a href="{% url 'add_notice' %}" class="btn btn-accent">+ Post Notice</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;">
+  {% for notice in page_obj %}
+  <div class="card mb-20">
+    <div style="padding:20px 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <h3 style="font-size:17px;">{{ notice.title }}</h3>
+          <span class="badge {% if notice.notice_type == 'urgent' %}badge-danger{% elif notice.notice_type == 'exam' %}badge-warning{% elif notice.notice_type == 'event' %}badge-success{% elif notice.notice_type == 'academic' %}badge-info{% else %}badge-secondary{% endif %}">
+            {{ notice.get_notice_type_display }}
+          </span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <span class="badge badge-secondary">{{ notice.get_target_audience_display }}</span>
+          {% if not notice.is_active %}<span class="badge badge-danger">Inactive</span>{% endif %}
+          {% if request.user.role == 'college' %}
+            <a href="{% url 'edit_notice' notice.pk %}" class="btn btn-sm btn-outline">✏️ Edit</a>
+            <a href="{% url 'delete_notice' notice.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+          {% elif request.user.role == 'teacher' and notice.created_by == request.user %}
+            <a href="{% url 'edit_notice' notice.pk %}" class="btn btn-sm btn-outline">✏️ Edit</a>
+            <a href="{% url 'delete_notice' notice.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+          {% endif %}
+        </div>
+      </div>
+      <p style="font-size:14px; color:var(--text-secondary); line-height:1.7;">{{ notice.content }}</p>
+      <div style="margin-top:14px; font-size:12px; color:var(--text-muted);">
+        📅 Posted {{ notice.created_at|date:"M d, Y" }} by {{ notice.created_by.get_full_name }}
+        {% if notice.expires_at %} &bull; Expires {{ notice.expires_at|date:"M d, Y" }}{% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state">
+    <div class="icon">📢</div>
+    <h3>No notices</h3>
+    <p>Check back later for announcements</p>
+  </div>
+  {% endfor %}
+
+  {% include 'includes/pagination.html' %}
+</div>
+{% endblock %}

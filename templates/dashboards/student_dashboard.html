@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Welcome, {{ student.user.first_name }}{% endblock %}
+{% block page_subtitle %}{{ student.department }} &bull; Semester {{ student.semester }} &bull; Roll: {{ student.roll_number }}{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card blue">
+    <div class="stat-icon blue">📚</div>
+    <div class="stat-value">{{ courses.count }}</div>
+    <div class="stat-label">Enrolled Courses</div>
+  </div>
+  <div class="stat-card {% if attendance_percent >= 75 %}green{% elif attendance_percent >= 60 %}gold{% else %}red{% endif %}">
+    <div class="stat-icon {% if attendance_percent >= 75 %}green{% elif attendance_percent >= 60 %}gold{% else %}red{% endif %}">📋</div>
+    <div class="stat-value">{{ attendance_percent }}%</div>
+    <div class="stat-label">Attendance</div>
+  </div>
+  <div class="stat-card gold">
+    <div class="stat-icon gold">📄</div>
+    <div class="stat-value">{{ pending_assignments }}</div>
+    <div class="stat-label">Assignments</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-icon red">💰</div>
+    <div class="stat-value">{{ fee_dues }}</div>
+    <div class="stat-label">Pending Dues</div>
+  </div>
+</div>
+
+{% if attendance_percent < 75 %}
+<div class="alert alert-warning">⚠️ Your attendance is below 75%. You need to attend more classes to be eligible for exams.</div>
+{% endif %}
+
+<div class="grid-2">
+  <div class="card mb-20">
+    <div class="card-header">
+      <span class="card-title">📚 My Courses</span>
+    </div>
+    <div class="card-body">
+      {% if courses %}
+        {% for course in courses %}
+          <div style="padding:12px 0; border-bottom:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div style="font-weight:600; font-size:14px;">{{ course.name }}</div>
+                <div style="font-size:12px; color:var(--text-secondary);">{{ course.code }} &bull; {{ course.credits }} credits</div>
+              </div>
+              {% if course.teacher %}
+                <div style="font-size:12px; color:var(--text-muted);">{{ course.teacher.user.get_full_name }}</div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">📚</div>
+          <h3>No courses found</h3>
+          <p>Courses matching your department and semester will appear here</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    <div class="card mb-20">
+      <div class="card-header">
+        <span class="card-title">📝 Upcoming Exams</span>
+        <a href="{% url 'exams' %}" class="btn btn-sm btn-outline">View All</a>
+      </div>
+      <div class="card-body">
+        {% for exam in upcoming_exams %}
+          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+            <div style="background:var(--primary); color:white; border-radius:8px; padding:8px 12px; text-align:center; min-width:48px;">
+              <div style="font-size:18px; font-weight:800; font-family:'Syne';">{{ exam.date|date:"d" }}</div>
+              <div style="font-size:10px; opacity:0.7;">{{ exam.date|date:"M" }}</div>
+            </div>
+            <div>
+              <div style="font-weight:600; font-size:14px;">{{ exam.course.name }}</div>
+              <div style="font-size:12px; color:var(--text-secondary);">{{ exam.get_exam_type_display }} &bull; {{ exam.start_time }} - {{ exam.end_time }}</div>
+            </div>
+          </div>
+        {% empty %}
+          <p style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">No upcoming exams 🎉</p>
+        {% endfor %}
+      </div>
+    </div>
+<p style="color:red; font-size:20px;">NOTICE COUNT: {{ recent_notices|length }}</p>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📢 Notices</span>
+        <a href="{% url 'notices' %}" class="btn btn-sm btn-outline">View All</a>
+      </div>
+      <div class="card-body" style="max-height:250px; overflow-y:auto;">
+        {% for notice in recent_notices %}
+          <div style="padding:10px 0; border-bottom:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+              <div>
+                <!-- Notice type badge -->
+                <span style="
+                  display:inline-block;
+                  font-size:10px;
+                  font-weight:600;
+                  padding:2px 8px;
+                  border-radius:20px;
+                  margin-bottom:4px;
+                  background:{% if notice.notice_type == 'urgent' %}#fee2e2; color:#dc2626;
+                  {% elif notice.notice_type == 'exam' %}#fef3c7; color:#d97706;
+                  {% elif notice.notice_type == 'academic' %}#dbeafe; color:#2563eb;
+                  {% elif notice.notice_type == 'event' %}#d1fae5; color:#059669;
+                  {% else %}#f3f4f6; color:#6b7280;{% endif %}
+                ">{{ notice.get_notice_type_display }}</span>
+                <div style="font-weight:600; font-size:14px; color:var(--text-primary);">{{ notice.title }}</div>
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); white-space:nowrap;">{{ notice.created_at|date:"M d, Y" }}</div>
+            </div>
+          </div>
+        {% empty %}
+          <p style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">No notices 📭</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

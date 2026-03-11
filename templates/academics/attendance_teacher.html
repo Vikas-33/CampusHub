@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance Management{% endblock %}
+{% block topbar_actions %}
+  {% if selected_course %}
+    <a href="{% url 'export_attendance_teacher' selected_course.pk %}" class="btn btn-outline">📥 Export CSV</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header"><span class="card-title">My Courses</span></div>
+    <div class="card-body">
+      {% for course in courses %}
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:600;">{{ course.name }}</div>
+          <div style="font-size:12px; color:var(--text-secondary);">{{ course.code }} &bull; Sem {{ course.semester }}</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <a href="{% url 'mark_attendance' course.pk %}" class="btn btn-sm btn-success">Mark Today</a>
+          <a href="?course={{ course.pk }}" class="btn btn-sm btn-outline">View Records</a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state"><div class="icon">📚</div><h3>No courses assigned</h3></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if selected_course %}
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Records: {{ selected_course.name }}</span>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Student</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for rec in attendance_records %}
+          <tr>
+            <td>{{ rec.student.user.get_full_name }}</td>
+            <td>{{ rec.date }}</td>
+            <td><span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}">{{ rec.status|capfirst }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No records</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

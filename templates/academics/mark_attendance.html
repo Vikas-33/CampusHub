@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Mark Attendance{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+{% block page_subtitle %}{{ course.name }} — {{ course.code }}{% endblock %}
+{% block content %}
+<div class="card" style="max-width:800px;">
+  <div class="card-header">
+    <span class="card-title">Students — {{ students.count }} enrolled</span>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <div style="padding:20px; background:var(--light-bg); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px;">
+      <label class="form-label" style="margin:0; white-space:nowrap;">Date *</label>
+      <input type="date" name="date" value="{{ today }}" class="form-input" style="width:200px;" required>
+      <button type="button" class="btn btn-sm btn-success" onclick="markAll('present')">✓ Mark All Present</button>
+      <button type="button" class="btn btn-sm btn-danger" onclick="markAll('absent')">✗ Mark All Absent</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>#</th><th>Student</th><th>Roll No.</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><div class="avatar-cell"><div class="table-avatar">{{ student.user.first_name|first }}{{ student.user.last_name|first }}</div><div class="avatar-info"><div class="name">{{ student.user.get_full_name }}</div></div></div></td>
+            <td>{{ student.roll_number }}</td>
+            <td>
+              <div style="display:flex; gap:8px;">
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #d1fae5; background:#f0fdf4;" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#d1fae5';">
+                  <input type="radio" name="status_{{ student.id }}" value="present" checked style="display:none;"> ✅ Present
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #fee2e2; background:white;" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#fee2e2';">
+                  <input type="radio" name="status_{{ student.id }}" value="absent" style="display:none;"> ❌ Absent
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #fef3c7; background:white;" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#fef3c7';">
+                  <input type="radio" name="status_{{ student.id }}" value="late" style="display:none;"> ⏰ Late
+                </label>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><div class="icon">👥</div><h3>No students in this course</h3></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if students %}
+    <div style="padding:20px; display:flex; gap:12px;">
+      <button type="submit" class="btn btn-success">💾 Save Attendance</button>
+      <a href="{% url 'attendance' %}" class="btn btn-outline">Cancel</a>
+    </div>
+    {% endif %}
+  </form>
+</div>
+<script>
+function markAll(status) {
+  document.querySelectorAll('input[type=radio][value='+status+']').forEach(r => {
+    r.checked = true;
+    const labels = r.closest('div').querySelectorAll('label');
+    labels.forEach(l => l.style.background = '');
+    r.closest('label').style.background = status === 'present' ? '#d1fae5' : status === 'absent' ? '#fee2e2' : '#fef3c7';
+  });
+}
+</script>
+{% endblock %}

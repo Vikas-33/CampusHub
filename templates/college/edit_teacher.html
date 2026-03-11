@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Edit Teacher{% endblock %}
+{% block page_title %}Edit Teacher{% endblock %}
+{% block page_subtitle %}{{ teacher.user.get_full_name }}{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 800px;">
+  <div class="card-header"><span class="card-title">Update Teacher Information</span></div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">First Name</label><input type="text" name="first_name" value="{{ form.initial.first_name }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input type="text" name="last_name" value="{{ form.initial.last_name }}" class="form-input" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Username</label><input type="text" name="username" value="{{ form.initial.username }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" value="{{ form.initial.email }}" class="form-input" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Employee ID</label><input type="text" name="employee_id" value="{{ teacher.employee_id }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Department</label><input type="text" name="department" value="{{ teacher.department }}" class="form-input" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Designation</label><input type="text" name="designation" value="{{ teacher.designation }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Qualification</label><input type="text" name="qualification" value="{{ teacher.qualification }}" class="form-input" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Specialization</label><input type="text" name="specialization" value="{{ teacher.specialization }}" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Salary</label><input type="number" name="salary" value="{{ teacher.salary }}" class="form-input" step="0.01"></div>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'manage_teachers' %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

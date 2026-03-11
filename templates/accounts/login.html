@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — EduCore</title>
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <h1>The Complete<br><span>College Management</span><br>Platform</h1>
+      <p>Streamline academic operations, manage students, teachers, exams, attendance, and fees — all in one powerful system.</p>
+    </div>
+    <div class="auth-features">
+      <div class="auth-feature">
+        <div class="feature-icon">🎓</div>
+        <div class="feature-text">
+          <h4>Student Management</h4>
+          <p>Track enrollments, attendance, grades, and fee payments</p>
+        </div>
+      </div>
+      <div class="auth-feature">
+        <div class="feature-icon">👨‍🏫</div>
+        <div class="feature-text">
+          <h4>Faculty Portal</h4>
+          <p>Manage courses, assignments, attendance and exams</p>
+        </div>
+      </div>
+      <div class="auth-feature">
+        <div class="feature-icon">📊</div>
+        <div class="feature-text">
+          <h4>Analytics & Reports</h4>
+          <p>Real-time insights into academic performance and operations</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form">
+      <div class="auth-logo">
+        <div class="icon">E</div>
+        <span>EduCore</span>
+      </div>
+      <h2>Welcome back</h2>
+      <p>Sign in to your account to continue</p>
+
+      {% for message in messages %}
+        <div class="alert alert-error">❌ {{ message }}</div>
+      {% endfor %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-input" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:15px; margin-top:8px;">
+          Sign In →
+        </button>
+      </form>
+
+      <p style="margin-top: 24px; text-align: center; font-size: 14px; color: var(--text-secondary);">
+        New college? <a href="{% url 'register_college' %}" style="color: var(--highlight); font-weight: 600;">Register here</a>
+      </p>
+
+      <div style="margin-top: 32px; padding: 16px; background: var(--light-bg); border-radius: 10px; font-size: 12px; color: var(--text-secondary);">
+        <strong>Demo credentials:</strong><br>
+        College: <code>admin / admin123</code><br>
+        (Run setup_demo command to create)
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

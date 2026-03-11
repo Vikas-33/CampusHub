@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance Overview{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="table-container">
+    <table>
+      <thead><tr><th>Student</th><th>Course</th><th>Date</th><th>Status</th><th>Marked By</th></tr></thead>
+      <tbody>
+        {% for rec in attendance_records %}
+        <tr>
+          <td>{{ rec.student.user.get_full_name }}</td>
+          <td>{{ rec.course.name }}</td>
+          <td>{{ rec.date }}</td>
+          <td><span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}">{{ rec.status|capfirst }}</span></td>
+          <td>{{ rec.marked_by.user.get_full_name|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><div class="icon">📋</div><h3>No records yet</h3></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

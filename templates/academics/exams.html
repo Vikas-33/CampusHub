@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Exams{% endblock %}
+{% block page_title %}Examinations{% endblock %}
+{% block topbar_actions %}
+  {% if request.user.role != 'student' %}
+    <a href="{% url 'add_exam' %}" class="btn btn-accent">+ Schedule Exam</a>
+  {% endif %}
+  {% if request.user.role == 'student' %}
+    <a href="{% url 'student_results' %}" class="btn btn-primary">📊 My Results</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="grid-3">
+  {% for exam in exams %}
+  <div class="exam-card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+      <div>
+        <div class="exam-date">{{ exam.date|date:"d" }}</div>
+        <div class="exam-month">{{ exam.date|date:"M Y" }}</div>
+      </div>
+      <span class="badge {% if exam.exam_type == 'final' %}badge-danger{% elif exam.exam_type == 'midterm' %}badge-warning{% elif exam.exam_type == 'quiz' %}badge-info{% else %}badge-teal{% endif %}">
+        {{ exam.get_exam_type_display }}
+      </span>
+    </div>
+
+    <div class="exam-details">
+      <div class="exam-course">{{ exam.course.name }}</div>
+      <div class="exam-meta">⏰ {{ exam.start_time|time:"H:i" }} – {{ exam.end_time|time:"H:i" }}</div>
+      {% if exam.venue %}<div class="exam-meta">📍 {{ exam.venue }}</div>{% endif %}
+      <div class="exam-meta">📝 {{ exam.total_marks }} marks &bull; Pass: {{ exam.passing_marks }}</div>
+    </div>
+
+    <div style="margin-top:14px; display:flex; gap:8px;">
+      {% if request.user.role == 'student' %}
+        <!-- Students see their own result for this exam -->
+        <a href="{% url 'student_exam_result' exam.pk %}" class="btn btn-xs btn-primary">My Result</a>
+      {% else %}
+        <!-- College and teachers manage results -->
+        <a href="{% url 'exam_results' exam.pk %}" class="btn btn-xs btn-primary">Results</a>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div style="grid-column:1/-1;">
+    <div class="empty-state">
+      <div class="icon">📝</div>
+      <h3>No exams scheduled</h3>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

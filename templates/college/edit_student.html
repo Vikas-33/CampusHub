@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Edit Student{% endblock %}
+{% block page_title %}Edit Student{% endblock %}
+{% block page_subtitle %}{{ student.user.get_full_name }}{% endblock %}
+{% block content %}
+<div class="card" style="max-width:800px;">
+  <div class="card-header"><span class="card-title">Update Student Information</span></div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">First Name</label><input type="text" name="first_name" value="{{ student.user.first_name }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input type="text" name="last_name" value="{{ student.user.last_name }}" class="form-input" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Username</label><input type="text" name="username" value="{{ student.user.username }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" value="{{ student.user.email }}" class="form-input" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Roll Number</label><input type="text" name="roll_number" value="{{ student.roll_number }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Enrollment Number</label><input type="text" name="enrollment_number" value="{{ student.enrollment_number }}" class="form-input" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Department</label><input type="text" name="department" value="{{ student.department }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Semester</label><select name="semester" class="form-input">{% for i in "12345678" %}<option value="{{ i }}" {% if student.semester|stringformat:"s" == i %}selected{% endif %}>Semester {{ i }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Batch Year</label><input type="number" name="batch_year" value="{{ student.batch_year }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" name="date_of_birth" value="{{ student.date_of_birth|date:'Y-m-d' }}" class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Address</label><textarea name="address" class="form-input" rows="2">{{ student.address }}</textarea></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Guardian Name</label><input type="text" name="guardian_name" value="{{ student.guardian_name }}" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Guardian Phone</label><input type="text" name="guardian_phone" value="{{ student.guardian_phone }}" class="form-input"></div>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'manage_students' %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

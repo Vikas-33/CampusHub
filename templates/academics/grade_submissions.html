@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Grade Submissions{% endblock %}
+{% block page_title %}Grade Submissions{% endblock %}
+{% block page_subtitle %}{{ assignment.title }} — {{ assignment.total_marks }} marks{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="post">
+    {% csrf_token %}
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Student</th><th>Submitted</th><th>Remarks</th><th>File</th><th>Marks / {{ assignment.total_marks }}</th></tr></thead>
+        <tbody>
+          {% for sub in submissions %}
+          <tr>
+            <td>{{ sub.student.user.get_full_name }}</td>
+            <td>{{ sub.submitted_at|date:"M d, Y H:i" }}</td>
+            <td>{{ sub.remarks|default:"—" }}</td>
+            <td>{% if sub.file %}<a href="{{ sub.file.url }}" class="btn btn-xs btn-info" target="_blank">Download</a>{% else %}<span style="color:var(--text-muted);">No file</span>{% endif %}</td>
+            <td><input type="number" name="marks_{{ sub.id }}" value="{{ sub.marks_obtained|default:'' }}" class="form-input" style="width:80px;" min="0" max="{{ assignment.total_marks }}"></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5"><div class="empty-state"><div class="icon">📄</div><h3>No submissions yet</h3></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if submissions %}
+    <div style="padding:20px; border-top:1px solid var(--border);">
+      <button type="submit" class="btn btn-primary">Save Grades</button>
+    </div>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}

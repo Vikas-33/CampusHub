@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}{{ college.college_name }}{% endblock %}
+{% block page_subtitle %}College Administration Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card blue">
+    <div class="stat-icon blue">🎓</div>
+    <div class="stat-value">{{ total_students }}</div>
+    <div class="stat-label">Total Students</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon green">👨‍🏫</div>
+    <div class="stat-value">{{ total_teachers }}</div>
+    <div class="stat-label">Faculty Members</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon purple">📚</div>
+    <div class="stat-value">{{ total_courses }}</div>
+    <div class="stat-label">Active Courses</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-icon red">💰</div>
+    <div class="stat-value">{{ pending_fees }}</div>
+    <div class="stat-label">Pending Fee Dues</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card mb-20">
+    <div class="card-header">
+      <span class="card-title">📢 Recent Notices</span>
+      <a href="{% url 'add_notice' %}" class="btn btn-sm btn-primary">+ Post Notice</a>
+    </div>
+    <div class="card-body">
+      {% if recent_notices %}
+        {% for notice in recent_notices %}
+          <div class="notice-item {{ notice.notice_type }}">
+            <div class="notice-title">{{ notice.title }}</div>
+            <div style="font-size:13px; color: var(--text-secondary); margin-top:4px;">{{ notice.content|truncatechars:80 }}</div>
+            <div class="notice-meta">{{ notice.created_at|date:"M d, Y" }} &bull; <span class="badge badge-info">{{ notice.get_target_audience_display }}</span></div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">📢</div>
+          <h3>No notices yet</h3>
+          <p>Post your first notice to students and teachers</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card mb-20">
+    <div class="card-header">
+      <span class="card-title">📝 Upcoming Exams</span>
+      <a href="{% url 'add_exam' %}" class="btn btn-sm btn-primary">+ Schedule</a>
+    </div>
+    <div class="card-body">
+      {% if upcoming_exams %}
+        {% for exam in upcoming_exams %}
+          <div style="display:flex; gap:16px; align-items:center; padding:14px 0; border-bottom:1px solid var(--border);">
+            <div style="text-align:center; min-width:48px;">
+              <div style="font-size:22px; font-weight:800; font-family:'Syne'; color:var(--primary);">{{ exam.date|date:"d" }}</div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">{{ exam.date|date:"M" }}</div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-weight:600; font-size:14px;">{{ exam.course.name }}</div>
+              <div style="font-size:12px; color:var(--text-secondary);">{{ exam.get_exam_type_display }} &bull; {{ exam.start_time|time:"H:i" }} - {{ exam.end_time|time:"H:i" }}</div>
+              {% if exam.venue %}<div style="font-size:12px; color:var(--text-muted);">📍 {{ exam.venue }}</div>{% endif %}
+            </div>
+            <span class="badge badge-info">{{ exam.get_exam_type_display }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">📝</div>
+          <h3>No upcoming exams</h3>
+          <p>Schedule exams for your courses</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="grid-3">
+  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'manage_teachers' %}'">
+    <div class="card-body" style="text-align:center; padding:32px;">
+      <div style="font-size:40px; margin-bottom:12px;">👨‍🏫</div>
+      <h3 style="font-size:16px;">Manage Teachers</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Add, edit, remove faculty</p>
+    </div>
+  </div>
+  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'manage_students' %}'">
+    <div class="card-body" style="text-align:center; padding:32px;">
+      <div style="font-size:40px; margin-bottom:12px;">🎓</div>
+      <h3 style="font-size:16px;">Manage Students</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Enroll and track students</p>
+    </div>
+  </div>
+  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'fees' %}'">
+    <div class="card-body" style="text-align:center; padding:32px;">
+      <div style="font-size:40px; margin-bottom:12px;">💰</div>
+      <h3 style="font-size:16px;">Fee Management</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Structures and payments</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

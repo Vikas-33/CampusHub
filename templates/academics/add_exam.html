@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Schedule Exam{% endblock %}
+{% block page_title %}Schedule Examination{% endblock %}
+{% block content %}
+<div class="card" style="max-width:700px;">
+  <div class="card-header"><span class="card-title">Exam Details</span></div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Course *</label>{{ form.course }}</div>
+        <div class="form-group"><label class="form-label">Exam Type *</label>{{ form.exam_type }}</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Date *</label><input type="date" name="date" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Venue</label><input type="text" name="venue" class="form-input" placeholder="e.g. Exam Hall A"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Start Time *</label><input type="time" name="start_time" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">End Time *</label><input type="time" name="end_time" class="form-input" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Total Marks</label><input type="number" name="total_marks" class="form-input" value="100"></div>
+        <div class="form-group"><label class="form-label">Passing Marks</label><input type="number" name="passing_marks" class="form-input" value="40"></div>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button type="submit" class="btn btn-accent">Schedule Exam</button>
+        <a href="{% url 'exams' %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
