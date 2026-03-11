@@ -1,4 +1,4 @@
-# EduCore — College Management Platform
+# CampusHub — College Management Platform
 
 A complete Django-based college management system with 3 user roles: **College Admin**, **Teacher**, and **Student**.
 
