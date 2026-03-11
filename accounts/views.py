@@ -7,6 +7,7 @@ from .forms import LoginForm, CollegeRegistrationForm, TeacherForm, StudentForm,
 from .models import User, CollegeProfile, TeacherProfile, StudentProfile
 from academics.models import Course, Notice, Attendance, FeePayment, Exam, Assignment
 from django.core.paginator import Paginator
+from academics.utils import send_teacher_credentials, send_student_credentials
 
 
 
@@ -260,6 +261,8 @@ def add_teacher(request):
         user.set_password(profile.employee_id)
         user.save()
 
+        send_teacher_credentials(profile) 
+
         messages.success(
             request,
             f'Teacher added! Employee ID: {profile.employee_id} | Username & Password: {profile.employee_id}'
@@ -398,6 +401,8 @@ def add_student(request):
             # Set password to roll_number
             user.set_password(profile.roll_number)
             user.save()
+            
+            send_student_credentials(profile)
 
             messages.success(
                 request,

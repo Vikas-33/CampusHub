@@ -41,7 +41,6 @@ class CollegeRegistrationForm(forms.ModelForm):
         required=False, max_length=15,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-    # Match template field names: password1 / password2
     password1 = forms.CharField(
         label='Password',
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
@@ -75,7 +74,6 @@ class CollegeRegistrationForm(forms.ModelForm):
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         if phone:
-            # strip spaces, dashes, plus sign for validation
             digits = phone.replace(' ', '').replace('-', '').replace('+', '')
             if not digits.isdigit():
                 raise forms.ValidationError('Enter a valid phone number.')
@@ -98,6 +96,7 @@ class CollegeRegistrationForm(forms.ModelForm):
                 website=self.cleaned_data.get('website', ''),
             )
         return user
+
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
@@ -123,23 +122,12 @@ class TeacherForm(forms.ModelForm):
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'})
     )
-    username = forms.CharField(
-        max_length=150,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'})
-    )
-    password = forms.CharField(
-        required=False,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control', 'placeholder': 'Password (default: teacher123)'
-        })
-    )
 
     class Meta:
         model = TeacherProfile
-        fields = ['employee_id', 'department', 'designation', 'qualification',
+        fields = ['department', 'designation', 'qualification',
                   'joining_date', 'salary', 'specialization']
         widgets = {
-            'employee_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. EMP001'}),
             'department': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Computer Science'}),
             'designation': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Assistant Professor'}),
             'qualification': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. M.Tech, PhD'}),
@@ -167,31 +155,17 @@ class StudentForm(forms.ModelForm):
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'})
     )
-    username = forms.CharField(
-        max_length=150,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'})
-    )
-    password = forms.CharField(
-        required=False,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control', 'placeholder': 'Password (default: student123)'
-        })
+    phone = forms.CharField(
+        required=False, max_length=15,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone'})
     )
 
     class Meta:
         model = StudentProfile
-        fields = ['roll_number', 'enrollment_number', 'department', 'semester',
-                  'batch_year', 'date_of_birth', 'address', 'guardian_name', 'guardian_phone']
+        fields = ['department', 'semester', 'batch_year', 'date_of_birth',
+                  'address', 'guardian_name', 'guardian_phone']
         widgets = {
-            'roll_number': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'e.g. 101'
-            }),
-            'enrollment_number': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'e.g. EN2024001'
-            }),
-            'department': forms.Select(attrs={
-                'class': 'form-control'
-            }),
+            'department': forms.Select(attrs={'class': 'form-control'}),
             'semester': forms.NumberInput(attrs={
                 'class': 'form-control', 'min': 1, 'max': 8,
                 'placeholder': 'Enter semester (1-8)'
@@ -200,18 +174,10 @@ class StudentForm(forms.ModelForm):
                 'class': 'form-control', 'min': 2000, 'max': 2100,
                 'placeholder': 'e.g. 2024'
             }),
-            'date_of_birth': forms.DateInput(attrs={
-                'class': 'form-control', 'type': 'date'
-            }),
-            'address': forms.Textarea(attrs={
-                'class': 'form-control', 'rows': 2
-            }),
-            'guardian_name': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Guardian Full Name'
-            }),
-            'guardian_phone': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'e.g. 9876543210'
-            }),
+            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'guardian_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Guardian Full Name'}),
+            'guardian_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 9876543210'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -242,10 +208,3 @@ class StudentForm(forms.ModelForm):
             if len(phone) != 10:
                 raise forms.ValidationError('Phone number must be exactly 10 digits.')
         return phone
-
-    def clean_enrollment_number(self):
-        enrollment = self.cleaned_data.get('enrollment_number')
-        instance_pk = self.instance.pk if self.instance else None
-        if StudentProfile.objects.filter(enrollment_number=enrollment).exclude(pk=instance_pk).exists():
-            raise forms.ValidationError('This enrollment number is already in use.')
-        return enrollment
