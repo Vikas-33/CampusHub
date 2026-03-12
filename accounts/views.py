@@ -258,6 +258,7 @@ def add_teacher(request, college_slug):
             salary=salary,
         )
         # profile.save() already set username to employee_id
+        user.username = profile.employee_id
         user.set_password(profile.employee_id)
         user.save()
         send_teacher_credentials(profile)
