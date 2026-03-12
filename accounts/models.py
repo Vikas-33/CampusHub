@@ -77,9 +77,9 @@ class TeacherProfile(models.Model):
         if not self.employee_id:
             self.employee_id = self._generate_employee_id()
         super().save(*args, **kwargs)
-        if self.user.username != self.employee_id:
-            self.user.username = self.employee_id
-            self.user.save(update_fields=['username'])
+        # if self.user.username != self.employee_id:
+        #     self.user.username = self.employee_id
+        #     self.user.save(update_fields=['username'])
 
     def __str__(self): return f"{self.user.get_full_name()} ({self.employee_id})"
 
@@ -109,7 +109,7 @@ class StudentProfile(models.Model):
             college=self.college, department=self.department, batch_year=year
         ).count() + 1
         total_count = StudentProfile.objects.filter(college=self.college).count() + 1
-        roll_number = f"{dept_code}{year}{dept_count:03d}"
+        roll_number = f"{initials}{dept_code}{year}{dept_count:03d}" 
         enrollment_number = f"{initials}{year}S{total_count:04d}"
         return roll_number, enrollment_number
 
@@ -121,8 +121,8 @@ class StudentProfile(models.Model):
             if not self.enrollment_number:
                 self.enrollment_number = enroll
         super().save(*args, **kwargs)
-        if self.user.username != self.roll_number:
-            self.user.username = self.roll_number
-            self.user.save(update_fields=['username'])
+        # if self.user.username != self.roll_number:
+        #     self.user.username = self.roll_number
+        #     self.user.save(update_fields=['username'])
 
     def __str__(self): return f"{self.user.get_full_name()} ({self.roll_number})"

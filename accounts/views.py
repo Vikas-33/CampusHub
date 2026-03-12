@@ -382,6 +382,7 @@ def add_student(request, college_slug):
                 guardian_phone=cd.get('guardian_phone', ''),
             )
             # profile.save() already set username to roll_number
+            user.username = profile.roll_number
             user.set_password(profile.roll_number)
             user.save()
             send_student_credentials(profile)
