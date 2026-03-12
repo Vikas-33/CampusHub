@@ -56,7 +56,7 @@ A complete Django-based college management system with 3 user roles: **College A
 
 ```bash
 git clone https://github.com/Vikas-33/CampusHub.git
-cd YOUR_REPO_NAME
+cd CampusHub
 ```
 
 Or click **Code → Download ZIP** on GitHub, extract it, and open a terminal in that folder.
