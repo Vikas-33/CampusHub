@@ -458,7 +458,7 @@ def exam_results(request, college_slug, exam_id):
         student = get_object_or_404(StudentProfile, pk=student_id)
         result, created = ExamResult.objects.update_or_create(
             exam=exam, student=student,
-            defaults={'marks_obtained': marks, 'grade': grade}
+            defaults={'marks_obtained': int(marks), 'grade': grade}
         )
         send_result_email(result)
         messages.success(request, f'Result saved! {student.user.get_full_name()} will be notified by email.')
