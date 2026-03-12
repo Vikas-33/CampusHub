@@ -6,6 +6,7 @@ from django.db.models import Count
 from .forms import LoginForm, CollegeRegistrationForm, TeacherForm, StudentForm, ProfileUpdateForm
 from .models import User, CollegeProfile, TeacherProfile, StudentProfile
 from academics.models import Course, Notice, Attendance, FeePayment, Exam, Assignment
+from accounts.models import StudentProfile
 from django.core.paginator import Paginator
 from academics.utils import send_teacher_credentials, send_student_credentials
 
@@ -216,7 +217,6 @@ def manage_teachers(request, college_slug):
         'dept_filter': dept_filter,
     })
 
-
 @login_required
 def add_teacher(request, college_slug):
     if not request.user.is_college():
@@ -239,8 +239,9 @@ def add_teacher(request, college_slug):
             messages.error(request, 'Please fill in all required fields.')
             return render(request, 'college/add_teacher.html')
 
+        import time
         user = User.objects.create_user(
-            username=f'temp_{email}',
+            username=f'tmp_{int(time.time() * 1000)}',
             email=email,
             first_name=first_name,
             last_name=last_name,
@@ -256,6 +257,7 @@ def add_teacher(request, college_slug):
             joining_date=joining_date,
             salary=salary,
         )
+        # profile.save() already set username to employee_id
         user.set_password(profile.employee_id)
         user.save()
         send_teacher_credentials(profile)
@@ -266,6 +268,7 @@ def add_teacher(request, college_slug):
         return redirect('manage_teachers', college_slug=college_slug)
 
     return render(request, 'college/add_teacher.html')
+
 
 
 @login_required
@@ -358,8 +361,9 @@ def add_student(request, college_slug):
         form = StudentForm(request.POST, college=college)
         if form.is_valid():
             cd = form.cleaned_data
+            import time
             user = User.objects.create_user(
-                username=f'temp_{cd["email"]}',
+                username=f'tmp_{int(time.time() * 1000)}',
                 email=cd['email'],
                 first_name=cd['first_name'],
                 last_name=cd['last_name'],
@@ -377,6 +381,7 @@ def add_student(request, college_slug):
                 guardian_name=cd.get('guardian_name', ''),
                 guardian_phone=cd.get('guardian_phone', ''),
             )
+            # profile.save() already set username to roll_number
             user.set_password(profile.roll_number)
             user.save()
             send_student_credentials(profile)
