@@ -55,7 +55,7 @@ A complete Django-based college management system with 3 user roles: **College A
 ### Step 1 — Get the Project
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+git clone https://github.com/Vikas-33/CampusHub.git
 cd YOUR_REPO_NAME
 ```
 
