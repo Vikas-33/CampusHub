@@ -61,7 +61,18 @@ class TeacherProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_profile')
     college = models.ForeignKey(CollegeProfile, on_delete=models.CASCADE, related_name='teachers')
     employee_id = models.CharField(max_length=20, unique=True, blank=True)
-    department = models.CharField(max_length=100, blank=True)
+    department = models.ForeignKey(
+        'academics.Department',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='department_teachers'
+    )
+    courses = models.ManyToManyField(
+        'academics.Course',
+        blank=True,
+        related_name='assigned_teachers'
+    )
     designation = models.CharField(max_length=100, blank=True)
     qualification = models.CharField(max_length=200, blank=True)
     joining_date = models.DateField(null=True, blank=True)

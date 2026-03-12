@@ -19,7 +19,7 @@ class Course(models.Model):
     code = models.CharField(max_length=20)
     credits = models.IntegerField(default=3)
     semester = models.IntegerField()
-    teacher = models.ForeignKey(TeacherProfile, null=True, blank=True, on_delete=models.SET_NULL, related_name='courses')
+    teacher = models.ForeignKey(TeacherProfile, null=True, blank=True, on_delete=models.SET_NULL, related_name='teaching_courses')
     description = models.TextField(blank=True)
     
     def __str__(self):
@@ -74,6 +74,17 @@ class Exam(models.Model):
     total_marks = models.IntegerField(default=100)
     passing_marks = models.IntegerField(default=40)
     venue = models.CharField(max_length=100, blank=True)
+
+    SEMESTER_CHOICES = [(str(i), f'Semester {i}') for i in range(1, 9)]
+    STATUS_CHOICES = [
+        ('scheduled', 'Scheduled'),
+        ('cancelled', 'Cancelled'),
+        ('postponed', 'Postponed'),
+    ]
+    semester = models.CharField(max_length=1, choices=SEMESTER_CHOICES, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+    postponed_date = models.DateField(null=True, blank=True)
+    cancellation_reason = models.TextField(blank=True)
     
     def __str__(self):
         return f"{self.course.name} - {self.exam_type} - {self.date}"

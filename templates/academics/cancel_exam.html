@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Cancel Exam{% endblock %}
+{% block page_title %}Cancel Examination{% endblock %}
+{% block content %}
+<div class="card" style="max-width:600px;">
+  <div class="card-header"><span class="card-title" style="color:var(--danger);">⚠️ Cancel Exam</span></div>
+  <div class="card-body">
+    <div class="alert alert-danger" style="margin-bottom:20px;">
+      You are about to cancel the <strong>{{ exam.get_exam_type_display }}</strong> exam for
+      <strong>{{ exam.course.name }}</strong> scheduled on <strong>{{ exam.date|date:"d M Y" }}</strong>.
+      All enrolled students will be notified by email.
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Reason for Cancellation</label>
+        <textarea name="reason" class="form-input" rows="3" placeholder="Optional: provide a reason for students..."></textarea>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+        <a href="{% url 'exams' college_slug %}" class="btn btn-outline">Go Back</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -21,7 +21,7 @@
         <div class="form-group"><label class="form-label">Enrollment Number</label><input type="text" name="enrollment_number" value="{{ student.enrollment_number }}" class="form-input" required></div>
       </div>
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Department</label><input type="text" name="department" value="{{ student.department }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Department</label>{{ form.department }}</div>
         <div class="form-group"><label class="form-label">Semester</label><select name="semester" class="form-input">{% for i in "12345678" %}<option value="{{ i }}" {% if student.semester|stringformat:"s" == i %}selected{% endif %}>Semester {{ i }}</option>{% endfor %}</select></div>
       </div>
       <div class="form-grid">

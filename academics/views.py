@@ -261,7 +261,7 @@ def export_attendance_teacher(request, college_slug, course_id):
     return response
 
 
-# --- ASSIGNMENTS ---
+# --- ASSIGNMENTS --- 
 
 @login_required
 def assignments(request, college_slug):
@@ -430,19 +430,51 @@ def add_exam(request, college_slug):
         teacher = request.user.teacher_profile
         college = teacher.college
         course_qs = Course.objects.filter(teacher=teacher)
+    SEMESTER_CHOICES = [(str(i), f'Semester {i}') for i in range(1, 9)]
     if request.method == 'POST':
-        form = ExamForm(request.POST)
-        form.fields['course'].queryset = course_qs
-        if form.is_valid():
-            exam = form.save(commit=False)
-            exam.college = college
-            exam.save()
-            messages.success(request, 'Exam scheduled!')
-            return redirect('exams', college_slug=college_slug)
-    else:
-        form = ExamForm()
-        form.fields['course'].queryset = course_qs
-    return render(request, 'academics/add_exam.html', {'form': form})
+        course_id     = request.POST.get('course')
+        exam_type     = request.POST.get('exam_type')
+        date          = request.POST.get('date')
+        venue         = request.POST.get('venue', '')
+        start_time    = request.POST.get('start_time')
+        end_time      = request.POST.get('end_time')
+        total_marks   = request.POST.get('total_marks', 100)
+        passing_marks = request.POST.get('passing_marks', 40)
+        semester      = request.POST.get('semester', '')
+        course = get_object_or_404(Course, pk=course_id)
+        exam = Exam.objects.create(
+            college=college, course=course, exam_type=exam_type,
+            date=date, venue=venue, start_time=start_time, end_time=end_time,
+            total_marks=total_marks, passing_marks=passing_marks,
+            semester=semester, status='scheduled',
+        )
+        # email students matching semester + course department
+        students = StudentProfile.objects.filter(
+            college=college,
+            department=course.department,
+            semester=int(semester) if semester else course.semester
+        )
+        emails = [s.user.email for s in students if s.user.email]
+        if emails:
+            from django.core.mail import send_mail
+            from django.conf import settings
+            send_mail(
+                f"Exam Scheduled: {course.name} — {exam.get_exam_type_display()}",
+                f"Dear Student,\n\nAn exam has been scheduled:\n\n"
+                f"Course : {course.name}\nType   : {exam.get_exam_type_display()}\n"
+                f"Date     : {exam.date}\n"
+                f"Time   : {exam.start_time} – {exam.end_time}\n"
+                f"Venue  : {venue or 'TBA'}\n\nAll the best!\n— CampusHub",
+                settings.EMAIL_HOST_USER, emails, fail_silently=True
+            )
+        messages.success(request, 'Exam scheduled!')
+        return redirect('exams', college_slug=college_slug)
+    return render(request, 'academics/add_exam.html', {
+        'courses': course_qs,
+        'semester_choices': SEMESTER_CHOICES,
+        'college_slug': college_slug,
+    })
+
 
 
 @login_required
@@ -809,3 +841,90 @@ def download_fee_receipt(request, college_slug, payment_id):
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+
+@login_required
+def cancel_exam(request, college_slug, exam_id):
+    if not (request.user.is_college() or request.user.is_teacher()):
+        return redirect('dashboard', college_slug=college_slug)
+    exam = get_object_or_404(Exam, pk=exam_id)
+    if request.method == 'POST':
+        reason = request.POST.get('reason', '')
+        exam.status = 'cancelled'
+        exam.cancellation_reason = reason
+        exam.save()
+        # email students
+        students = StudentProfile.objects.filter(
+            college=exam.college,
+            department=exam.course.department,
+            semester=exam.course.semester
+        )
+        emails = [s.user.email for s in students if s.user.email]
+        if emails:
+            from django.core.mail import send_mail
+            from django.conf import settings
+            send_mail(
+                f"Exam Cancelled: {exam.course.name} — {exam.get_exam_type_display()}",
+                f"Dear Student,\n\nThe {exam.get_exam_type_display()} exam for {exam.course.name} "
+                f"scheduled on {exam.date.strftime('%d %B %Y')} has been CANCELLED.\n"
+                + (f"Reason: {reason}\n" if reason else "")
+                + "\n— CampusHub",
+                settings.EMAIL_HOST_USER, emails, fail_silently=True
+            )
+        messages.success(request, 'Exam cancelled and students notified.')
+        return redirect('exams', college_slug=college_slug)
+    return render(request, 'academics/cancel_exam.html', {'exam': exam, 'college_slug': college_slug})
+
+
+@login_required
+def postpone_exam(request, college_slug, exam_id):
+    if not (request.user.is_college() or request.user.is_teacher()):
+        return redirect('dashboard', college_slug=college_slug)
+    exam = get_object_or_404(Exam, pk=exam_id)
+    if request.method == 'POST':
+        new_date = request.POST.get('new_date', '').strip()
+        old_date = exam.postponed_date if exam.postponed_date else exam.date  
+        exam.status = 'postponed'
+        exam.postponed_date = new_date if new_date else None
+        exam.save()
+        students = StudentProfile.objects.filter(
+            college=exam.college,
+            department=exam.course.department,
+            semester=exam.course.semester
+        )
+        emails = [s.user.email for s in students if s.user.email]
+        if emails:
+            from django.core.mail import send_mail
+            from django.conf import settings
+            date_str = new_date if new_date else "TBD"
+            send_mail(
+                f"Exam Postponed: {exam.course.name} — {exam.get_exam_type_display()}",
+                f"Dear Student,\n\nThe {exam.get_exam_type_display()} exam for {exam.course.name} "
+                f"scheduled on {old_date} has been POSTPONED.\n"
+                f"New Date: {date_str}\n\n— CampusHub",
+                settings.EMAIL_HOST_USER, emails, fail_silently=True
+            )
+        messages.success(request, 'Exam postponed and students notified.')
+        return redirect('exams', college_slug=college_slug)
+    return render(request, 'academics/postpone_exam.html', {'exam': exam, 'college_slug': college_slug})
+
+
+@login_required
+def edit_department(request, college_slug, dept_id):
+    if not request.user.is_college():
+        return redirect('dashboard', college_slug=college_slug)
+    college = request.user.college_profile
+    dept = get_object_or_404(Department, pk=dept_id, college=college)
+    teachers = TeacherProfile.objects.filter(college=college)
+    if request.method == 'POST':
+        dept.name = request.POST.get('name', '').strip()
+        dept.code = request.POST.get('code', '').strip().upper()
+        dept.description = request.POST.get('description', '').strip()
+        hod_id = request.POST.get('head_of_department')
+        dept.head_of_department = TeacherProfile.objects.filter(pk=hod_id).first() if hod_id else None
+        dept.save()
+        messages.success(request, 'Department updated.')
+        return redirect('departments', college_slug=college_slug)
+    return render(request, 'academics/edit_department.html', {
+        'dept': dept, 'teachers': teachers, 'college_slug': college_slug
+    })

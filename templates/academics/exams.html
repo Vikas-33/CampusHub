@@ -3,43 +3,68 @@
 {% block page_title %}Examinations{% endblock %}
 {% block topbar_actions %}
   {% if request.user.role != 'student' %}
-    <a href="{% url 'add_exam' college_slug=college_slug %}" class="btn btn-accent">+ Schedule Exam</a>
+    <a href="{% url 'add_exam' college_slug %}" class="btn btn-accent">+ Schedule Exam</a>
   {% endif %}
   {% if request.user.role == 'student' %}
-    <a href="{% url 'student_results' college_slug=college_slug %}" class="btn btn-primary">📊 My Results</a>
+    <a href="{% url 'student_results' college_slug %}" class="btn btn-primary">📊 My Results</a>
   {% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="grid-3">
   {% for exam in exams %}
-  <div class="exam-card">
+  <div class="exam-card" style="{% if exam.status == 'cancelled' %}opacity:0.6;{% elif exam.status == 'postponed' %}border-left:4px solid var(--warning);{% endif %}">
     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
       <div>
         <div class="exam-date">{{ exam.date|date:"d" }}</div>
         <div class="exam-month">{{ exam.date|date:"M Y" }}</div>
       </div>
-      <span class="badge {% if exam.exam_type == 'final' %}badge-danger{% elif exam.exam_type == 'midterm' %}badge-warning{% elif exam.exam_type == 'quiz' %}badge-info{% else %}badge-teal{% endif %}">
-        {{ exam.get_exam_type_display }}
-      </span>
+      <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+        <span class="badge {% if exam.exam_type == 'final' %}badge-danger{% elif exam.exam_type == 'midterm' %}badge-warning{% elif exam.exam_type == 'quiz' %}badge-info{% else %}badge-teal{% endif %}">
+          {{ exam.get_exam_type_display }}
+        </span>
+        {% if exam.status == 'cancelled' %}
+          <span class="badge badge-danger">Cancelled</span>
+        {% elif exam.status == 'postponed' %}
+          <span class="badge badge-warning">Postponed</span>
+        {% endif %}
+      </div>
     </div>
+
     <div class="exam-details">
       <div class="exam-course">{{ exam.course.name }}</div>
+      {% if exam.semester %}<div class="exam-meta">📚 Semester {{ exam.semester }}</div>{% endif %}
       <div class="exam-meta">⏰ {{ exam.start_time|time:"H:i" }} – {{ exam.end_time|time:"H:i" }}</div>
       {% if exam.venue %}<div class="exam-meta">📍 {{ exam.venue }}</div>{% endif %}
       <div class="exam-meta">📝 {{ exam.total_marks }} marks &bull; Pass: {{ exam.passing_marks }}</div>
+      {% if exam.status == 'postponed' %}
+        <div class="exam-meta" style="color:var(--warning);">
+          📅 New date: {% if exam.postponed_date %}{{ exam.postponed_date|date:"d M Y" }}{% else %}TBD{% endif %}
+        </div>
+      {% endif %}
+      {% if exam.status == 'cancelled' and exam.cancellation_reason %}
+        <div class="exam-meta" style="color:var(--danger);">ℹ️ {{ exam.cancellation_reason }}</div>
+      {% endif %}
     </div>
-    <div style="margin-top:14px; display:flex; gap:8px;">
+
+    <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
       {% if request.user.role == 'student' %}
-        <a href="{% url 'student_exam_result' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-primary">My Result</a>
+        <a href="{% url 'student_exam_result' college_slug exam.pk %}" class="btn btn-xs btn-primary">My Result</a>
       {% else %}
-        <a href="{% url 'exam_results' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-primary">Results</a>
+        <a href="{% url 'exam_results' college_slug exam.pk %}" class="btn btn-xs btn-primary">Results</a>
+        {% if exam.status != 'cancelled' %}
+          <a href="{% url 'postpone_exam' college_slug exam.pk %}" class="btn btn-xs btn-outline">Postpone</a>
+          <a href="{% url 'cancel_exam' college_slug exam.pk %}" class="btn btn-xs btn-danger">Cancel</a>
+        {% endif %}
       {% endif %}
     </div>
   </div>
   {% empty %}
   <div style="grid-column:1/-1;">
-    <div class="empty-state"><div class="icon">📝</div><h3>No exams scheduled</h3></div>
+    <div class="empty-state">
+      <div class="icon">📝</div>
+      <h3>No exams scheduled</h3>
+    </div>
   </div>
   {% endfor %}
 </div>

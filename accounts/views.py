@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.db.models import Count
 from .forms import LoginForm, CollegeRegistrationForm, TeacherForm, StudentForm, ProfileUpdateForm
 from .models import User, CollegeProfile, TeacherProfile, StudentProfile
-from academics.models import Course, Notice, Attendance, FeePayment, Exam, Assignment
+from academics.models import Course, Notice, Attendance, FeePayment, Exam, Assignment,Department, Course
 from accounts.models import StudentProfile
 from django.core.paginator import Paginator
 from academics.utils import send_teacher_credentials, send_student_credentials
@@ -223,21 +223,26 @@ def add_teacher(request, college_slug):
         messages.error(request, 'Access denied.')
         return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
+    departments = Department.objects.filter(college=college)
+    courses = Course.objects.filter(department__college=college)
 
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
-        department = request.POST.get('department', '').strip()
+        dept_id = request.POST.get('department')
         designation = request.POST.get('designation', '').strip()
         qualification = request.POST.get('qualification', '').strip()
         specialization = request.POST.get('specialization', '').strip()
         joining_date = request.POST.get('joining_date') or None
         salary = request.POST.get('salary') or None
+        course_ids = request.POST.getlist('courses')
 
-        if not all([first_name, last_name, email, department, designation, qualification]):
+        if not all([first_name, last_name, email, dept_id, designation, qualification]):
             messages.error(request, 'Please fill in all required fields.')
-            return render(request, 'college/add_teacher.html')
+            return render(request, 'college/add_teacher.html', {'departments': departments, 'courses': courses, 'college_slug': college_slug})
+
+        department = Department.objects.filter(pk=dept_id, college=college).first()
 
         import time
         user = User.objects.create_user(
@@ -257,18 +262,17 @@ def add_teacher(request, college_slug):
             joining_date=joining_date,
             salary=salary,
         )
-        # profile.save() already set username to employee_id
+        if course_ids:
+            profile.courses.set(Course.objects.filter(pk__in=course_ids, department__college=college))
+
         user.username = profile.employee_id
         user.set_password(profile.employee_id)
         user.save()
         send_teacher_credentials(profile)
-        messages.success(
-            request,
-            f'Teacher added! Employee ID: {profile.employee_id} | Username & Password: {profile.employee_id}'
-        )
+        messages.success(request, f'Teacher added! Employee ID: {profile.employee_id} | Username & Password: {profile.employee_id}')
         return redirect('manage_teachers', college_slug=college_slug)
 
-    return render(request, 'college/add_teacher.html')
+    return render(request, 'college/add_teacher.html', {'departments': departments, 'courses': courses, 'college_slug': college_slug})
 
 
 

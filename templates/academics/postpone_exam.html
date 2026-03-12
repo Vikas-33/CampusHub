@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Postpone Exam{% endblock %}
+{% block page_title %}Postpone Examination{% endblock %}
+{% block content %}
+<div class="card" style="max-width:600px;">
+  <div class="card-header"><span class="card-title" style="color:var(--warning);">📅 Postpone Exam</span></div>
+  <div class="card-body">
+    <div class="alert alert-warning" style="margin-bottom:20px;">
+      You are postponing the <strong>{{ exam.get_exam_type_display }}</strong> exam for
+      <strong>{{ exam.course.name }}</strong> currently scheduled on <strong>{{ exam.date|date:"d M Y" }}</strong>.
+      Students will be notified of the new date (or TBD if not set).
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">New Date <span style="color:var(--text-muted); font-weight:400;">(leave blank for TBD)</span></label>
+        <input type="date" name="new_date" class="form-input">
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button type="submit" class="btn btn-accent">Confirm Postpone</button>
+        <a href="{% url 'exams' college_slug %}" class="btn btn-outline">Go Back</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
