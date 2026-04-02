@@ -2,7 +2,7 @@
 {% block title %}Attendance{% endblock %}
 {% block page_title %}My Attendance{% endblock %}
 {% block topbar_actions %}
-  <a href="{% url 'export_attendance_student' college_slug=college_slug %}" class="btn btn-outline">📥 Export CSV</a>
+  <a href="{% url 'export_attendance_student' %}" class="btn btn-outline">📥 Export CSV</a>
 {% endblock %}
 
 {% block content %}

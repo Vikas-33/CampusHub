@@ -22,32 +22,9 @@
         <input type="email" name="email" class="form-input" required>
       </div>
       <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Department *</label>
-          <select name="department" class="form-input" required>
-            <option value="">— Select Department —</option>
-            {% for dept in departments %}
-              <option value="{{ dept.pk }}">{{ dept.name }} ({{ dept.code }})</option>
-            {% endfor %}
-          </select>
-        </div>
+        <div class="form-group"><label class="form-label">Department *</label><input type="text" name="department" class="form-input" required></div>
         <div class="form-group"><label class="form-label">Designation *</label><input type="text" name="designation" class="form-input" placeholder="e.g. Associate Professor" required></div>
       </div>
-
-      <div class="form-group">
-        <label class="form-label">Assigned Courses</label>
-        <div style="border:1px solid var(--border); border-radius:8px; padding:12px; max-height:180px; overflow-y:auto; background:var(--bg-secondary);">
-          {% for course in courses %}
-          <label style="display:flex; align-items:center; gap:8px; padding:4px 0; cursor:pointer; font-size:14px;">
-            <input type="checkbox" name="courses" value="{{ course.pk }}" style="width:16px; height:16px;">
-            {{ course.name }} <span style="color:var(--text-muted);">({{ course.department.code }})</span>
-          </label>
-          {% empty %}
-          <p style="color:var(--text-muted); font-size:13px;">No courses available. Add courses first.</p>
-          {% endfor %}
-        </div>
-      </div>
-
       <div class="form-grid">
         <div class="form-group"><label class="form-label">Qualification *</label><input type="text" name="qualification" class="form-input" placeholder="e.g. Ph.D. Computer Science" required></div>
         <div class="form-group"><label class="form-label">Specialization</label><input type="text" name="specialization" class="form-input"></div>
@@ -58,7 +35,7 @@
       </div>
       <div style="display:flex; gap:12px; margin-top:8px;">
         <button type="submit" class="btn btn-accent">Add Teacher</button>
-        <a href="{% url 'manage_teachers' college_slug %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'manage_teachers' %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

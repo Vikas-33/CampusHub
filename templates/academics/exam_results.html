@@ -4,12 +4,16 @@
 {% block page_subtitle %}{{ exam.course.name }} — {{ exam.get_exam_type_display }} — {{ exam.date }}{% endblock %}
 
 {% block content %}
+
 {% if request.user.role == 'student' %}
+  <!-- Students are redirected to their own result page — this is just a fallback -->
   <div class="alert alert-info">
-    ℹ️ <a href="{% url 'student_exam_result' college_slug=college_slug exam_id=exam.pk %}" style="font-weight:600;">View your personal result for this exam →</a>
+    ℹ️ <a href="{% url 'student_exam_result' exam.pk %}" style="font-weight:600;">View your personal result for this exam →</a>
   </div>
 {% else %}
+
 <div class="grid-2">
+  <!-- Result Entry Form — only for college and teachers -->
   <div class="card">
     <div class="card-header"><span class="card-title">Enter Result</span></div>
     <div class="card-body">
@@ -48,12 +52,18 @@
     </div>
   </div>
 
+  <!-- Results Table -->
   <div class="card">
     <div class="card-header"><span class="card-title">Results ({{ results.count }})</span></div>
     <div class="table-container">
       <table>
         <thead>
-          <tr><th>Student</th><th>Marks</th><th>Grade</th><th>Status</th></tr>
+          <tr>
+            <th>Student</th>
+            <th>Marks</th>
+            <th>Grade</th>
+            <th>Status</th>
+          </tr>
         </thead>
         <tbody>
           {% for result in results %}
@@ -71,12 +81,17 @@
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:32px;">No results entered yet</td></tr>
+          <tr>
+            <td colspan="4" style="text-align:center; color:var(--text-muted); padding:32px;">
+              No results entered yet
+            </td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 </div>
+
 {% endif %}
 {% endblock %}

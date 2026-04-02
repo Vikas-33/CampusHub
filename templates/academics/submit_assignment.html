@@ -6,7 +6,7 @@
 <div class="card" style="max-width:600px;">
   <div class="card-header"><span class="card-title">{{ assignment.course.name }}</span></div>
   <div class="card-body">
-    <div style="padding:16px; background:var(--light-bg); border-radius:8px; margin-bottom:24px;">
+    <div style="padding:16px; background:var(--bg-overlay); border-radius:8px; margin-bottom:24px;">
       <h4 style="font-size:15px; margin-bottom:8px;">{{ assignment.title }}</h4>
       <p style="font-size:14px; color:var(--text-secondary);">{{ assignment.description }}</p>
       <div style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
@@ -20,7 +20,7 @@
       <div class="form-group"><label class="form-label">Remarks</label><textarea name="remarks" class="form-input" rows="3" placeholder="Add any notes..."></textarea></div>
       <div style="display:flex; gap:12px;">
         <button type="submit" class="btn btn-success">Submit Assignment</button>
-        <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'assignments' %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

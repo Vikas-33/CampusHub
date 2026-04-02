@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Departments{% endblock %}
 {% block page_title %}Departments{% endblock %}
-{% block topbar_actions %}<a href="{% url 'add_department' college_slug %}" class="btn btn-accent">+ Add Department</a>{% endblock %}
+{% block topbar_actions %}<a href="{% url 'add_department' %}" class="btn btn-accent">+ Add Department</a>{% endblock %}
 {% block content %}
 <div class="grid-3">
   {% for dept in departments %}
@@ -14,9 +14,6 @@
       <h3 style="font-size:17px; margin-bottom:4px;">{{ dept.name }}</h3>
       {% if dept.head_of_department %}<p style="font-size:13px; color:var(--text-secondary);">HOD: {{ dept.head_of_department.user.get_full_name }}</p>{% endif %}
       {% if dept.description %}<p style="font-size:12px; color:var(--text-muted); margin-top:8px;">{{ dept.description|truncatechars:80 }}</p>{% endif %}
-      <div style="margin-top:16px;">
-        <a href="{% url 'edit_department' college_slug dept.pk %}" class="btn btn-xs btn-outline">✏️ Edit</a>
-      </div>
     </div>
   </div>
   {% empty %}

@@ -1,39 +1,32 @@
 {% extends 'base.html' %}
 {% block title %}Teachers{% endblock %}
-{% block page_title %}Faculty Management{% endblock %}
-{% block page_subtitle %}{{ page_obj.paginator.count }} teachers registered{% endblock %}
-{% block topbar_actions %}<a href="{% url 'add_teacher' college_slug=college_slug %}" class="btn btn-accent">+ Add Teacher</a>{% endblock %}
+{% block page_title %}Faculty{% endblock %}
+{% block page_subtitle %}{{ page_obj.paginator.count }} registered{% endblock %}
+{% block topbar_actions %}<a href="{% url 'add_teacher' college_slug %}" class="btn btn-accent">+ Add Faculty</a>{% endblock %}
 {% block content %}
 <div class="card">
   <div class="filter-bar">
-    <form method="get" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+    <form method="get" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%;">
       <div style="position:relative; flex:1; min-width:200px;">
-        <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted);">🔍</span>
-        <input type="text" name="q" value="{{ search_query }}"
-          placeholder="Search by name, employee ID, email..."
-          style="width:100%; padding:8px 12px 8px 32px; border:1px solid var(--border); border-radius:8px; font-size:14px;">
+        <span style="position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:13px; pointer-events:none;">⌕</span>
+        <input type="text" name="q" value="{{ search_query }}" placeholder="Search name, employee ID, email..."
+          style="width:100%; padding:8px 12px 8px 30px;">
       </div>
-      <select name="department" class="form-input" style="width:auto; padding:8px 12px;">
+      <select name="department" style="width:auto;">
         <option value="">All Departments</option>
         {% for dept in departments %}
           <option value="{{ dept.name }}" {% if dept.name == dept_filter %}selected{% endif %}>{{ dept.name }}</option>
         {% endfor %}
       </select>
-      <button type="submit" class="btn btn-sm btn-primary">Apply</button>
-      <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="btn btn-sm btn-outline">Clear</a>
+      <button type="submit" class="btn btn-accent btn-sm">Apply</button>
+      <a href="{% url 'manage_teachers' college_slug %}" class="btn btn-outline btn-sm">Clear</a>
     </form>
   </div>
-
-  {% if search_query %}
-    <div style="padding:8px 20px; font-size:13px; color:var(--text-muted); border-bottom:1px solid var(--border);">
-      Showing {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "<strong>{{ search_query }}</strong>"
-    </div>
-  {% endif %}
 
   <div class="table-container">
     <table>
       <thead>
-        <tr><th>Faculty Member</th><th>Employee ID</th><th>Department</th><th>Designation</th><th>Qualification</th><th>Joining Date</th><th>Actions</th></tr>
+        <tr><th>Faculty</th><th>Employee ID</th><th>Department</th><th>Designation</th><th>Qualification</th><th>Joined</th><th>Actions</th></tr>
       </thead>
       <tbody>
         {% for teacher in page_obj %}
@@ -47,33 +40,29 @@
               </div>
             </div>
           </td>
-          <td><code style="background:var(--light-bg); padding:2px 6px; border-radius:4px; font-size:12px;">{{ teacher.employee_id }}</code></td>
-          <td>{{ teacher.department }}</td>
+          <td><code>{{ teacher.employee_id }}</code></td>
+          <td style="color:var(--text-secondary);">{{ teacher.department }}</td>
           <td><span class="badge badge-info">{{ teacher.designation }}</span></td>
-          <td>{{ teacher.qualification }}</td>
-          <td>{{ teacher.joining_date|date:"M d, Y"|default:"—" }}</td>
+          <td style="color:var(--text-secondary); font-size:12.5px;">{{ teacher.qualification }}</td>
+          <td style="font-family:'Geist Mono',monospace; font-size:12px; color:var(--text-muted);">{{ teacher.joining_date|date:"M d, Y"|default:"—" }}</td>
           <td>
             <div style="display:flex; gap:6px;">
-              <a href="{% url 'edit_teacher' college_slug=college_slug pk=teacher.pk %}" class="btn btn-xs btn-outline">Edit</a>
-              <a href="{% url 'delete_teacher' college_slug=college_slug pk=teacher.pk %}" class="btn btn-xs btn-danger">Delete</a>
+              <a href="{% url 'edit_teacher' college_slug teacher.pk %}" class="btn btn-xs btn-outline">Edit</a>
+              <a href="{% url 'delete_teacher' college_slug teacher.pk %}" class="btn btn-xs btn-danger">Delete</a>
             </div>
           </td>
         </tr>
         {% empty %}
-        <tr>
-          <td colspan="7">
-            <div class="empty-state">
-              <div class="icon">👨‍🏫</div>
-              <h3>{% if search_query %}No teachers match "{{ search_query }}"{% else %}No teachers yet{% endif %}</h3>
-              <p>{% if search_query %}<a href="{% url 'manage_teachers' college_slug=college_slug %}">Clear search</a>{% else %}Add your first faculty member{% endif %}</p>
-            </div>
-          </td>
-        </tr>
+        <tr><td colspan="7">
+          <div class="empty-state">
+            <span class="icon">◈</span>
+            <h3>{% if search_query %}No results for "{{ search_query }}"{% else %}No faculty yet{% endif %}</h3>
+          </div>
+        </td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-
   {% include 'includes/pagination.html' %}
 </div>
 {% endblock %}

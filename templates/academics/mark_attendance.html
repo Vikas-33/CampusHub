@@ -9,7 +9,7 @@
   </div>
   <form method="post">
     {% csrf_token %}
-    <div style="padding:20px; background:var(--light-bg); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px;">
+    <div style="padding:20px; background:var(--bg-overlay); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px;">
       <label class="form-label" style="margin:0; white-space:nowrap;">Date *</label>
       <input type="date" name="date" value="{{ today }}" class="form-input" style="width:200px;" required>
       <button type="button" class="btn btn-sm btn-success" onclick="markAll('present')">✓ Mark All Present</button>
@@ -29,10 +29,10 @@
                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #d1fae5; background:#f0fdf4;" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#d1fae5';">
                   <input type="radio" name="status_{{ student.id }}" value="present" checked style="display:none;"> ✅ Present
                 </label>
-                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #fee2e2; background:white;" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#fee2e2';">
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #fee2e2; background:var(--bg-raised);" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#fee2e2';">
                   <input type="radio" name="status_{{ student.id }}" value="absent" style="display:none;"> ❌ Absent
                 </label>
-                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #fef3c7; background:white;" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#fef3c7';">
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #fef3c7; background:var(--bg-raised);" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#fef3c7';">
                   <input type="radio" name="status_{{ student.id }}" value="late" style="display:none;"> ⏰ Late
                 </label>
               </div>
@@ -47,7 +47,7 @@
     {% if students %}
     <div style="padding:20px; display:flex; gap:12px;">
       <button type="submit" class="btn btn-success">💾 Save Attendance</button>
-      <a href="{% url 'attendance' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+      <a href="{% url 'attendance' %}" class="btn btn-outline">Cancel</a>
     </div>
     {% endif %}
   </form>

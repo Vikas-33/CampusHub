@@ -1,116 +1,40 @@
 {% extends 'base.html' %}
-{% block title %}Add Student{% endblock %}
-{% block page_title %}Enroll New Student{% endblock %}
-{% block page_subtitle %}Register a new student{% endblock %}
+{% block title %}Enroll Student{% endblock %}
+{% block page_title %}Enroll Student{% endblock %}
+{% block page_subtitle %}auto-generates roll number & credentials{% endblock %}
 {% block content %}
-<div class="card" style="max-width:800px;">
+<div class="card" style="max-width:780px;">
   <div class="card-header"><span class="card-title">Student Information</span></div>
   <div class="card-body">
-
-    <div class="alert alert-info" style="margin-bottom:20px;">
-      ℹ️ Roll number, enrollment number and username will be <strong>auto-generated</strong>. Default password will be the same as the Roll Number.
-    </div>
-
-    {% if form.errors %}
-    <div class="alert alert-error" style="margin-bottom:16px;">
-      ❌ Please fix the following errors:
-      <ul style="margin:8px 0 0 16px;">
-        {% for field in form %}
-          {% for error in field.errors %}
-            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-        {% for error in form.non_field_errors %}
-          <li>{{ error }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-
+    <div class="alert alert-info">→ Roll number, enrollment number and login credentials will be auto-generated.</div>
     <form method="post">
       {% csrf_token %}
       <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">First Name *</label>
-          <input type="text" name="first_name" class="form-input {% if form.first_name.errors %}input-error{% endif %}"
-            value="{{ form.first_name.value|default:'' }}" required>
-          {% if form.first_name.errors %}<span class="field-error">{{ form.first_name.errors.0 }}</span>{% endif %}
-        </div>
-        <div class="form-group">
-          <label class="form-label">Last Name *</label>
-          <input type="text" name="last_name" class="form-input {% if form.last_name.errors %}input-error{% endif %}"
-            value="{{ form.last_name.value|default:'' }}" required>
-          {% if form.last_name.errors %}<span class="field-error">{{ form.last_name.errors.0 }}</span>{% endif %}
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Email *</label>
-        <input type="email" name="email" class="form-input {% if form.email.errors %}input-error{% endif %}"
-          value="{{ form.email.value|default:'' }}" required>
-        {% if form.email.errors %}<span class="field-error">{{ form.email.errors.0 }}</span>{% endif %}
+        <div class="form-group"><label class="form-label">First Name</label><input type="text" name="first_name" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input type="text" name="last_name" class="form-input" required></div>
       </div>
       <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Department *</label>
-          <select name="department" class="form-input {% if form.department.errors %}input-error{% endif %}" required>
-            <option value="">— Select Department —</option>
-            {% for dept in form.department.field.queryset %}
-              <option value="{{ dept.pk }}" {% if form.department.value == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
-            {% endfor %}
-          </select>
-          {% if form.department.errors %}<span class="field-error">{{ form.department.errors.0 }}</span>{% endif %}
-        </div>
-        <div class="form-group">
-          <label class="form-label">Semester *</label>
-          <select name="semester" class="form-input {% if form.semester.errors %}input-error{% endif %}" required>
-            {% for i in "12345678" %}
-              <option value="{{ i }}" {% if form.semester.value == i %}selected{% endif %}>Semester {{ i }}</option>
-            {% endfor %}
-          </select>
-          {% if form.semester.errors %}<span class="field-error">{{ form.semester.errors.0 }}</span>{% endif %}
-        </div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-input"></div>
       </div>
       <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Batch Year *</label>
-          <input type="number" name="batch_year" class="form-input {% if form.batch_year.errors %}input-error{% endif %}"
-            value="{{ form.batch_year.value|default:'' }}" placeholder="e.g. 2022" required>
-          {% if form.batch_year.errors %}<span class="field-error">{{ form.batch_year.errors.0 }}</span>{% endif %}
-        </div>
-        <div class="form-group">
-          <label class="form-label">Date of Birth</label>
-          <input type="date" name="date_of_birth" class="form-input" value="{{ form.date_of_birth.value|default:'' }}">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Address</label>
-        <textarea name="address" class="form-input" rows="2">{{ form.address.value|default:'' }}</textarea>
+        <div class="form-group"><label class="form-label">Department</label>{{ form.department }}</div>
+        <div class="form-group"><label class="form-label">Semester</label><input type="number" name="semester" class="form-input" min="1" max="8" required></div>
       </div>
       <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Guardian Name</label>
-          <input type="text" name="guardian_name" class="form-input" value="{{ form.guardian_name.value|default:'' }}">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Guardian Phone</label>
-          <input type="text" name="guardian_phone" class="form-input {% if form.guardian_phone.errors %}input-error{% endif %}"
-            value="{{ form.guardian_phone.value|default:'' }}">
-          {% if form.guardian_phone.errors %}<span class="field-error">{{ form.guardian_phone.errors.0 }}</span>{% endif %}
-        </div>
+        <div class="form-group"><label class="form-label">Batch Year</label><input type="number" name="batch_year" class="form-input" placeholder="e.g. 2024" required></div>
+        <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" name="date_of_birth" class="form-input"></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Phone</label>
-        <input type="text" name="phone" class="form-input" value="{{ form.phone.value|default:'' }}">
+      <div class="form-group"><label class="form-label">Address</label><textarea name="address" class="form-input" rows="2"></textarea></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Guardian Name</label><input type="text" name="guardian_name" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Guardian Phone</label><input type="text" name="guardian_phone" class="form-input"></div>
       </div>
-      <div style="display:flex; gap:12px; margin-top:8px;">
+      <div style="display:flex; gap:10px; margin-top:4px;">
         <button type="submit" class="btn btn-accent">Enroll Student</button>
-        <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'manage_students' college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>
 </div>
-<style>
-  .input-error { border-color: #e53e3e !important; }
-  .field-error { color: #e53e3e; font-size: 12px; margin-top: 4px; display: block; }
-</style>
 {% endblock %}
