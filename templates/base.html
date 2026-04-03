@@ -7,7 +7,7 @@
 <title>{% block title %}CampusHub{% endblock %} — College Management</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
 </head>
 <body>
@@ -16,47 +16,61 @@
 
 <div class="layout">
   <aside class="sidebar" id="sidebar">
+
+    <!-- Logo -->
     <div class="sidebar-logo">
-      <div class="logo-icon">CH</div>
+      <div class="logo-icon">C</div>
       <div class="logo-text">
         <h2>CampusHub</h2>
-        <span>{{ request.college.college_name|default:"management system" }}</span>
+        <span>Management System</span>
       </div>
     </div>
+
+    <!-- College pill -->
+    {% if college_slug %}
+    <div class="sidebar-college">
+      <div class="college-icon">{{ college_slug|first|upper }}</div>
+      <div>
+        <div class="college-name">{{ college_slug|upper }}</div>
+        <div class="college-sub">{{ request.college.college_name|default:"Institution" }}</div>
+      </div>
+    </div>
+    {% endif %}
 
     <nav class="sidebar-nav">
       <div class="nav-section-label">Main</div>
       <a href="{% url 'dashboard' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-        <span>⬡</span> Dashboard
+        <span class="nav-icon">🏠</span> Dashboard
       </a>
 
       {% if request.user.is_authenticated %}
         {% if request.user.role == 'college' %}
-          <div class="nav-section-label">Management</div>
-          <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="nav-item {% if 'teacher' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◈</span> Teachers
-          </a>
+          <div class="nav-section-label">People</div>
           <a href="{% url 'manage_students' college_slug=college_slug %}" class="nav-item {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◉</span> Students
+            <span class="nav-icon">🎓</span> Students
           </a>
+          <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="nav-item {% if 'teacher' in request.resolver_match.url_name %}active{% endif %}">
+            <span class="nav-icon">👨‍🏫</span> Teachers
+          </a>
+          <div class="nav-section-label">Academics</div>
           <a href="{% url 'departments' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'departments' %}active{% endif %}">
-            <span>⬢</span> Departments
+            <span class="nav-icon">🏛️</span> Departments
           </a>
           <a href="{% url 'courses' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
-            <span>▦</span> Courses
+            <span class="nav-icon">📚</span> Courses
           </a>
-          <div class="nav-section-label">Academic</div>
           <a href="{% url 'exams' college_slug=college_slug %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
-            <span>▣</span> Exams
+            <span class="nav-icon">📝</span> Exams & Results
           </a>
           <a href="{% url 'attendance' college_slug=college_slug %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◧</span> Attendance
+            <span class="nav-icon">📋</span> Attendance
           </a>
+          <div class="nav-section-label">Admin</div>
           <a href="{% url 'fees' college_slug=college_slug %}" class="nav-item {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◈</span> Fees
+            <span class="nav-icon">💰</span> Fees
           </a>
           <a href="{% url 'notices' college_slug=college_slug %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◬</span> Notices
+            <span class="nav-icon">📢</span> Notices
             {% if unread_notice_count > 0 %}
               <span class="notif-badge">{{ unread_notice_count }}</span>
             {% endif %}
@@ -65,46 +79,46 @@
         {% elif request.user.role == 'teacher' %}
           <div class="nav-section-label">Teaching</div>
           <a href="{% url 'courses' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
-            <span>▦</span> My Courses
+            <span class="nav-icon">📚</span> My Courses
           </a>
           <a href="{% url 'attendance' college_slug=college_slug %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◧</span> Attendance
+            <span class="nav-icon">📋</span> Attendance
           </a>
           <a href="{% url 'assignments' college_slug=college_slug %}" class="nav-item {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
-            <span>▤</span> Assignments
+            <span class="nav-icon">📄</span> Assignments
           </a>
           <a href="{% url 'exams' college_slug=college_slug %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
-            <span>▣</span> Exams
+            <span class="nav-icon">📝</span> Exams
           </a>
           <a href="{% url 'notices' college_slug=college_slug %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◬</span> Notices
+            <span class="nav-icon">📢</span> Notices
             {% if unread_notice_count > 0 %}
               <span class="notif-badge">{{ unread_notice_count }}</span>
             {% endif %}
           </a>
 
         {% elif request.user.role == 'student' %}
-          <div class="nav-section-label">Academics</div>
+          <div class="nav-section-label">My Academics</div>
           <a href="{% url 'courses' college_slug=college_slug %}" class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
-            <span>▦</span> My Courses
+            <span class="nav-icon">📚</span> My Courses
           </a>
           <a href="{% url 'attendance' college_slug=college_slug %}" class="nav-item {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◧</span> Attendance
+            <span class="nav-icon">📋</span> Attendance
           </a>
           <a href="{% url 'assignments' college_slug=college_slug %}" class="nav-item {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
-            <span>▤</span> Assignments
+            <span class="nav-icon">📄</span> Assignments
           </a>
           <a href="{% url 'exams' college_slug=college_slug %}" class="nav-item {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
-            <span>▣</span> Exams
+            <span class="nav-icon">📝</span> Exams
           </a>
           <a href="{% url 'student_results' college_slug=college_slug %}" class="nav-item {% if 'result' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◎</span> My Results
+            <span class="nav-icon">📊</span> My Results
           </a>
           <a href="{% url 'fees' college_slug=college_slug %}" class="nav-item {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◈</span> Fees
+            <span class="nav-icon">💰</span> Fees
           </a>
           <a href="{% url 'notices' college_slug=college_slug %}" class="nav-item {% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
-            <span>◬</span> Notices
+            <span class="nav-icon">📢</span> Notices
             {% if unread_notice_count > 0 %}
               <span class="notif-badge">{{ unread_notice_count }}</span>
             {% endif %}
@@ -113,20 +127,22 @@
       {% endif %}
     </nav>
 
+    <!-- User card at bottom -->
     <div class="sidebar-bottom">
       {% if request.user.is_authenticated %}
       <a href="{% url 'profile' college_slug=college_slug %}" class="user-card">
         <div class="user-avatar">{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}</div>
         <div class="user-info">
           <div class="name">{{ request.user.get_full_name|truncatechars:18 }}</div>
-          <div class="role-badge">{{ college_slug|upper }} / {{ request.user.role }}</div>
-          <a href="{% url 'logout' %}" class="logout-link" onclick="event.stopPropagation()">sign out</a>
+          <div class="role-badge">{{ request.user.role|capfirst }}</div>
+          <a href="{% url 'logout' %}" class="logout-link" onclick="event.stopPropagation()">Sign out</a>
         </div>
       </a>
       {% endif %}
     </div>
   </aside>
 
+  <!-- Main -->
   <div class="main-content">
     <div class="topbar">
       <div style="display:flex; align-items:center;">
@@ -146,7 +162,7 @@
     <div class="content-body">
       {% for message in messages %}
         <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
-          {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% elif message.tags == 'warning' %}⚠{% else %}→{% endif %}
+          {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
           {{ message }}
         </div>
       {% endfor %}

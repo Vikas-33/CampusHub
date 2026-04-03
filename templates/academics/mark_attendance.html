@@ -4,61 +4,63 @@
 {% block page_subtitle %}{{ course.name }} — {{ course.code }}{% endblock %}
 {% block content %}
 <div class="card" style="max-width:800px;">
-  <div class="card-header">
-    <span class="card-title">Students — {{ students.count }} enrolled</span>
-  </div>
-  <form method="post">
-    {% csrf_token %}
-    <div style="padding:20px; background:var(--bg-overlay); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px;">
+  <div class="card-header"><span class="card-title">Students — {{ students.count }} enrolled</span></div>
+  <form method="post">{% csrf_token %}
+    <div style="padding:16px 20px; background:var(--surface-2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
       <label class="form-label" style="margin:0; white-space:nowrap;">Date *</label>
-      <input type="date" name="date" value="{{ today }}" class="form-input" style="width:200px;" required>
-      <button type="button" class="btn btn-sm btn-success" onclick="markAll('present')">✓ Mark All Present</button>
-      <button type="button" class="btn btn-sm btn-danger" onclick="markAll('absent')">✗ Mark All Absent</button>
+      <input type="date" name="date" value="{{ today }}" class="form-input" style="width:180px;" required>
+      <button type="button" class="btn btn-sm btn-success" onclick="markAll('present')">✓ All Present</button>
+      <button type="button" class="btn btn-sm btn-danger" onclick="markAll('absent')">✗ All Absent</button>
     </div>
     <div class="table-container">
       <table>
-        <thead><tr><th>#</th><th>Student</th><th>Roll No.</th><th>Status</th></tr></thead>
+        <thead><tr><th>#</th><th>Student</th><th>Roll No</th><th>Status</th></tr></thead>
         <tbody>
           {% for student in students %}
           <tr>
-            <td>{{ forloop.counter }}</td>
+            <td style="color:var(--text-muted);">{{ forloop.counter }}</td>
             <td><div class="avatar-cell"><div class="table-avatar">{{ student.user.first_name|first }}{{ student.user.last_name|first }}</div><div class="avatar-info"><div class="name">{{ student.user.get_full_name }}</div></div></div></td>
-            <td>{{ student.roll_number }}</td>
+            <td><code>{{ student.roll_number }}</code></td>
             <td>
               <div style="display:flex; gap:8px;">
-                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #d1fae5; background:#f0fdf4;" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#d1fae5';">
-                  <input type="radio" name="status_{{ student.id }}" value="present" checked style="display:none;"> ✅ Present
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:6px;border:1.5px solid var(--green-border);background:var(--green-light);" onclick="selectStatus(this,'present')">
+                  <input type="radio" name="status_{{ student.id }}" value="present" checked style="display:none;"> ✓ Present
                 </label>
-                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #fee2e2; background:var(--bg-raised);" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#fee2e2';">
-                  <input type="radio" name="status_{{ student.id }}" value="absent" style="display:none;"> ❌ Absent
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:6px;border:1.5px solid var(--border);background:white;" onclick="selectStatus(this,'absent')">
+                  <input type="radio" name="status_{{ student.id }}" value="absent" style="display:none;"> ✗ Absent
                 </label>
-                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; border:1.5px solid #fef3c7; background:var(--bg-raised);" onclick="this.parentNode.querySelectorAll('label').forEach(l=>l.style.background=''); this.style.background='#fef3c7';">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:6px;border:1.5px solid var(--amber-border);background:white;" onclick="selectStatus(this,'late')">
                   <input type="radio" name="status_{{ student.id }}" value="late" style="display:none;"> ⏰ Late
                 </label>
               </div>
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="4"><div class="empty-state"><div class="icon">👥</div><h3>No students in this course</h3></div></td></tr>
+          <tr><td colspan="4"><div class="empty-state"><span class="icon">👥</span><h3>No students in this course</h3></div></td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
     {% if students %}
-    <div style="padding:20px; display:flex; gap:12px;">
-      <button type="submit" class="btn btn-success">💾 Save Attendance</button>
-      <a href="{% url 'attendance' %}" class="btn btn-outline">Cancel</a>
+    <div style="padding:18px 20px; display:flex; gap:12px; border-top:1px solid var(--border);">
+      <button type="submit" class="btn btn-accent">Save Attendance</button>
+      <a href="{% url 'attendance' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
     </div>
     {% endif %}
   </form>
 </div>
 <script>
+function selectStatus(label, status) {
+  const group = label.parentNode;
+  group.querySelectorAll('label').forEach(l => { l.style.background='white'; l.style.borderColor='var(--border)'; });
+  if(status==='present'){ label.style.background='var(--green-light)'; label.style.borderColor='var(--green-border)'; }
+  else if(status==='absent'){ label.style.background='var(--red-light)'; label.style.borderColor='var(--red-border)'; }
+  else { label.style.background='var(--amber-light)'; label.style.borderColor='var(--amber-border)'; }
+}
 function markAll(status) {
   document.querySelectorAll('input[type=radio][value='+status+']').forEach(r => {
     r.checked = true;
-    const labels = r.closest('div').querySelectorAll('label');
-    labels.forEach(l => l.style.background = '');
-    r.closest('label').style.background = status === 'present' ? '#d1fae5' : status === 'absent' ? '#fee2e2' : '#fef3c7';
+    selectStatus(r.closest('label'), status);
   });
 }
 </script>

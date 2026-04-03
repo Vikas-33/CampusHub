@@ -2,91 +2,43 @@
 {% block title %}My Result{% endblock %}
 {% block page_title %}Exam Result{% endblock %}
 {% block page_subtitle %}{{ exam.course.name }} — {{ exam.get_exam_type_display }}{% endblock %}
-
 {% block content %}
 <div style="max-width:500px;">
   <div class="card">
     <div class="card-header">
-      <span class="card-title">📝 {{ exam.course.name }}</span>
-      <span class="badge {% if exam.exam_type == 'final' %}badge-danger{% elif exam.exam_type == 'midterm' %}badge-warning{% else %}badge-info{% endif %}">
-        {{ exam.get_exam_type_display }}
-      </span>
+      <span class="card-title">{{ exam.course.name }}</span>
+      <span class="badge {% if exam.exam_type == 'final' %}badge-danger{% elif exam.exam_type == 'midterm' %}badge-warning{% else %}badge-info{% endif %}">{{ exam.get_exam_type_display }}</span>
     </div>
     <div class="card-body">
-
-      <!-- Exam Info -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; padding-bottom:24px; border-bottom:1px solid var(--border);">
-        <div>
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Date</div>
-          <div style="font-weight:600;">{{ exam.date|date:"M d, Y" }}</div>
-        </div>
-        <div>
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Time</div>
-          <div style="font-weight:600;">{{ exam.start_time|time:"H:i" }} – {{ exam.end_time|time:"H:i" }}</div>
-        </div>
-        <div>
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Total Marks</div>
-          <div style="font-weight:600;">{{ exam.total_marks }}</div>
-        </div>
-        <div>
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Passing Marks</div>
-          <div style="font-weight:600;">{{ exam.passing_marks }}</div>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border);">
+        <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Date</div><div style="font-weight:600;">{{ exam.date|date:"M d, Y" }}</div></div>
+        <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Time</div><div style="font-weight:600;">{{ exam.start_time|time:"H:i" }} – {{ exam.end_time|time:"H:i" }}</div></div>
+        <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Total Marks</div><div style="font-weight:600;">{{ exam.total_marks }}</div></div>
+        <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Passing Marks</div><div style="font-weight:600;">{{ exam.passing_marks }}</div></div>
       </div>
-
       {% if result %}
-        <!-- Result Found -->
-        <div style="text-align:center; padding:20px 0;">
-          <div style="font-size:64px; font-weight:800; font-family:'Geist Mono',monospace;
-            color:{% if result.marks_obtained >= exam.passing_marks %}var(--success){% else %}var(--danger){% endif %};">
-            {{ result.marks_obtained }}
-          </div>
-          <div style="font-size:16px; color:var(--text-secondary); margin-bottom:16px;">
-            out of {{ exam.total_marks }}
-          </div>
-
-          <!-- Progress bar -->
-          <div class="progress-bar" style="margin:0 auto 16px; max-width:300px;">
-            <div class="progress-fill" style="
-              width:{% widthratio result.marks_obtained exam.total_marks 100 %}%;
-              background:{% if result.marks_obtained >= exam.passing_marks %}var(--success){% else %}var(--danger){% endif %};
-            "></div>
-          </div>
-
-          <div style="display:flex; justify-content:center; gap:16px; margin-top:16px;">
-            {% if result.grade %}
-              <div style="text-align:center;">
-                <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">GRADE</div>
-                <span class="badge badge-purple" style="font-size:20px; padding:8px 20px;">{{ result.grade }}</span>
-              </div>
-            {% endif %}
-            <div style="text-align:center;">
-              <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">STATUS</div>
-              <span class="badge {% if result.marks_obtained >= exam.passing_marks %}badge-success{% else %}badge-danger{% endif %}" style="font-size:16px; padding:8px 20px;">
-                {% if result.marks_obtained >= exam.passing_marks %}✅ Pass{% else %}❌ Fail{% endif %}
-              </span>
-            </div>
-          </div>
-
-          {% if result.remarks %}
-            <div style="margin-top:20px; padding:12px; background:var(--bg-overlay); border-radius:8px; font-size:14px; color:var(--text-secondary);">
-              💬 {{ result.remarks }}
-            </div>
-          {% endif %}
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:64px;font-weight:900;color:{% if result.marks_obtained >= exam.passing_marks %}var(--green){% else %}var(--red){% endif %};">{{ result.marks_obtained }}</div>
+        <div style="font-size:16px;color:var(--text-secondary);margin-bottom:16px;">out of {{ exam.total_marks }}</div>
+        <div class="progress-bar" style="margin:0 auto 16px;max-width:300px;">
+          <div class="progress-fill" style="width:{% widthratio result.marks_obtained exam.total_marks 100 %}%;background:{% if result.marks_obtained >= exam.passing_marks %}var(--green){% else %}var(--red){% endif %};"></div>
         </div>
-
+        <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;">
+          {% if result.grade %}<div style="text-align:center;"><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">GRADE</div><span class="badge badge-purple" style="font-size:20px;padding:8px 20px;">{{ result.grade }}</span></div>{% endif %}
+          <div style="text-align:center;"><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">STATUS</div><span class="badge {% if result.marks_obtained >= exam.passing_marks %}badge-success{% else %}badge-danger{% endif %}" style="font-size:16px;padding:8px 20px;">{% if result.marks_obtained >= exam.passing_marks %}Pass{% else %}Fail{% endif %}</span></div>
+        </div>
+        {% if result.remarks %}<div style="margin-top:20px;padding:12px;background:var(--surface-2);border-radius:8px;font-size:14px;color:var(--text-secondary);">{{ result.remarks }}</div>{% endif %}
+      </div>
       {% else %}
-        <!-- Result Not Published Yet -->
-        <div style="text-align:center; padding:40px 0;">
-          <div style="font-size:48px; margin-bottom:16px;">⏳</div>
-          <h3 style="color:var(--text-secondary); margin-bottom:8px;">Result Not Published Yet</h3>
-          <p style="font-size:14px; color:var(--text-muted);">Check back after your teacher enters the results.</p>
-        </div>
+      <div style="text-align:center;padding:40px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">⏳</div>
+        <h3 style="color:var(--text-secondary);margin-bottom:8px;">Result Not Published Yet</h3>
+        <p style="font-size:14px;color:var(--text-muted);">Check back after your teacher enters the results.</p>
+      </div>
       {% endif %}
-
     </div>
-    <div style="padding:16px 24px; border-top:1px solid var(--border);">
-      <a href="{% url 'student_results' %}" class="btn btn-outline">← All My Results</a>
+    <div style="padding:16px 20px;border-top:1px solid var(--border);">
+      <a href="{% url 'student_results' college_slug=college_slug %}" class="btn btn-outline">← All My Results</a>
     </div>
   </div>
 </div>

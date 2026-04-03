@@ -1,44 +1,45 @@
 {% extends 'base.html' %}
 {% block title %}Students{% endblock %}
-{% block page_title %}Students{% endblock %}
-{% block page_subtitle %}{{ page_obj.paginator.count }} enrolled{% endblock %}
-{% block topbar_actions %}<a href="{% url 'add_student' college_slug %}" class="btn btn-accent">+ Enroll</a>{% endblock %}
+{% block page_title %}Student Management{% endblock %}
+{% block page_subtitle %}{{ page_obj.paginator.count }} students enrolled{% endblock %}
+{% block topbar_actions %}<a href="{% url 'add_student' college_slug=college_slug %}" class="btn btn-accent">+ Enroll Student</a>{% endblock %}
 {% block content %}
 <div class="card">
   <div class="filter-bar">
-    <form method="get" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%;">
+    <form method="get" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
       <div style="position:relative; flex:1; min-width:200px;">
-        <span style="position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:13px; pointer-events:none;">⌕</span>
-        <input type="text" name="q" value="{{ search_query }}" placeholder="Search name, roll no, email..."
-          style="width:100%; padding:8px 12px 8px 30px;">
+        <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted);">🔍</span>
+        <input type="text" name="q" value="{{ search_query }}"
+          placeholder="Search by name, roll no, email..."
+          style="width:100%; padding:8px 12px 8px 32px; border:1px solid var(--border); border-radius:8px; font-size:14px;">
       </div>
-      <select name="department" style="width:auto;">
+      <select name="department" class="form-input" style="width:auto; padding:8px 12px;">
         <option value="">All Departments</option>
         {% for dept in departments %}
           <option value="{{ dept.id }}" {% if dept.id|stringformat:"s" == dept_filter %}selected{% endif %}>{{ dept.name }}</option>
         {% endfor %}
       </select>
-      <select name="semester" style="width:auto;">
+      <select name="semester" class="form-input" style="width:auto; padding:8px 12px;">
         <option value="">All Semesters</option>
         {% for i in "12345678" %}
           <option value="{{ i }}" {% if i == sem_filter %}selected{% endif %}>Sem {{ i }}</option>
         {% endfor %}
       </select>
-      <button type="submit" class="btn btn-accent btn-sm">Apply</button>
-      <a href="{% url 'manage_students' college_slug %}" class="btn btn-outline btn-sm">Clear</a>
+      <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+      <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-sm btn-outline">Clear</a>
     </form>
   </div>
 
   {% if search_query %}
-    <div style="padding:8px 18px; font-size:11.5px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); font-family:'Geist Mono',monospace;">
-      {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "{{ search_query }}"
+    <div style="padding:8px 20px; font-size:13px; color:var(--text-muted); border-bottom:1px solid var(--border);">
+      Showing {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "<strong>{{ search_query }}</strong>"
     </div>
   {% endif %}
 
   <div class="table-container">
     <table>
       <thead>
-        <tr><th>Student</th><th>Roll No</th><th>Enrollment</th><th>Department</th><th>Sem</th><th>Batch</th><th>Actions</th></tr>
+        <tr><th>Student</th><th>Roll No.</th><th>Enrollment No.</th><th>Department</th><th>Semester</th><th>Batch</th><th>Actions</th></tr>
       </thead>
       <tbody>
         {% for student in page_obj %}
@@ -52,30 +53,33 @@
               </div>
             </div>
           </td>
-          <td><code>{{ student.roll_number }}</code></td>
-          <td><code>{{ student.enrollment_number }}</code></td>
+          <td><code style="background:var(--surface-2); padding:2px 6px; border-radius:4px; font-size:12px;">{{ student.roll_number }}</code></td>
+          <td>{{ student.enrollment_number }}</td>
           <td>{{ student.department }}</td>
-          <td><span class="badge badge-purple">{{ student.semester }}</span></td>
-          <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ student.batch_year }}</td>
+          <td><span class="badge badge-purple">Sem {{ student.semester }}</span></td>
+          <td>{{ student.batch_year }}</td>
           <td>
             <div style="display:flex; gap:6px;">
-              <a href="{% url 'edit_student' college_slug student.pk %}" class="btn btn-xs btn-outline">Edit</a>
-              <a href="{% url 'delete_student' college_slug student.pk %}" class="btn btn-xs btn-danger">Delete</a>
+              <a href="{% url 'edit_student' student.pk %}" class="btn btn-xs btn-outline">Edit</a>
+              <a href="{% url 'delete_student' student.pk %}" class="btn btn-xs btn-danger">Delete</a>
             </div>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="7">
-          <div class="empty-state">
-            <span class="icon">◉</span>
-            <h3>{% if search_query %}No results for "{{ search_query }}"{% else %}No students yet{% endif %}</h3>
-            <p>{% if search_query %}<a href="{% url 'manage_students' college_slug %}" style="color:var(--cyan);">Clear search</a>{% else %}Enroll your first student{% endif %}</p>
-          </div>
-        </td></tr>
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">
+              <div class="icon">🎓</div>
+              <h3>{% if search_query %}No students match "{{ search_query }}"{% else %}No students found{% endif %}</h3>
+              <p>{% if search_query %}<a href="{% url 'manage_students' %}">Clear search</a>{% else %}Enroll your first student{% endif %}</p>
+            </div>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
   {% include 'includes/pagination.html' %}
 </div>
 {% endblock %}

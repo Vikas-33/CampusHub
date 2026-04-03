@@ -1,28 +1,27 @@
 {% extends 'base.html' %}
 {% block title %}Enroll Student{% endblock %}
 {% block page_title %}Enroll Student{% endblock %}
-{% block page_subtitle %}auto-generates roll number & credentials{% endblock %}
+{% block page_subtitle %}Auto-generates roll number and credentials{% endblock %}
 {% block content %}
 <div class="card" style="max-width:780px;">
   <div class="card-header"><span class="card-title">Student Information</span></div>
   <div class="card-body">
-    <div class="alert alert-info">→ Roll number, enrollment number and login credentials will be auto-generated.</div>
-    <form method="post">
-      {% csrf_token %}
+    <div class="alert alert-info">ℹ️ Roll number, enrollment number and login credentials will be auto-generated.</div>
+    <form method="post">{% csrf_token %}
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">First Name</label><input type="text" name="first_name" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Last Name</label><input type="text" name="last_name" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">First Name *</label><input type="text" name="first_name" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Last Name *</label><input type="text" name="last_name" class="form-input" required></div>
       </div>
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-input" required></div>
         <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-input"></div>
       </div>
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Department</label>{{ form.department }}</div>
-        <div class="form-group"><label class="form-label">Semester</label><input type="number" name="semester" class="form-input" min="1" max="8" required></div>
+        <div class="form-group"><label class="form-label">Department *</label>{{ form.department }}</div>
+        <div class="form-group"><label class="form-label">Semester *</label><input type="number" name="semester" class="form-input" min="1" max="8" required></div>
       </div>
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Batch Year</label><input type="number" name="batch_year" class="form-input" placeholder="e.g. 2024" required></div>
+        <div class="form-group"><label class="form-label">Batch Year *</label><input type="number" name="batch_year" class="form-input" placeholder="e.g. 2024" required></div>
         <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" name="date_of_birth" class="form-input"></div>
       </div>
       <div class="form-group"><label class="form-label">Address</label><textarea name="address" class="form-input" rows="2"></textarea></div>
@@ -30,9 +29,9 @@
         <div class="form-group"><label class="form-label">Guardian Name</label><input type="text" name="guardian_name" class="form-input"></div>
         <div class="form-group"><label class="form-label">Guardian Phone</label><input type="text" name="guardian_phone" class="form-input"></div>
       </div>
-      <div style="display:flex; gap:10px; margin-top:4px;">
+      <div style="display:flex; gap:12px; margin-top:8px;">
         <button type="submit" class="btn btn-accent">Enroll Student</button>
-        <a href="{% url 'manage_students' college_slug %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

@@ -9,14 +9,14 @@
       <tbody>
         {% for rec in attendance_records %}
         <tr>
-          <td>{{ rec.student.user.get_full_name }}</td>
+          <td><div style="font-weight:600; color:var(--text-primary);">{{ rec.student.user.get_full_name }}</div></td>
           <td>{{ rec.course.name }}</td>
           <td>{{ rec.date }}</td>
           <td><span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}">{{ rec.status|capfirst }}</span></td>
           <td>{{ rec.marked_by.user.get_full_name|default:"—" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5"><div class="empty-state"><div class="icon">📋</div><h3>No records yet</h3></div></td></tr>
+        <tr><td colspan="5"><div class="empty-state"><span class="icon">📋</span><h3>No attendance records yet</h3></div></td></tr>
         {% endfor %}
       </tbody>
     </table>

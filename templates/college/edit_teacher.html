@@ -1,36 +1,46 @@
 {% extends 'base.html' %}
 {% block title %}Edit Teacher{% endblock %}
 {% block page_title %}Edit Teacher{% endblock %}
-{% block page_subtitle %}{{ teacher.user.get_full_name }}{% endblock %}
 {% block content %}
-<div class="card" style="max-width: 800px;">
-  <div class="card-header"><span class="card-title">Update Teacher Information</span></div>
+<div class="card" style="max-width:800px;">
+  <div class="card-header"><span class="card-title">{{ profile.user.get_full_name }}</span></div>
   <div class="card-body">
-    <form method="post">
-      {% csrf_token %}
+    <form method="post">{% csrf_token %}
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">First Name</label><input type="text" name="first_name" value="{{ form.initial.first_name }}" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Last Name</label><input type="text" name="last_name" value="{{ form.initial.last_name }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">First Name *</label><input type="text" name="first_name" class="form-input" value="{{ profile.user.first_name }}" required></div>
+        <div class="form-group"><label class="form-label">Last Name *</label><input type="text" name="last_name" class="form-input" value="{{ profile.user.last_name }}" required></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-input" value="{{ profile.user.email }}" required></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Department</label>
+          <select name="department" class="form-input">
+            <option value="">— None —</option>
+            {% for dept in departments %}<option value="{{ dept.pk }}" {% if profile.department and profile.department.pk == dept.pk %}selected{% endif %}>{{ dept.name }} ({{ dept.code }})</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Designation</label><input type="text" name="designation" class="form-input" value="{{ profile.designation }}"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Assigned Courses</label>
+        <div style="border:1.5px solid var(--border);border-radius:8px;padding:12px;max-height:180px;overflow-y:auto;background:var(--surface-2);">
+          {% for course in courses %}
+          <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:14px;">
+            <input type="checkbox" name="courses" value="{{ course.pk }}" {% if course in profile.courses.all %}checked{% endif %}>
+            {{ course.name }} <span style="color:var(--text-muted);">({{ course.department.code }})</span>
+          </label>
+          {% empty %}<p style="color:var(--text-muted);font-size:13px;">No courses available.</p>{% endfor %}
+        </div>
       </div>
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Username</label><input type="text" name="username" value="{{ form.initial.username }}" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" value="{{ form.initial.email }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Qualification</label><input type="text" name="qualification" class="form-input" value="{{ profile.qualification }}"></div>
+        <div class="form-group"><label class="form-label">Specialization</label><input type="text" name="specialization" class="form-input" value="{{ profile.specialization }}"></div>
       </div>
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Employee ID</label><input type="text" name="employee_id" value="{{ teacher.employee_id }}" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Department</label><input type="text" name="department" value="{{ teacher.department }}" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Joining Date</label><input type="date" name="joining_date" class="form-input" value="{{ profile.joining_date|date:'Y-m-d' }}"></div>
+        <div class="form-group"><label class="form-label">Salary (₹)</label><input type="number" name="salary" class="form-input" value="{{ profile.salary }}" step="0.01"></div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Designation</label><input type="text" name="designation" value="{{ teacher.designation }}" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Qualification</label><input type="text" name="qualification" value="{{ teacher.qualification }}" class="form-input" required></div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Specialization</label><input type="text" name="specialization" value="{{ teacher.specialization }}" class="form-input"></div>
-        <div class="form-group"><label class="form-label">Salary</label><input type="number" name="salary" value="{{ teacher.salary }}" class="form-input" step="0.01"></div>
-      </div>
-      <div style="display:flex; gap:12px;">
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a href="{% url 'manage_teachers' %}" class="btn btn-outline">Cancel</a>
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <button type="submit" class="btn btn-accent">Save Changes</button>
+        <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

@@ -3,14 +3,11 @@
 {% block page_title %}Confirm Deletion{% endblock %}
 {% block content %}
 <div class="card" style="max-width:480px;">
-  <div class="card-header"><span class="card-title" style="color:var(--rose);">✕ Delete Confirmation</span></div>
+  <div class="card-header"><span class="card-title" style="color:var(--red);">Delete Confirmation</span></div>
   <div class="card-body">
     <div class="alert alert-error">This action is permanent and cannot be undone.</div>
-    <p style="color:var(--text-secondary); font-size:14px; margin-bottom:24px;">
-      Are you sure you want to delete <strong style="color:var(--text-primary);">{{ object }}</strong>?
-    </p>
-    <form method="post">
-      {% csrf_token %}
+    <p style="color:var(--text-secondary);font-size:14px;margin-bottom:24px;">Are you sure you want to delete <strong style="color:var(--text-primary);">{{ object }}</strong>?</p>
+    <form method="post">{% csrf_token %}
       <div style="display:flex; gap:10px;">
         <button type="submit" class="btn btn-danger">Confirm Delete</button>
         <a href="{{ cancel_url }}" class="btn btn-outline">Cancel</a>

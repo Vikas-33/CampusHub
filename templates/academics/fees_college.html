@@ -2,15 +2,14 @@
 {% block title %}Fees{% endblock %}
 {% block page_title %}Fee Management{% endblock %}
 {% block topbar_actions %}
-  <a href="{% url 'add_fee_structure' %}" class="btn btn-outline">+ Fee Structure</a>
-  <a href="{% url 'record_payment' %}" class="btn btn-accent">+ Record Payment</a>
+  <a href="{% url 'add_fee_structure' college_slug=college_slug %}" class="btn btn-outline">+ Fee Structure</a>
+  <a href="{% url 'record_payment' college_slug=college_slug %}" class="btn btn-accent">+ Record Payment</a>
 {% endblock %}
 {% block content %}
-<div class="stats-grid">
-  <div class="stat-card green"><div class="stat-icon green">✅</div><div class="stat-value">{{ paid_count }}</div><div class="stat-label">Paid</div></div>
-  <div class="stat-card red"><div class="stat-icon red">⏳</div><div class="stat-value">{{ pending_count }}</div><div class="stat-label">Pending</div></div>
+<div class="stats-grid" style="margin-bottom:20px;">
+  <div class="stat-card green" style="position:relative;"><div class="stat-icon-wrap">✅</div><div class="stat-label" style="margin-bottom:6px;">Paid</div><div class="stat-value">{{ paid_count }}</div></div>
+  <div class="stat-card red" style="position:relative;"><div class="stat-icon-wrap">⏳</div><div class="stat-label" style="margin-bottom:6px;">Pending</div><div class="stat-value">{{ pending_count }}</div></div>
 </div>
-
 <div class="grid-2">
   <div class="card">
     <div class="card-header"><span class="card-title">Fee Structures</span></div>
@@ -19,20 +18,12 @@
         <thead><tr><th>Name</th><th>Amount</th><th>Department</th><th>Due Date</th></tr></thead>
         <tbody>
           {% for fs in fee_structures %}
-          <tr>
-            <td>{{ fs.name }}</td>
-            <td><strong>₹{{ fs.amount }}</strong></td>
-            <td>{{ fs.department|default:"All" }}</td>
-            <td>{{ fs.due_date|date:"M d, Y"|default:"—" }}</td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-muted);">No structures defined</td></tr>
-          {% endfor %}
+          <tr><td>{{ fs.name }}</td><td><strong>₹{{ fs.amount }}</strong></td><td>{{ fs.department|default:"All" }}</td><td>{{ fs.due_date|date:"M d, Y"|default:"—" }}</td></tr>
+          {% empty %}<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-muted);">No structures defined</td></tr>{% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-
   <div class="card">
     <div class="card-header"><span class="card-title">Recent Payments</span></div>
     <div class="table-container">
@@ -47,9 +38,7 @@
             <td><span class="badge {% if payment.status == 'paid' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% elif payment.status == 'overdue' %}badge-danger{% else %}badge-info{% endif %}">{{ payment.status|capfirst }}</span></td>
             <td>{{ payment.payment_date|date:"M d"|default:"—" }}</td>
           </tr>
-          {% empty %}
-          <tr><td colspan="5" style="text-align:center; padding:32px; color:var(--text-muted);">No payments recorded</td></tr>
-          {% endfor %}
+          {% empty %}<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--text-muted);">No payments recorded</td></tr>{% endfor %}
         </tbody>
       </table>
     </div>

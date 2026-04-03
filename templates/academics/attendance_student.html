@@ -2,21 +2,15 @@
 {% block title %}Attendance{% endblock %}
 {% block page_title %}My Attendance{% endblock %}
 {% block topbar_actions %}
-  <a href="{% url 'export_attendance_student' %}" class="btn btn-outline">📥 Export CSV</a>
+  <a href="{% url 'export_attendance_student' college_slug=college_slug %}" class="btn btn-outline">📥 Export CSV</a>
 {% endblock %}
-
 {% block content %}
 <div class="stats-grid">
-  <div class="stat-card blue"><div class="stat-icon blue">📋</div><div class="stat-value">{{ total }}</div><div class="stat-label">Total Classes</div></div>
-  <div class="stat-card green"><div class="stat-icon green">✅</div><div class="stat-value">{{ present }}</div><div class="stat-label">Present</div></div>
-  <div class="stat-card red"><div class="stat-icon red">❌</div><div class="stat-value">{{ total|add:"-"|add:present }}</div><div class="stat-label">Absent</div></div>
-  <div class="stat-card {% if percent >= 75 %}green{% elif percent >= 60 %}gold{% else %}red{% endif %}">
-    <div class="stat-icon {% if percent >= 75 %}green{% elif percent >= 60 %}gold{% else %}red{% endif %}">📊</div>
-    <div class="stat-value">{{ percent }}%</div>
-    <div class="stat-label">Attendance %</div>
-  </div>
+  <div class="stat-card blue" style="position:relative;"><div class="stat-icon-wrap">📋</div><div class="stat-label" style="margin-bottom:6px;">Total Classes</div><div class="stat-value">{{ total }}</div></div>
+  <div class="stat-card green" style="position:relative;"><div class="stat-icon-wrap">✅</div><div class="stat-label" style="margin-bottom:6px;">Present</div><div class="stat-value">{{ present }}</div></div>
+  <div class="stat-card red" style="position:relative;"><div class="stat-icon-wrap">❌</div><div class="stat-label" style="margin-bottom:6px;">Absent</div><div class="stat-value">{{ total|add:"-"|add:present }}</div></div>
+  <div class="stat-card {% if percent >= 75 %}green{% elif percent >= 60 %}gold{% else %}red{% endif %}" style="position:relative;"><div class="stat-icon-wrap">📊</div><div class="stat-label" style="margin-bottom:6px;">Attendance %</div><div class="stat-value">{{ percent }}%</div></div>
 </div>
-
 <div class="card">
   <div class="card-header"><span class="card-title">Attendance Records</span></div>
   <div class="table-container">
@@ -30,7 +24,7 @@
           <td><span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}">{{ rec.status|capfirst }}</span></td>
         </tr>
         {% empty %}
-        <tr><td colspan="3"><div class="empty-state"><div class="icon">📋</div><h3>No attendance records</h3></div></td></tr>
+        <tr><td colspan="3"><div class="empty-state"><span class="icon">📋</span><h3>No attendance records</h3></div></td></tr>
         {% endfor %}
       </tbody>
     </table>

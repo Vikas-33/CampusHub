@@ -1,110 +1,117 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
-{% block page_title %}{{ college.college_name }}{% endblock %}
-{% block page_subtitle %}College Administration Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
+
+<!-- Greeting -->
+<div style="margin-bottom:24px;">
+  <h2 style="font-size:24px; font-weight:800; letter-spacing:-0.5px; color:var(--text-primary);">
+    Good {% now "G" as hour %}{% if hour < 12 %}morning{% elif hour < 17 %}afternoon{% else %}evening{% endif %}, {{ request.user.first_name }}!
+  </h2>
+  <p style="color:var(--text-muted); font-size:14px; margin-top:4px;">Here's what's happening at your institution today.</p>
+</div>
+
+<!-- Stat cards -->
 <div class="stats-grid">
-  <div class="stat-card blue">
-    <div class="stat-icon blue">🎓</div>
-    <div class="stat-value">{{ total_students }}</div>
-    <div class="stat-label">Total Students</div>
+  <div class="stat-card blue" style="position:relative;">
+    <div class="stat-icon-wrap">🎓</div>
+    <div class="stat-label" style="margin-bottom:6px;">Total Students</div>
+    <div class="stat-value">{{ total_students|default:"0" }}</div>
   </div>
-  <div class="stat-card green">
-    <div class="stat-icon green">👨‍🏫</div>
-    <div class="stat-value">{{ total_teachers }}</div>
-    <div class="stat-label">Faculty Members</div>
+  <div class="stat-card purple" style="position:relative;">
+    <div class="stat-icon-wrap">👨‍🏫</div>
+    <div class="stat-label" style="margin-bottom:6px;">Total Teachers</div>
+    <div class="stat-value">{{ total_teachers|default:"0" }}</div>
   </div>
-  <div class="stat-card purple">
-    <div class="stat-icon purple">📚</div>
-    <div class="stat-value">{{ total_courses }}</div>
-    <div class="stat-label">Active Courses</div>
+  <div class="stat-card green" style="position:relative;">
+    <div class="stat-icon-wrap">📋</div>
+    <div class="stat-label" style="margin-bottom:6px;">Departments</div>
+    <div class="stat-value">{{ total_departments|default:"0" }}</div>
   </div>
-  <div class="stat-card red">
-    <div class="stat-icon red">💰</div>
-    <div class="stat-value">{{ pending_fees }}</div>
-    <div class="stat-label">Pending Fee Dues</div>
+  <div class="stat-card gold" style="position:relative;">
+    <div class="stat-icon-wrap">📝</div>
+    <div class="stat-label" style="margin-bottom:6px;">Pending Exams</div>
+    <div class="stat-value">{{ upcoming_exams_count|default:"0" }}</div>
   </div>
 </div>
 
-<div class="grid-2">
-  <div class="card mb-20">
+<!-- Main grid -->
+<div style="display:grid; grid-template-columns:1fr 300px; gap:20px;">
+
+  <!-- Notices / Recent activity -->
+  <div class="card">
     <div class="card-header">
       <span class="card-title">📢 Recent Notices</span>
-      <a href="{% url 'add_notice' college_slug=college_slug %}" class="btn btn-sm btn-primary">+ Post Notice</a>
+      <a href="{% url 'add_notice' college_slug=college_slug %}" class="btn btn-accent btn-sm">+ Post Notice</a>
     </div>
-    <div class="card-body">
-      {% if recent_notices %}
-        {% for notice in recent_notices %}
-          <div class="notice-item {{ notice.notice_type }}">
-            <div class="notice-title">{{ notice.title }}</div>
-            <div style="font-size:13px; color: var(--text-secondary); margin-top:4px;">{{ notice.content|truncatechars:80 }}</div>
-            <div class="notice-meta">{{ notice.created_at|date:"M d, Y" }} &bull; <span class="badge badge-info">{{ notice.get_target_audience_display }}</span></div>
+    <div style="padding:0;">
+      {% for notice in recent_notices %}
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; padding:14px 20px; border-bottom:1px solid var(--border); transition:background 0.15s;" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+          <div style="display:flex; align-items:flex-start; gap:12px;">
+            <div style="width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0;
+              background:{% if notice.notice_type == 'urgent' %}var(--red){% elif notice.notice_type == 'exam' %}var(--amber){% elif notice.notice_type == 'event' %}var(--green){% else %}var(--blue){% endif %};"></div>
+            <div>
+              <div style="font-weight:600; font-size:13.5px; color:var(--text-primary);">{{ notice.title }}</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                <span class="badge {% if notice.notice_type == 'urgent' %}badge-danger{% elif notice.notice_type == 'exam' %}badge-warning{% elif notice.notice_type == 'event' %}badge-success{% else %}badge-info{% endif %}" style="font-size:10.5px;">{{ notice.get_notice_type_display }}</span>
+              </div>
+            </div>
           </div>
-        {% endfor %}
-      {% else %}
-        <div class="empty-state">
-          <div class="icon">📢</div>
-          <h3>No notices yet</h3>
-          <p>Post your first notice to students and teachers</p>
+          <span style="font-size:11.5px; color:var(--text-muted); white-space:nowrap; margin-left:12px;">{{ notice.created_at|date:"M d, Y" }}</span>
         </div>
-      {% endif %}
+      {% empty %}
+        <div class="empty-state"><span class="icon">📭</span><h3>No notices yet</h3><p>Post your first notice</p></div>
+      {% endfor %}
     </div>
   </div>
 
-  <div class="card mb-20">
-    <div class="card-header">
-      <span class="card-title">📝 Upcoming Exams</span>
-      <a href="{% url 'add_exam' college_slug=college_slug %}" class="btn btn-sm btn-primary">+ Schedule</a>
-    </div>
-    <div class="card-body">
-      {% if upcoming_exams %}
-        {% for exam in upcoming_exams %}
-          <div style="display:flex; gap:16px; align-items:center; padding:14px 0; border-bottom:1px solid var(--border);">
-            <div style="text-align:center; min-width:48px;">
-              <div style="font-size:22px; font-weight:800; font-family:'Syne'; color:var(--primary);">{{ exam.date|date:"d" }}</div>
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">{{ exam.date|date:"M" }}</div>
-            </div>
-            <div style="flex:1;">
-              <div style="font-weight:600; font-size:14px;">{{ exam.course.name }}</div>
-              <div style="font-size:12px; color:var(--text-secondary);">{{ exam.get_exam_type_display }} &bull; {{ exam.start_time|time:"H:i" }} - {{ exam.end_time|time:"H:i" }}</div>
-              {% if exam.venue %}<div style="font-size:12px; color:var(--text-muted);">📍 {{ exam.venue }}</div>{% endif %}
-            </div>
-            <span class="badge badge-info">{{ exam.get_exam_type_display }}</span>
-          </div>
-        {% endfor %}
-      {% else %}
-        <div class="empty-state">
-          <div class="icon">📝</div>
-          <h3>No upcoming exams</h3>
-          <p>Schedule exams for your courses</p>
-        </div>
-      {% endif %}
+  <!-- Quick Actions -->
+  <div class="card" style="height:fit-content;">
+    <div class="card-header"><span class="card-title">Quick Actions</span></div>
+    <div style="padding:8px;">
+      <a href="{% url 'add_student' college_slug=college_slug %}" style="display:flex; align-items:center; gap:12px; padding:12px 12px; border-radius:8px; transition:background 0.15s; color:var(--text-primary);" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <div style="width:36px; height:36px; border-radius:8px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;">🎓</div>
+        <span style="font-size:13.5px; font-weight:600;">Add New Student</span>
+      </a>
+      <a href="{% url 'attendance' college_slug=college_slug %}" style="display:flex; align-items:center; gap:12px; padding:12px 12px; border-radius:8px; transition:background 0.15s; color:var(--text-primary);" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <div style="width:36px; height:36px; border-radius:8px; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;">📋</div>
+        <span style="font-size:13.5px; font-weight:600;">Mark Attendance</span>
+      </a>
+      <a href="{% url 'add_exam' college_slug=college_slug %}" style="display:flex; align-items:center; gap:12px; padding:12px 12px; border-radius:8px; transition:background 0.15s; color:var(--text-primary);" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <div style="width:36px; height:36px; border-radius:8px; background:var(--purple-light); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;">📝</div>
+        <span style="font-size:13.5px; font-weight:600;">Schedule Exam</span>
+      </a>
+      <a href="{% url 'manage_teachers' college_slug=college_slug %}" style="display:flex; align-items:center; gap:12px; padding:12px 12px; border-radius:8px; transition:background 0.15s; color:var(--text-primary);" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <div style="width:36px; height:36px; border-radius:8px; background:var(--amber-light); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;">👨‍🏫</div>
+        <span style="font-size:13.5px; font-weight:600;">Manage Teachers</span>
+      </a>
     </div>
   </div>
 </div>
 
-<div class="grid-3">
-  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'manage_teachers' college_slug=college_slug %}'">
-    <div class="card-body" style="text-align:center; padding:32px;">
-      <div style="font-size:40px; margin-bottom:12px;">👨‍🏫</div>
-      <h3 style="font-size:16px;">Manage Teachers</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Add, edit, remove faculty</p>
-    </div>
+<!-- Upcoming exams strip -->
+{% if upcoming_exams %}
+<div class="card" style="margin-top:20px;">
+  <div class="card-header">
+    <span class="card-title">📅 Upcoming Schedule</span>
+    <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-outline btn-sm">View all</a>
   </div>
-  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'manage_students' college_slug=college_slug %}'">
-    <div class="card-body" style="text-align:center; padding:32px;">
-      <div style="font-size:40px; margin-bottom:12px;">🎓</div>
-      <h3 style="font-size:16px;">Manage Students</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Enroll and track students</p>
-    </div>
-  </div>
-  <div class="card" style="cursor:pointer;" onclick="location.href='{% url 'fees' college_slug=college_slug %}'">
-    <div class="card-body" style="text-align:center; padding:32px;">
-      <div style="font-size:40px; margin-bottom:12px;">💰</div>
-      <h3 style="font-size:16px;">Fee Management</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Structures and payments</p>
-    </div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:0;">
+    {% for exam in upcoming_exams %}
+      <div style="padding:16px 20px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <div style="width:32px; height:32px; border-radius:8px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; font-size:15px;">📅</div>
+          <div>
+            <div style="font-weight:700; font-size:13.5px;">{{ exam.course.name }}</div>
+            <div style="font-size:11.5px; color:var(--text-muted);">{{ exam.date|date:"M d, Y" }}</div>
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted);">{{ exam.get_exam_type_display }}{% if exam.course.semester %} · Semester {{ exam.course.semester }}{% endif %}</div>
+      </div>
+    {% endfor %}
   </div>
 </div>
+{% endif %}
+
 {% endblock %}

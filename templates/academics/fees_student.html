@@ -5,55 +5,20 @@
 <div class="card">
   <div class="table-container">
     <table>
-      <thead>
-        <tr>
-          <th>Fee Type</th>
-          <th>Total Amount</th>
-          <th>Amount Paid</th>
-          <th>Status</th>
-          <th>Payment Date</th>
-          <th>Receipt No.</th>
-          <th>Download</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Fee Type</th><th>Total</th><th>Paid</th><th>Status</th><th>Date</th><th>Receipt</th><th>Download</th></tr></thead>
       <tbody>
         {% for payment in payments %}
         <tr>
           <td>{{ payment.fee_structure.name }}</td>
-          <td>&#8377;{{ payment.fee_structure.amount }}</td>
-          <td>&#8377;{{ payment.amount_paid }}</td>
-          <td>
-            <span class="badge {% if payment.status == 'paid' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% elif payment.status == 'overdue' %}badge-danger{% else %}badge-info{% endif %}">
-              {{ payment.status|capfirst }}
-            </span>
-          </td>
+          <td>₹{{ payment.fee_structure.amount }}</td>
+          <td>₹{{ payment.amount_paid }}</td>
+          <td><span class="badge {% if payment.status == 'paid' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% elif payment.status == 'overdue' %}badge-danger{% else %}badge-info{% endif %}">{{ payment.status|capfirst }}</span></td>
           <td>{{ payment.payment_date|date:"M d, Y"|default:"—" }}</td>
-          <td>
-            {% if payment.receipt_number %}
-              <code style="background:var(--bg-overlay); padding:2px 6px; border-radius:4px; font-size:12px;">{{ payment.receipt_number }}</code>
-            {% else %}
-              <span style="color:var(--text-muted);">—</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if payment.status == 'paid' %}
-              <a href="{% url 'download_fee_receipt' payment.pk %}" class="btn btn-xs btn-primary" title="Download PDF Receipt">
-                📄 Receipt
-              </a>
-            {% else %}
-              <span style="font-size:12px; color:var(--text-muted);">Not paid</span>
-            {% endif %}
-          </td>
+          <td>{% if payment.receipt_number %}<code>{{ payment.receipt_number }}</code>{% else %}<span style="color:var(--text-muted);">—</span>{% endif %}</td>
+          <td>{% if payment.status == 'paid' %}<a href="{% url 'download_fee_receipt' college_slug=college_slug payment.pk %}" class="btn btn-xs btn-outline">📄 Receipt</a>{% else %}<span style="font-size:12px;color:var(--text-muted);">Not paid</span>{% endif %}</td>
         </tr>
         {% empty %}
-        <tr>
-          <td colspan="7">
-            <div class="empty-state">
-              <div class="icon">💰</div>
-              <h3>No fee records</h3>
-            </div>
-          </td>
-        </tr>
+        <tr><td colspan="7"><div class="empty-state"><span class="icon">💰</span><h3>No fee records</h3></div></td></tr>
         {% endfor %}
       </tbody>
     </table>

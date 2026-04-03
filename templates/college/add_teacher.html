@@ -1,29 +1,36 @@
 {% extends 'base.html' %}
 {% block title %}Add Teacher{% endblock %}
-{% block page_title %}Add New Teacher{% endblock %}
-{% block page_subtitle %}Register a new faculty member{% endblock %}
+{% block page_title %}Add Teacher{% endblock %}
+{% block page_subtitle %}Auto-generates employee ID and credentials{% endblock %}
 {% block content %}
-<div class="card" style="max-width: 800px;">
+<div class="card" style="max-width:800px;">
   <div class="card-header"><span class="card-title">Teacher Information</span></div>
   <div class="card-body">
-
-    <div class="alert alert-info" style="margin-bottom:20px;">
-      ℹ️ Employee ID and username will be <strong>auto-generated</strong>. Default password will be the same as the Employee ID.
-    </div>
-
-    <form method="post">
-      {% csrf_token %}
+    <div class="alert alert-info">ℹ️ Employee ID and login credentials will be auto-generated. Default password = Employee ID.</div>
+    <form method="post">{% csrf_token %}
       <div class="form-grid">
         <div class="form-group"><label class="form-label">First Name *</label><input type="text" name="first_name" class="form-input" required></div>
         <div class="form-group"><label class="form-label">Last Name *</label><input type="text" name="last_name" class="form-input" required></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Email *</label>
-        <input type="email" name="email" class="form-input" required>
-      </div>
+      <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-input" required></div>
       <div class="form-grid">
-        <div class="form-group"><label class="form-label">Department *</label><input type="text" name="department" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Department *</label>
+          <select name="department" class="form-input" required>
+            <option value="">— Select Department —</option>
+            {% for dept in departments %}<option value="{{ dept.pk }}">{{ dept.name }} ({{ dept.code }})</option>{% endfor %}
+          </select>
+        </div>
         <div class="form-group"><label class="form-label">Designation *</label><input type="text" name="designation" class="form-input" placeholder="e.g. Associate Professor" required></div>
+      </div>
+      <div class="form-group"><label class="form-label">Assigned Courses</label>
+        <div style="border:1.5px solid var(--border);border-radius:8px;padding:12px;max-height:180px;overflow-y:auto;background:var(--surface-2);">
+          {% for course in courses %}
+          <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:14px;">
+            <input type="checkbox" name="courses" value="{{ course.pk }}">
+            {{ course.name }} <span style="color:var(--text-muted);">({{ course.department.code }})</span>
+          </label>
+          {% empty %}<p style="color:var(--text-muted);font-size:13px;">No courses available. Add courses first.</p>{% endfor %}
+        </div>
       </div>
       <div class="form-grid">
         <div class="form-group"><label class="form-label">Qualification *</label><input type="text" name="qualification" class="form-input" placeholder="e.g. Ph.D. Computer Science" required></div>
@@ -35,7 +42,7 @@
       </div>
       <div style="display:flex; gap:12px; margin-top:8px;">
         <button type="submit" class="btn btn-accent">Add Teacher</button>
-        <a href="{% url 'manage_teachers' %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

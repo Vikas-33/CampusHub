@@ -1,23 +1,28 @@
 {% extends 'base.html' %}
 {% block title %}Departments{% endblock %}
 {% block page_title %}Departments{% endblock %}
-{% block topbar_actions %}<a href="{% url 'add_department' %}" class="btn btn-accent">+ Add Department</a>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'add_department' college_slug=college_slug %}" class="btn btn-accent">+ Add Department</a>
+{% endblock %}
 {% block content %}
 <div class="grid-3">
   {% for dept in departments %}
   <div class="card">
-    <div class="card-body" style="padding:28px;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
-        <div style="font-size:36px;">🏛️</div>
+    <div class="card-body" style="padding:24px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+        <div style="width:44px; height:44px; border-radius:10px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; font-size:22px;">🏛️</div>
         <span class="badge badge-info">{{ dept.code }}</span>
       </div>
-      <h3 style="font-size:17px; margin-bottom:4px;">{{ dept.name }}</h3>
+      <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">{{ dept.name }}</h3>
       {% if dept.head_of_department %}<p style="font-size:13px; color:var(--text-secondary);">HOD: {{ dept.head_of_department.user.get_full_name }}</p>{% endif %}
-      {% if dept.description %}<p style="font-size:12px; color:var(--text-muted); margin-top:8px;">{{ dept.description|truncatechars:80 }}</p>{% endif %}
+      {% if dept.description %}<p style="font-size:12.5px; color:var(--text-muted); margin-top:8px; line-height:1.6;">{{ dept.description|truncatechars:80 }}</p>{% endif %}
+      <div style="margin-top:14px;">
+        <a href="{% url 'edit_department' college_slug=college_slug dept.pk %}" class="btn btn-xs btn-outline">✏️ Edit</a>
+      </div>
     </div>
   </div>
   {% empty %}
-  <div style="grid-column:1/-1;"><div class="empty-state"><div class="icon">🏛️</div><h3>No departments yet</h3><p>Create your first department</p></div></div>
+  <div style="grid-column:1/-1;"><div class="empty-state"><span class="icon">🏛️</span><h3>No departments yet</h3><p>Create your first department</p></div></div>
   {% endfor %}
 </div>
 {% endblock %}

@@ -1,98 +1,36 @@
 {% extends 'base.html' %}
 {% block title %}My Results{% endblock %}
 {% block page_title %}My Exam Results{% endblock %}
-{% block page_subtitle %}{{ student.user.get_full_name }} &bull; {{ student.department }} &bull; Semester {{ student.semester }}{% endblock %}
-
+{% block page_subtitle %}{{ student.user.get_full_name }} · {{ student.department }} · Semester {{ student.semester }}{% endblock %}
 {% block content %}
-
-<!-- Summary Stats -->
-<div class="stats-grid" style="margin-bottom:28px;">
-  <div class="stat-card blue">
-    <div class="stat-icon blue">📝</div>
-    <div class="stat-value">{{ total_exams }}</div>
-    <div class="stat-label">Total Exams</div>
-  </div>
-  <div class="stat-card green">
-    <div class="stat-icon green">✅</div>
-    <div class="stat-value">{{ passed }}</div>
-    <div class="stat-label">Passed</div>
-  </div>
-  <div class="stat-card red">
-    <div class="stat-icon red">❌</div>
-    <div class="stat-value">{{ failed }}</div>
-    <div class="stat-label">Failed</div>
-  </div>
-  <div class="stat-card gold">
-    <div class="stat-icon gold">📊</div>
-    <div class="stat-value">{{ average }}%</div>
-    <div class="stat-label">Average Score</div>
-  </div>
+<div class="stats-grid">
+  <div class="stat-card blue" style="position:relative;"><div class="stat-icon-wrap">📝</div><div class="stat-label" style="margin-bottom:6px;">Total Exams</div><div class="stat-value">{{ total_exams }}</div></div>
+  <div class="stat-card green" style="position:relative;"><div class="stat-icon-wrap">✅</div><div class="stat-label" style="margin-bottom:6px;">Passed</div><div class="stat-value">{{ passed }}</div></div>
+  <div class="stat-card red" style="position:relative;"><div class="stat-icon-wrap">❌</div><div class="stat-label" style="margin-bottom:6px;">Failed</div><div class="stat-value">{{ failed }}</div></div>
+  <div class="stat-card gold" style="position:relative;"><div class="stat-icon-wrap">📊</div><div class="stat-label" style="margin-bottom:6px;">Average Score</div><div class="stat-value">{{ average }}%</div></div>
 </div>
-
-<!-- Results Table -->
 <div class="card">
-  <div class="card-header">
-    <span class="card-title">📋 All Results</span>
-  </div>
+  <div class="card-header"><span class="card-title">All Results</span></div>
   <div class="table-container">
     <table>
-      <thead>
-        <tr>
-          <th>Course</th>
-          <th>Exam Type</th>
-          <th>Date</th>
-          <th>Marks</th>
-          <th>Grade</th>
-          <th>Status</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Course</th><th>Exam Type</th><th>Date</th><th>Marks</th><th>Grade</th><th>Status</th></tr></thead>
       <tbody>
         {% for result in results %}
         <tr>
-          <td>
-            <div style="font-weight:600;">{{ result.exam.course.name }}</div>
-            <div style="font-size:12px; color:var(--text-muted);">{{ result.exam.course.code }}</div>
-          </td>
-          <td>
-            <span class="badge {% if result.exam.exam_type == 'final' %}badge-danger{% elif result.exam.exam_type == 'midterm' %}badge-warning{% elif result.exam.exam_type == 'quiz' %}badge-info{% else %}badge-teal{% endif %}">
-              {{ result.exam.get_exam_type_display }}
-            </span>
-          </td>
+          <td><div style="font-weight:600;color:var(--text-primary);">{{ result.exam.course.name }}</div><div style="font-size:12px;color:var(--text-muted);">{{ result.exam.course.code }}</div></td>
+          <td><span class="badge {% if result.exam.exam_type == 'final' %}badge-danger{% elif result.exam.exam_type == 'midterm' %}badge-warning{% elif result.exam.exam_type == 'quiz' %}badge-info{% else %}badge-purple{% endif %}">{{ result.exam.get_exam_type_display }}</span></td>
           <td>{{ result.exam.date|date:"M d, Y" }}</td>
           <td>
             <div style="font-weight:600;">{{ result.marks_obtained }} / {{ result.exam.total_marks }}</div>
-            <div style="font-size:12px; color:var(--text-muted);">
-              {{ result.marks_obtained|floatformat:0 }} / {{ result.exam.total_marks }} 
-              ({{ result.marks_obtained|floatformat:0 }}%)
-            </div>
-            <!-- Progress bar -->
-            <div class="progress-bar" style="margin-top:4px; width:100px;">
-              <div class="progress-fill" style="
-                width:{% widthratio result.marks_obtained result.exam.total_marks 100 %}%;
-                background:{% if result.marks_obtained >= result.exam.passing_marks %}var(--success){% else %}var(--danger){% endif %};
-              "></div>
+            <div class="progress-bar" style="margin-top:4px; width:80px;">
+              <div class="progress-fill" style="width:{% widthratio result.marks_obtained result.exam.total_marks 100 %}%; background:{% if result.marks_obtained >= result.exam.passing_marks %}var(--green){% else %}var(--red){% endif %};"></div>
             </div>
           </td>
-          <td>
-            {% if result.grade %}
-              <span class="badge badge-purple" style="font-size:14px; padding:4px 12px;">{{ result.grade }}</span>
-            {% else %}
-              <span style="color:var(--text-muted); font-size:13px;">—</span>
-            {% endif %}
-          </td>
-          <td>
-            <span class="badge {% if result.marks_obtained >= result.exam.passing_marks %}badge-success{% else %}badge-danger{% endif %}">
-              {% if result.marks_obtained >= result.exam.passing_marks %}✅ Pass{% else %}❌ Fail{% endif %}
-            </span>
-          </td>
+          <td>{% if result.grade %}<span class="badge badge-purple">{{ result.grade }}</span>{% else %}<span style="color:var(--text-muted);">—</span>{% endif %}</td>
+          <td><span class="badge {% if result.marks_obtained >= result.exam.passing_marks %}badge-success{% else %}badge-danger{% endif %}">{% if result.marks_obtained >= result.exam.passing_marks %}Pass{% else %}Fail{% endif %}</span></td>
         </tr>
         {% empty %}
-        <tr>
-          <td colspan="6" style="text-align:center; color:var(--text-muted); padding:48px;">
-            <div style="font-size:32px; margin-bottom:12px;">📝</div>
-            No results published yet
-          </td>
-        </tr>
+        <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:48px;">No results published yet</td></tr>
         {% endfor %}
       </tbody>
     </table>

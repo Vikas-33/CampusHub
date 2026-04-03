@@ -1,78 +1,30 @@
 {% extends 'base.html' %}
 {% block title %}Edit Notice{% endblock %}
 {% block page_title %}Edit Notice{% endblock %}
-{% block page_subtitle %}Update notice details{% endblock %}
-
 {% block content %}
 <div class="card" style="max-width:700px;">
-  <div class="card-header">
-    <span class="card-title">✏️ Edit Notice</span>
-  </div>
+  <div class="card-header"><span class="card-title">Edit Notice</span></div>
   <div class="card-body">
-
-    {% if form.errors %}
-    <div class="alert alert-error">
-      ❌ Please fix the errors below.
-      <ul style="margin:8px 0 0 16px;">
-        {% for field in form %}
-          {% for error in field.errors %}
-            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-
-    <form method="post">
-      {% csrf_token %}
-
-      <div class="form-group">
-        <label class="form-label">Title *</label>
-        <input type="text" name="title" class="form-input" value="{{ form.title.value|default:'' }}" required>
-        {% if form.title.errors %}<span style="color:#e53e3e; font-size:12px;">{{ form.title.errors.0 }}</span>{% endif %}
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Content *</label>
-        <textarea name="content" class="form-input" rows="5" required>{{ form.content.value|default:'' }}</textarea>
-        {% if form.content.errors %}<span style="color:#e53e3e; font-size:12px;">{{ form.content.errors.0 }}</span>{% endif %}
-      </div>
-
+    {% if form.errors %}<div class="alert alert-error">❌ Please fix the errors below.</div>{% endif %}
+    <form method="post">{% csrf_token %}
+      <div class="form-group"><label class="form-label">Title *</label><input type="text" name="title" class="form-input" value="{{ form.title.value|default:'' }}" required></div>
+      <div class="form-group"><label class="form-label">Content *</label><textarea name="content" class="form-input" rows="5" required>{{ form.content.value|default:'' }}</textarea></div>
       <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Notice Type</label>
-          <select name="notice_type" class="form-input">
-            {% for value, label in form.fields.notice_type.choices %}
-              <option value="{{ value }}" {% if form.notice_type.value == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
+        <div class="form-group"><label class="form-label">Notice Type</label>
+          <select name="notice_type" class="form-input">{% for value, label in form.fields.notice_type.choices %}<option value="{{ value }}" {% if form.notice_type.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Target Audience</label>
-          <select name="target_audience" class="form-input">
-            {% for value, label in form.fields.target_audience.choices %}
-              <option value="{{ value }}" {% if form.target_audience.value == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
+        <div class="form-group"><label class="form-label">Target Audience</label>
+          <select name="target_audience" class="form-input">{% for value, label in form.fields.target_audience.choices %}<option value="{{ value }}" {% if form.target_audience.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
         </div>
       </div>
-
-      <div class="form-group">
-        <label class="form-label">Expires At (optional)</label>
-        <input type="datetime-local" name="expires_at" class="form-input"
-          value="{{ form.expires_at.value|default:'' }}">
-      </div>
-
+      <div class="form-group"><label class="form-label">Expires At (optional)</label><input type="datetime-local" name="expires_at" class="form-input" value="{{ form.expires_at.value|default:'' }}"></div>
       <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-        <input type="checkbox" name="is_active" id="is_active"
-          {% if form.is_active.value %}checked{% endif %}
-          style="width:auto;">
+        <input type="checkbox" name="is_active" id="is_active" {% if form.is_active.value %}checked{% endif %}>
         <label for="is_active" class="form-label" style="margin:0;">Active (visible to users)</label>
       </div>
-
       <div style="display:flex; gap:12px; margin-top:8px;">
         <button type="submit" class="btn btn-accent">Save Changes</button>
-        <a href="{% url 'notices' %}" class="btn btn-outline">Cancel</a>
+        <a href="{% url 'notices' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>
