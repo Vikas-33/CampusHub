@@ -39,12 +39,14 @@
     {% endif %}
     <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
       {% if request.user.role == 'student' %}
-        <a href="{% url 'student_exam_result' college_slug=college_slug exam.pk %}" class="btn btn-xs btn-info">My Result</a>
+          <a href="{% url 'student_exam_result' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-info">My Result</a>
       {% else %}
-        <a href="{% url 'exam_results' college_slug=college_slug exam.pk %}" class="btn btn-xs btn-accent">Results</a>
+        <a href="{% url 'exam_results' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-accent">Results</a>
+
+
         {% if exam.status != 'cancelled' %}
-          <a href="{% url 'postpone_exam' college_slug=college_slug exam.pk %}" class="btn btn-xs btn-warning">Postpone</a>
-          <a href="{% url 'cancel_exam' college_slug=college_slug exam.pk %}" class="btn btn-xs btn-danger">Cancel</a>
+          <a href="{% url 'postpone_exam' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-warning">Postpone</a>
+          <a href="{% url 'cancel_exam' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-danger">Cancel</a>
         {% endif %}
       {% endif %}
     </div>

@@ -4,8 +4,8 @@
 {% block page_subtitle %}{{ exam.course.name }} — {{ exam.get_exam_type_display }} — {{ exam.date }}{% endblock %}
 {% block content %}
 {% if request.user.role == 'student' %}
-  <div class="alert alert-info">ℹ️ <a href="{% url 'student_exam_result' college_slug=college_slug exam.pk %}" style="font-weight:600;">View your personal result →</a></div>
-{% else %}
+  <a href="{% url 'student_exam_result' college_slug=college_slug exam_id=exam.pk %}">
+  {% else %}
 <div class="grid-2">
   <div class="card">
     <div class="card-header"><span class="card-title">Enter Result</span></div>
