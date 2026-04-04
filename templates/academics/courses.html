@@ -22,7 +22,7 @@
           <td>{% if course.teacher %}{{ course.teacher.user.get_full_name }}{% else %}<span style="color:var(--text-muted);">Unassigned</span>{% endif %}</td>
           <td>
             {% if request.user.role == 'teacher' %}
-              <a href="{% url 'mark_attendance' college_slug=college_slug course.pk %}" class="btn btn-xs btn-success">Attendance</a>
+              <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-xs btn-success">Attendance</a>
             {% elif request.user.role == 'student' %}
               <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-xs btn-info">Assignments</a>
             {% endif %}

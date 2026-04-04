@@ -54,8 +54,8 @@
           <td>{{ teacher.joining_date|date:"M d, Y"|default:"—" }}</td>
           <td>
             <div style="display:flex; gap:6px;">
-              <a href="{% url 'edit_teacher' teacher.pk %}" class="btn btn-xs btn-outline">Edit</a>
-              <a href="{% url 'delete_teacher' teacher.pk %}" class="btn btn-xs btn-danger">Delete</a>
+              <a href="{% url 'edit_teacher' college_slug=college_slug pk=teacher.pk %}" class="btn btn-xs btn-outline">Edit</a>
+              <a href="{% url 'delete_teacher' college_slug=college_slug pk=teacher.pk %}" class="btn btn-xs btn-danger">Delete</a>
             </div>
           </td>
         </tr>

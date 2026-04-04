@@ -18,7 +18,7 @@
           <div style="font-size:12px;color:var(--text-muted);">{{ course.code }} · Sem {{ course.semester }}</div>
         </div>
         <div style="display:flex;gap:8px;">
-          <a href="{% url 'mark_attendance' college_slug=college_slug course.pk %}" class="btn btn-sm btn-success">Mark Today</a>
+          <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-sm btn-success">Mark Today</a>
           <a href="?course={{ course.pk }}" class="btn btn-sm btn-outline">Records</a>
         </div>
       </div>

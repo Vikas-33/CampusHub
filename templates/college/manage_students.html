@@ -60,8 +60,8 @@
           <td>{{ student.batch_year }}</td>
           <td>
             <div style="display:flex; gap:6px;">
-              <a href="{% url 'edit_student' student.pk %}" class="btn btn-xs btn-outline">Edit</a>
-              <a href="{% url 'delete_student' student.pk %}" class="btn btn-xs btn-danger">Delete</a>
+              <a href="{% url 'edit_student' college_slug=college_slug pk=student.pk %}" class="btn btn-xs btn-outline">Edit</a>
+              <a href="{% url 'delete_student' college_slug=college_slug pk=student.pk %}" class="btn btn-xs btn-danger">Delete</a>
             </div>
           </td>
         </tr>

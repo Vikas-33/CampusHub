@@ -33,10 +33,10 @@
           <td>
             {% if request.user.role == 'student' %}
               {% if assignment.pk in submitted_ids %}<span style="font-size:13px; color:var(--text-muted);">Done ✓</span>
-              {% elif not assignment.is_overdue %}<a href="{% url 'submit_assignment' college_slug=college_slug assignment.pk %}" class="btn btn-xs btn-success">Submit</a>
+              {% elif not assignment.is_overdue %}<a href="{% url 'submit_assignment' college_slug=college_slug pk=assignment.pk %}" class="btn btn-xs btn-success">Submit</a>
               {% else %}<span style="font-size:13px; color:var(--red);">Closed</span>{% endif %}
             {% elif request.user.role == 'teacher' %}
-              <a href="{% url 'grade_submissions' college_slug=college_slug assignment.pk %}" class="btn btn-xs btn-info">Grade</a>
+              <a href="{% url 'grade_submissions' college_slug=college_slug pk=assignment.pk %}" class="btn btn-xs btn-info">Grade</a>
             {% endif %}
           </td>
         </tr>

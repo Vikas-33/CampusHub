@@ -15,7 +15,7 @@
           <td><span class="badge {% if payment.status == 'paid' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% elif payment.status == 'overdue' %}badge-danger{% else %}badge-info{% endif %}">{{ payment.status|capfirst }}</span></td>
           <td>{{ payment.payment_date|date:"M d, Y"|default:"—" }}</td>
           <td>{% if payment.receipt_number %}<code>{{ payment.receipt_number }}</code>{% else %}<span style="color:var(--text-muted);">—</span>{% endif %}</td>
-          <td>{% if payment.status == 'paid' %}<a href="{% url 'download_fee_receipt' college_slug=college_slug payment.pk %}" class="btn btn-xs btn-outline">📄 Receipt</a>{% else %}<span style="font-size:12px;color:var(--text-muted);">Not paid</span>{% endif %}</td>
+          <td>{% if payment.status == 'paid' %}<a href="{% url 'download_fee_receipt' college_slug=college_slug payment_id=payment.pk %}" class="btn btn-xs btn-outline">📄 Receipt</a>{% else %}<span style="font-size:12px;color:var(--text-muted);">Not paid</span>{% endif %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="7"><div class="empty-state"><span class="icon">💰</span><h3>No fee records</h3></div></td></tr>
