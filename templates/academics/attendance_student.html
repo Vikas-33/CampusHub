@@ -1,30 +1,112 @@
 {% extends 'base.html' %}
 {% block title %}Attendance{% endblock %}
 {% block page_title %}My Attendance{% endblock %}
+{% block page_subtitle %}Track your attendance performance across all enrolled courses{% endblock %}
+
 {% block topbar_actions %}
-  <a href="{% url 'export_attendance_student' college_slug=college_slug %}" class="btn btn-outline">📥 Export CSV</a>
+  <a href="{% url 'export_attendance_student' college_slug=college_slug %}" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); font-weight: 600; box-shadow: var(--shadow-sm);"><i class="fas fa-file-download"></i> Export Records</a>
 {% endblock %}
+
 {% block content %}
-<div class="stats-grid">
-  <div class="stat-card blue" style="position:relative;"><div class="stat-icon-wrap">📋</div><div class="stat-label" style="margin-bottom:6px;">Total Classes</div><div class="stat-value">{{ total }}</div></div>
-  <div class="stat-card green" style="position:relative;"><div class="stat-icon-wrap">✅</div><div class="stat-label" style="margin-bottom:6px;">Present</div><div class="stat-value">{{ present }}</div></div>
-  <div class="stat-card red" style="position:relative;"><div class="stat-icon-wrap">❌</div><div class="stat-label" style="margin-bottom:6px;">Absent</div><div class="stat-value">{{ total|add:"-"|add:present }}</div></div>
-  <div class="stat-card {% if percent >= 75 %}green{% elif percent >= 60 %}gold{% else %}red{% endif %}" style="position:relative;"><div class="stat-icon-wrap">📊</div><div class="stat-label" style="margin-bottom:6px;">Attendance %</div><div class="stat-value">{{ percent }}%</div></div>
+<div class="stats-grid" style="margin-bottom: 32px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;">
+  
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--blue); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden;">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Total Classes</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ total }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-chalkboard-teacher"></i>
+    </div>
+  </div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--green); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden;">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Present</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ present }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-user-check"></i>
+    </div>
+  </div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--red); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden;">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Absent</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ total|add:"-"|add:present }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); color: var(--red); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-user-times"></i>
+    </div>
+  </div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid {% if percent >= 75 %}var(--green){% elif percent >= 60 %}var(--amber){% else %}var(--red){% endif %}; padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden;">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Attendance %</div>
+      <div style="font-size: 32px; font-weight: 700; color: {% if percent >= 75 %}var(--green){% elif percent >= 60 %}var(--amber){% else %}var(--red){% endif %}; line-height: 1;">{{ percent }}%</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: {% if percent >= 75 %}var(--green-light){% elif percent >= 60 %}var(--amber-light){% else %}rgba(239, 68, 68, 0.1){% endif %}; color: {% if percent >= 75 %}var(--green){% elif percent >= 60 %}var(--amber){% else %}var(--red){% endif %}; display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-chart-pie"></i>
+    </div>
+  </div>
+
 </div>
-<div class="card">
-  <div class="card-header"><span class="card-title">Attendance Records</span></div>
+
+<div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+  <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px;">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+      <i class="fas fa-list-alt"></i>
+    </div>
+    <div>
+      <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">Detailed Records</span>
+      <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Your recent attendance log</div>
+    </div>
+  </div>
+  
   <div class="table-container">
-    <table>
-      <thead><tr><th>Course</th><th>Date</th><th>Status</th></tr></thead>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: var(--surface-2); border-bottom: 2px solid var(--border-strong);">
+          <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Course</th>
+          <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Date</th>
+          <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Status</th>
+        </tr>
+      </thead>
       <tbody>
         {% for rec in attendance_records %}
-        <tr>
-          <td>{{ rec.course.name }}</td>
-          <td>{{ rec.date }}</td>
-          <td><span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}">{{ rec.status|capfirst }}</span></td>
+        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.backgroundColor='var(--surface-2)'" onmouseout="this.style.backgroundColor='transparent'">
+          <td style="padding: 16px 24px; font-weight: 600; color: var(--text-primary); font-size: 14.5px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--blue); font-size: 13px;">
+                <i class="fas fa-book-open"></i>
+              </div>
+              {{ rec.course.name }}
+            </div>
+          </td>
+          <td style="padding: 16px 24px;">
+            <div style="color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <i class="far fa-calendar-alt"></i> {{ rec.date|date:"M j, Y" }}
+            </div>
+          </td>
+          <td style="padding: 16px 24px;">
+            <span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}" style="padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+              {% if rec.status == 'present' %}<i class="fas fa-check-circle"></i>{% elif rec.status == 'absent' %}<i class="fas fa-times-circle"></i>{% else %}<i class="fas fa-clock"></i>{% endif %}
+              {{ rec.status|capfirst }}
+            </span>
+          </td>
         </tr>
         {% empty %}
-        <tr><td colspan="3"><div class="empty-state"><span class="icon">📋</span><h3>No attendance records</h3></div></td></tr>
+        <tr>
+          <td colspan="3" style="padding: 48px; text-align: center;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+              <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-muted); margin-bottom: 16px;">
+                <i class="fas fa-list"></i>
+              </div>
+              <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 600;">No attendance records</h3>
+              <p style="margin: 0; font-size: 15px; max-width: 400px; line-height: 1.5;">Your teachers haven't recorded attendance for any of your courses yet.</p>
+            </div>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>

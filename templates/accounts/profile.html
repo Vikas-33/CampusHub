@@ -1,55 +1,64 @@
 {% extends 'base.html' %}
 {% block title %}Profile{% endblock %}
 {% block page_title %}My Profile{% endblock %}
+{% block page_subtitle %}Manage your account details and settings.{% endblock %}
+
 {% block content %}
-<div class="grid-2" style="max-width:900px;">
+<div class="grid-2" style="max-width: 1000px; gap: 24px;">
 
   <!-- Left: Profile Card -->
   <div class="card">
-    <div style="padding:32px; text-align:center; background:linear-gradient(135deg, var(--primary), var(--accent));">
+    <div style="padding: 32px; text-align: center; background: var(--surface-2); border-bottom: 1px solid var(--border);">
 
-      <!-- Avatar: photo if uploaded, else initials -->
-      {% if request.user.profile_pic %}
-        <img src="{{ request.user.profile_pic.url }}"
-          style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid rgba(255,255,255,0.4); margin:0 auto 16px; display:block;">
-      {% else %}
-        <div style="width:90px; height:90px; border-radius:50%; background:linear-gradient(135deg, var(--highlight), var(--gold)); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:28px; font-weight:800; color:white; font-family:'Syne';">
-          {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-        </div>
-      {% endif %}
+      <!-- Avatar -->
+      <div style="position: relative; display: inline-block; margin-bottom: 16px;">
+        {% if request.user.profile_pic %}
+          <img src="{{ request.user.profile_pic.url }}"
+            style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: var(--shadow-md);">
+        {% else %}
+          <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: white; border: 4px solid white; box-shadow: var(--shadow-md);">
+            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+          </div>
+        {% endif %}
+      </div>
 
-      <h3 style="color:white; font-size:20px;">{{ request.user.get_full_name }}</h3>
-      <p style="color:rgba(255,255,255,0.6); font-size:14px;">@{{ request.user.username }}</p>
-      <span class="badge badge-info" style="margin-top:8px; display:inline-flex;">{{ request.user.role|capfirst }}</span>
+      <h3 style="font-size: 22px; font-weight: 700;">{{ request.user.get_full_name }}</h3>
+      <p style="color: var(--text-muted); font-size: 14px;">@{{ request.user.username }}</p>
+      <span class="badge badge-info" style="margin-top: 12px; display: inline-flex;">{{ request.user.get_role_display }}</span>
     </div>
 
     <div class="card-body">
       {% if request.user.role == 'teacher' and request.user.teacher_profile %}
         {% with t=request.user.teacher_profile %}
-        <div style="display:flex; flex-direction:column; gap:12px;">
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Employee ID</span><span style="font-weight:600; font-size:13px;">{{ t.employee_id }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Department</span><span style="font-weight:600; font-size:13px;">{{ t.department }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Designation</span><span style="font-weight:600; font-size:13px;">{{ t.designation }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Qualification</span><span style="font-weight:600; font-size:13px;">{{ t.qualification }}</span></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px;">
+          <div class="info-item"><span class="label">Employee ID</span><span class="value">{{ t.employee_id }}</span></div>
+          <div class="info-item"><span class="label">Department</span><span class="value">{{ t.department }}</span></div>
+          <div class="info-item"><span class="label">Designation</span><span class="value">{{ t.designation }}</span></div>
+          <div class="info-item"><span class="label">Qualification</span><span class="value">{{ t.qualification }}</span></div>
         </div>
         {% endwith %}
       {% elif request.user.role == 'student' and request.user.student_profile %}
         {% with s=request.user.student_profile %}
-        <div style="display:flex; flex-direction:column; gap:12px;">
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Roll Number</span><span style="font-weight:600; font-size:13px;">{{ s.roll_number }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Enrollment</span><span style="font-weight:600; font-size:13px;">{{ s.enrollment_number }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Department</span><span style="font-weight:600; font-size:13px;">{{ s.department }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Semester</span><span style="font-weight:600; font-size:13px;">{{ s.semester }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Batch Year</span><span style="font-weight:600; font-size:13px;">{{ s.batch_year }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">College</span><span style="font-weight:600; font-size:13px;">{{ s.college.college_name }}</span></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px;">
+          <div class="info-item"><span class="label">Roll Number</span><span class="value">{{ s.roll_number }}</span></div>
+          <div class="info-item"><span class="label">Enrollment</span><span class="value">{{ s.enrollment_number }}</span></div>
+          <div class="info-item"><span class="label">Department</span><span class="value">{{ s.department }}</span></div>
+          <div class="info-item"><span class="label">Semester</span><span class="value">{{ s.semester }}</span></div>
+          <div class="info-item"><span class="label">Batch Year</span><span class="value">{{ s.batch_year }}</span></div>
+          <div class="info-item"><span class="label">College</span><span class="value">{{ s.college.college_name }}</span></div>
         </div>
         {% endwith %}
       {% elif request.user.role == 'college' and request.user.college_profile %}
         {% with c=request.user.college_profile %}
-        <div style="display:flex; flex-direction:column; gap:12px;">
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">College</span><span style="font-weight:600; font-size:13px;">{{ c.college_name }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Est. Year</span><span style="font-weight:600; font-size:13px;">{{ c.established_year|default:"—" }}</span></div>
-          {% if c.website %}<div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:13px;">Website</span><a href="{{ c.website }}" style="font-size:13px; color:var(--info);">{{ c.website }}</a></div>{% endif %}
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="info-item"><span class="label">College Name</span><span class="value">{{ c.college_name }}</span></div>
+          <div class="info-item"><span class="label">Established</span><span class="value">{{ c.established_year|default:"—" }}</span></div>
+          {% if c.website %}
+          <div class="info-item">
+            <span class="label">Website</span>
+            <a href="{{ c.website }}" target="_blank" class="value" style="color: var(--blue); text-decoration: underline;">{{ c.website }}</a>
+          </div>
+          {% endif %}
         </div>
         {% endwith %}
       {% endif %}
@@ -58,7 +67,7 @@
 
   <!-- Right: Edit Form -->
   <div class="card">
-    <div class="card-header"><span class="card-title">Edit Profile</span></div>
+    <div class="card-header"><h3 class="card-title">Edit Profile</h3></div>
     <div class="card-body">
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -66,68 +75,107 @@
         <!-- Profile Photo Upload -->
         <div class="form-group">
           <label class="form-label">Profile Photo</label>
-          <div style="display:flex; align-items:center; gap:16px; margin-bottom:8px;">
-
-            <!-- Preview -->
+          <div style="display: flex; align-items: center; gap: 16px;">
             {% if request.user.profile_pic %}
               <img id="photo-preview" src="{{ request.user.profile_pic.url }}"
-                style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--border);">
+                style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover;">
             {% else %}
               <div id="photo-preview-initials"
-                style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, var(--highlight), var(--gold)); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; color:white;">
+                style="width: 64px; height: 64px; border-radius: 50%; background: var(--blue-light); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600; color: var(--blue);">
                 {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
               </div>
-              <img id="photo-preview" src="" style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--border); display:none;">
+              <img id="photo-preview" src="" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; display: none;">
             {% endif %}
-
             <div>
               <input type="file" name="profile_pic" id="profile_pic" accept="image/*"
-                style="display:none;" onchange="previewPhoto(this)">
-              <label for="profile_pic" class="btn btn-sm btn-outline" style="cursor:pointer;">
-                📷 Choose Photo
+                style="display: none;" onchange="previewPhoto(this)">
+              <label for="profile_pic" class="btn btn-sm btn-outline" style="cursor: pointer;">
+                <i class="fas fa-upload"></i> Choose Photo
               </label>
-              <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">JPG, PNG up to 5MB</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">JPG, PNG, GIF up to 5MB</div>
             </div>
           </div>
         </div>
 
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">First Name</label>
-            <input type="text" name="first_name" value="{{ request.user.first_name }}" class="form-input">
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" name="first_name" id="first_name" value="{{ request.user.first_name }}" class="form-input">
           </div>
           <div class="form-group">
-            <label class="form-label">Last Name</label>
-            <input type="text" name="last_name" value="{{ request.user.last_name }}" class="form-input">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" name="last_name" id="last_name" value="{{ request.user.last_name }}" class="form-input">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" value="{{ request.user.email }}" class="form-input">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Phone</label>
-          <input type="text" name="phone" value="{{ request.user.phone }}" class="form-input">
+          <label for="email" class="form-label">Email Address</label>
+          <input type="email" name="email" id="email" value="{{ request.user.email }}" class="form-input">
         </div>
 
-        <button type="submit" class="btn btn-primary" style="margin-top:8px;">Update Profile</button>
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
+
+        {% if user_form.errors or profile_form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <!-- Role-specific fields -->
+        {% if request.user.role == 'college' %}
+          <div class="form-group">
+            <label for="college_name" class="form-label">College Name</label>
+            <input type="text" name="college_name" id="college_name" value="{{ request.user.college_profile.college_name }}" class="form-input">
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="established_year" class="form-label">Established Year</label>
+              <input type="number" name="established_year" id="established_year" value="{{ request.user.college_profile.established_year|default:'' }}" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="website" class="form-label">Website</label>
+              <input type="url" name="website" id="website" value="{{ request.user.college_profile.website|default:'' }}" class="form-input">
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="form-group" style="margin-top: 24px;">
+          <button type="submit" class="btn btn-accent">Save Changes</button>
+        </div>
       </form>
     </div>
   </div>
-
 </div>
+
+<style>
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+.info-item .label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.info-item .value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
 
 <script>
 function previewPhoto(input) {
   if (input.files && input.files[0]) {
-    const reader = new FileReader();
+    var reader = new FileReader();
     reader.onload = function(e) {
-      const preview = document.getElementById('photo-preview');
-      const initials = document.getElementById('photo-preview-initials');
-      preview.src = e.target.result;
-      preview.style.display = 'block';
-      if (initials) initials.style.display = 'none';
-    };
+      document.getElementById('photo-preview').src = e.target.result;
+      document.getElementById('photo-preview').style.display = 'block';
+      document.getElementById('photo-preview-initials').style.display = 'none';
+    }
     reader.readAsDataURL(input.files[0]);
   }
 }

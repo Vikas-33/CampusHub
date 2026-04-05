@@ -1,44 +1,139 @@
 {% extends 'base.html' %}
 {% block title %}Edit Student{% endblock %}
 {% block page_title %}Edit Student{% endblock %}
-{% block page_subtitle %}{{ student.user.get_full_name }}{% endblock %}
+{% block page_subtitle %}Update profile and academic records for {{ student.user.get_full_name }}{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:800px;">
-  <div class="card-header"><span class="card-title">Update Student Information</span></div>
-  <div class="card-body">
+<div class="card" style="max-width:900px; margin: 0 auto; box-shadow: var(--shadow-lg); border: none;">
+  <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 24px 32px;">
+    <span class="card-title" style="font-size: 20px; letter-spacing: -0.5px;">{{ student.user.get_full_name }} ({{ student.roll_number|default:"No Roll No." }})</span>
+    <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 6px;">Modify the student's personal configurations, contact, and academic details.</p>
+  </div>
+  
+  <div class="card-body" style="padding: 32px;">
     <form method="post">{% csrf_token %}
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">First Name *</label><input type="text" name="first_name" class="form-input" value="{{ student.user.first_name }}" required></div>
-        <div class="form-group"><label class="form-label">Last Name *</label><input type="text" name="last_name" class="form-input" value="{{ student.user.last_name }}" required></div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-input" value="{{ student.user.email }}" required></div>
-        <div class="form-group"><label class="form-label">Username</label><input type="text" name="username" class="form-input" value="{{ student.user.username }}" readonly style="opacity:0.6;cursor:not-allowed;"></div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Roll Number</label><input type="text" class="form-input" value="{{ student.roll_number }}" readonly style="opacity:0.6;cursor:not-allowed;"></div>
-        <div class="form-group"><label class="form-label">Enrollment Number</label><input type="text" class="form-input" value="{{ student.enrollment_number }}" readonly style="opacity:0.6;cursor:not-allowed;"></div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Department</label>{{ form.department }}</div>
-        <div class="form-group"><label class="form-label">Semester</label>
-          <select name="semester" class="form-input">{% for i in "12345678" %}<option value="{{ i }}" {% if student.semester|stringformat:"s" == i %}selected{% endif %}>Semester {{ i }}</option>{% endfor %}</select>
+      
+      <!-- Section: System Records (Readonly) -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">System Identity (Locked)</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">System Username</label>
+            <input type="text" name="username" class="form-input" value="{{ student.user.username }}" readonly style="opacity:0.7; cursor:not-allowed; background: var(--surface-2); border-color: transparent;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address <span style="color: var(--red);">*</span></label>
+            <input type="email" name="email" class="form-input" value="{{ student.user.email }}" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Roll Number</label>
+            <input type="text" class="form-input" value="{{ student.roll_number }}" readonly style="opacity:0.7; cursor:not-allowed; background: var(--surface-2); border-color: transparent;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Enrollment Number</label>
+            <input type="text" class="form-input" value="{{ student.enrollment_number }}" readonly style="opacity:0.7; cursor:not-allowed; background: var(--surface-2); border-color: transparent;">
+          </div>
         </div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Batch Year</label><input type="number" name="batch_year" class="form-input" value="{{ student.batch_year }}"></div>
-        <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" name="date_of_birth" class="form-input" value="{{ student.date_of_birth|date:'Y-m-d' }}"></div>
+
+      <!-- Section: Personal Details -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Personal & Contact Details</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">First Name <span style="color: var(--red);">*</span></label>
+            <input type="text" name="first_name" class="form-input" value="{{ student.user.first_name }}" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name <span style="color: var(--red);">*</span></label>
+            <input type="text" name="last_name" class="form-input" value="{{ student.user.last_name }}" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of Birth</label>
+          <input type="date" name="date_of_birth" class="form-input" value="{{ student.date_of_birth|date:'Y-m-d' }}" style="padding: 10px 14px; border-radius: var(--radius); color: var(--text-primary);">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Residential Address</label>
+          <textarea name="address" class="form-input" rows="2" style="padding: 10px 14px; border-radius: var(--radius);">{{ student.address }}</textarea>
+        </div>
       </div>
-      <div class="form-group"><label class="form-label">Address</label><textarea name="address" class="form-input" rows="2">{{ student.address }}</textarea></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Guardian Name</label><input type="text" name="guardian_name" class="form-input" value="{{ student.guardian_name }}"></div>
-        <div class="form-group"><label class="form-label">Guardian Phone</label><input type="text" name="guardian_phone" class="form-input" value="{{ student.guardian_phone }}"></div>
+
+      <!-- Section: Academic Details -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Academic Enrollment</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <!-- Using custom style on form.department -->
+            <div style="border-radius: var(--radius);">
+              {{ form.department }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Semester</label>
+            <select name="semester" class="form-input" style="padding: 10px 14px; border-radius: var(--radius); cursor: pointer;">
+              {% for i in "12345678" %}
+                <option value="{{ i }}" {% if student.semester|stringformat:"s" == i %}selected{% endif %}>Semester {{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr;">
+          <div class="form-group">
+            <label class="form-label">Batch Year</label>
+            <input type="number" name="batch_year" class="form-input" value="{{ student.batch_year }}" style="padding: 10px 14px; border-radius: var(--radius); width: 50%;">
+          </div>
+        </div>
       </div>
-      <div style="display:flex; gap:12px; margin-top:8px;">
-        <button type="submit" class="btn btn-accent">Save Changes</button>
-        <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+
+      <!-- Section: Guardian Info -->
+      <div style="margin-bottom: 36px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Guardian / Emergency Contact</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Guardian Name</label>
+            <input type="text" name="guardian_name" class="form-input" value="{{ student.guardian_name }}" placeholder="e.g. Michael Smith" style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Guardian Phone</label>
+            <input type="text" name="guardian_phone" class="form-input" value="{{ student.guardian_phone }}" placeholder="+1 (555) 123-4567" style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: var(--shadow-sm);">
+          <i class="fas fa-save" style="margin-right: 8px;"></i> Save Changes
+        </button>
+        <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
+          Cancel & Return
+        </a>
       </div>
     </form>
   </div>
 </div>
+<style>
+  /* Patch for form.department django widget */
+  select[name="department"] {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background-color: var(--surface-1);
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  select[name="department"]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-light);
+  }
+</style>
 {% endblock %}

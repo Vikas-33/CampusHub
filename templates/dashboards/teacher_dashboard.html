@@ -1,113 +1,176 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard{% endblock %}
-{% block page_title %}Welcome, {{ teacher.user.get_full_name }}{% endblock %}
-{% block page_subtitle %}{{ teacher.designation }} — {{ teacher.department }}{% endblock %}
+{% block title %}Teacher Dashboard{% endblock %}
+{% block page_title %}Welcome back, {{ teacher.user.first_name }} 👋{% endblock %}
+{% block page_subtitle %}{{ teacher.designation }} • {{ teacher.department.name }}{% endblock %}
 
 {% block content %}
+<!-- Stats Row -->
 <div class="stats-grid">
-  <div class="stat-card blue">
-    <div class="stat-icon blue">📚</div>
-    <div class="stat-value">{{ courses.count }}</div>
-    <div class="stat-label">My Courses</div>
+  <div class="stat-card">
+    <div class="stat-icon-wrap" style="background:var(--blue-light); color:var(--blue);">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+    </div>
+    <div class="stat-value">{{ courses.count|default:"0" }}</div>
+    <div class="stat-label">Active Courses</div>
   </div>
-  <div class="stat-card green">
-    <div class="stat-icon green">🎓</div>
-    <div class="stat-value">{{ total_students }}</div>
-    <div class="stat-label">College Students</div>
+  <div class="stat-card">
+    <div class="stat-icon-wrap" style="background:var(--green-light); color:var(--green);">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div class="stat-value">{{ total_students|default:"0" }}</div>
+    <div class="stat-label">Total Students</div>
   </div>
-  <div class="stat-card gold">
-    <div class="stat-icon gold">📄</div>
-    <div class="stat-value">{{ assignments }}</div>
+  <div class="stat-card">
+    <div class="stat-icon-wrap" style="background:var(--amber-light); color:var(--amber);">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+    </div>
+    <div class="stat-value">{{ assignments|default:"0" }}</div>
     <div class="stat-label">Assignments Posted</div>
   </div>
-  <div class="stat-card purple">
-    <div class="stat-icon purple">📝</div>
-    <div class="stat-value">{{ upcoming_exams.count }}</div>
+  <div class="stat-card">
+    <div class="stat-icon-wrap" style="background:var(--purple-light); color:var(--purple);">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div class="stat-value">{{ upcoming_exams.count|default:"0" }}</div>
     <div class="stat-label">Upcoming Exams</div>
   </div>
 </div>
 
 <div class="grid-2">
-  <div class="card mb-20">
+  <!-- Left Column: Courses -->
+  <div class="card mb-24">
     <div class="card-header">
-      <span class="card-title">📚 My Courses</span>
+      <h3 class="card-title">📚 My Courses</h3>
       <a href="{% url 'courses' college_slug=college_slug %}" class="btn btn-sm btn-outline">View All</a>
     </div>
-    <div class="card-body">
+    <div class="card-body" style="padding: 0;">
       {% if courses %}
-        {% for course in courses %}
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border);">
-            <div>
-              <div style="font-weight:600; font-size:14px;">{{ course.name }}</div>
-              <div style="font-size:12px; color:var(--text-secondary);">{{ course.code }} &bull; Sem {{ course.semester }} &bull; {{ course.credits }} credits</div>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <a href="{% url 'mark_attendance' course.pk %}" class="btn btn-xs btn-success">Mark Att.</a>
-              <a href="{% url 'add_assignment' %}" class="btn btn-xs btn-info">+ Task</a>
-            </div>
-          </div>
-        {% endfor %}
+        <div class="table-container">
+          <table>
+            <thead style="background: var(--surface-1); border-bottom: 1px solid var(--border);">
+              <tr>
+                <th style="padding-left:24px;">Course Name</th>
+                <th>Details</th>
+                <th style="text-align:right; padding-right:24px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for course in courses %}
+              <tr>
+                <td style="padding-left:24px;">
+                  <div class="name" style="font-size:14.5px;">{{ course.name }}</div>
+                  <div style="font-size:12.5px; color:var(--text-muted); margin-top:3px;">{{ course.code }}</div>
+                </td>
+                <td>
+                  <span class="badge badge-secondary">Sem {{ course.semester }}</span>
+                  <span class="badge badge-secondary" style="margin-left:4px;">{{ course.credits }} Credits</span>
+                </td>
+                <td style="text-align:right; padding-right:24px;">
+                  <div style="display:flex; gap:8px; justify-content:flex-end;">
+                    <a href="{% url 'add_assignment' college_slug=college_slug %}" class="btn btn-xs btn-outline" title="Add Assignment">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:4px; vertical-align:middle;"><path d="M12 5v14M5 12h14"/></svg>Task
+                    </a>
+                    <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-xs btn-primary">
+                      Attendance
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
       {% else %}
-        <div class="empty-state"><div class="icon">📚</div><h3>No courses assigned</h3></div>
+        <div class="empty-state" style="border:none; border-radius:0;">
+          <svg class="icon" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <h3>No Courses Assigned</h3>
+          <p>You haven't been assigned to any courses yet.</p>
+        </div>
       {% endif %}
     </div>
   </div>
 
-  <div>
-    <div class="card mb-20">
+  <!-- Right Column: Notices & Exams -->
+  <div style="display:flex; flex-direction:column; gap:24px;">
+    
+    <!-- Notices -->
+    <div class="card">
       <div class="card-header">
-        <span class="card-title">📢 Notices</span>
-        <a href="{% url 'add_notice' college_slug=college_slug %}" class="btn btn-sm btn-primary">+ Post</a>
+        <h3 class="card-title">📢 Latest Notices</h3>
+        <a href="{% url 'add_notice' college_slug=college_slug %}" class="btn btn-sm btn-primary" style="display:flex; align-items:center; gap:4px;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Post
+        </a>
       </div>
-      <div class="card-body" style="max-height:220px; overflow-y:auto;">
-        {% for notice in recent_notices %}
-          <div style="padding:10px 0; border-bottom:1px solid var(--border);">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-              <div>
-                <span style="
-                  display:inline-block;
-                  font-size:10px;
-                  font-weight:600;
-                  padding:2px 8px;
-                  border-radius:20px;
-                  margin-bottom:4px;
-                  {% if notice.notice_type == 'urgent' %}background:#fee2e2; color:#dc2626;
-                  {% elif notice.notice_type == 'exam' %}background:#fef3c7; color:#d97706;
-                  {% elif notice.notice_type == 'academic' %}background:#dbeafe; color:#2563eb;
-                  {% elif notice.notice_type == 'event' %}background:#d1fae5; color:#059669;
-                  {% else %}background:#f3f4f6; color:#6b7280;{% endif %}
-                ">{{ notice.get_notice_type_display }}</span>
-                <div style="font-weight:600; font-size:14px; color:var(--text-primary);">{{ notice.title }}</div>
+      <div class="card-body" style="padding:16px 24px;">
+        {% if recent_notices %}
+          <div style="display:flex; flex-direction:column; gap:12px;">
+          {% for notice in recent_notices %}
+            <div class="notice-item" style="margin-bottom:0; padding:12px 16px; 
+              {% if notice.notice_type == 'urgent' %}border-left-color:var(--red);{% elif notice.notice_type == 'exam' %}border-left-color:var(--amber);{% elif notice.notice_type == 'event' %}border-left-color:var(--green);{% else %}border-left-color:var(--blue);{% endif %}
+            ">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                <div>
+                  <div style="margin-bottom:6px;">
+                    <span class="badge 
+                      {% if notice.notice_type == 'urgent' %}badge-danger
+                      {% elif notice.notice_type == 'exam' %}badge-warning
+                      {% elif notice.notice_type == 'event' %}badge-success
+                      {% else %}badge-info{% endif %}" style="font-size:10.5px; padding:2px 8px;">
+                      {{ notice.get_notice_type_display }}
+                    </span>
+                  </div>
+                  <h4 class="notice-title" style="margin-bottom:4px; line-height:1.4;">{{ notice.title }}</h4>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:500; white-space:nowrap; background:var(--surface-2); padding:4px 8px; border-radius:var(--radius-sm);">
+                  {{ notice.created_at|date:"M d" }}
+                </div>
               </div>
-              <div style="font-size:11px; color:var(--text-muted); white-space:nowrap;">{{ notice.created_at|date:"M d" }}</div>
             </div>
+          {% endfor %}
           </div>
-        {% empty %}
-          <p style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">No notices 📭</p>
-        {% endfor %}
+        {% else %}
+          <div style="text-align:center; padding:32px 0;">
+            <p style="color:var(--text-muted); font-size:14.5px;">No recent notices 📭</p>
+          </div>
+        {% endif %}
       </div>
     </div>
 
+    <!-- Upcoming Exams -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">📝 Upcoming Exams</span>
+        <h3 class="card-title">📝 Upcoming Exams</h3>
         <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-sm btn-outline">View All</a>
       </div>
-      <div class="card-body">
-        {% for exam in upcoming_exams %}
-          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
-            <div style="background:#0f172a; color:white; border-radius:8px; padding:8px 12px; text-align:center; min-width:48px;">
-              <div style="font-size:18px; font-weight:800; font-family:'Outfit',sans-serif;">{{ exam.date|date:"d" }}</div>
-              <div style="font-size:10px; opacity:0.7;">{{ exam.date|date:"M" }}</div>
+      <div class="card-body" style="padding:16px 24px;">
+        {% if upcoming_exams %}
+          <div style="display:flex; flex-direction:column; gap:16px;">
+          {% for exam in upcoming_exams %}
+            <div style="display:flex; gap:16px; align-items:center; padding:12px; background:var(--surface-2); border-radius:var(--radius); border:1px solid var(--border);">
+              <div style="background:white; border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:8px 0; text-align:center; min-width:54px; box-shadow:var(--shadow-xs);">
+                <div style="font-size:12px; font-weight:700; color:var(--red); text-transform:uppercase; margin-bottom:2px; letter-spacing:0.5px;">{{ exam.date|date:"M" }}</div>
+                <div style="font-size:20px; font-weight:800; color:var(--text-primary); line-height:1;">{{ exam.date|date:"d" }}</div>
+              </div>
+              <div style="flex:1;">
+                <h4 style="font-weight:700; font-size:14.5px; color:var(--text-primary); margin-bottom:4px;">{{ exam.course.name }}</h4>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:13px; color:var(--text-secondary); font-weight:500;">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:-2px; margin-right:2px; opacity:0.7;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> {{ exam.course.code }}
+                  </span>
+                  <span style="width:4px; height:4px; background:var(--border-strong); border-radius:50%;"></span>
+                  <span style="font-size:13px; color:var(--text-secondary); font-weight:500;">
+                    {{ exam.get_exam_type_display }}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <div style="font-weight:600; font-size:13px;">{{ exam.course.name }}</div>
-              <div style="font-size:12px; color:var(--text-secondary);">{{ exam.get_exam_type_display }}</div>
-            </div>
+          {% endfor %}
           </div>
-        {% empty %}
-          <p style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">No upcoming exams</p>
-        {% endfor %}
+        {% else %}
+          <div style="text-align:center; padding:32px 0;">
+            <p style="color:var(--text-muted); font-size:14.5px;">No upcoming exams planned ✨</p>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>

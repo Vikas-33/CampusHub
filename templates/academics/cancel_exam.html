@@ -1,16 +1,41 @@
 {% extends 'base.html' %}
 {% block title %}Cancel Exam{% endblock %}
 {% block page_title %}Cancel Examination{% endblock %}
+{% block page_subtitle %}Revoke an upcoming examination and notify all participants{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:600px;">
-  <div class="card-header"><span class="card-title" style="color:var(--red);">Cancel Exam</span></div>
-  <div class="card-body">
-    <div class="alert alert-error">You are cancelling the <strong>{{ exam.get_exam_type_display }}</strong> exam for <strong>{{ exam.course.name }}</strong> on <strong>{{ exam.date|date:"d M Y" }}</strong>. All students will be notified.</div>
+<div class="card" style="max-width: 600px; margin: 0 auto; box-shadow: var(--shadow-xl); border: 1px solid var(--red); border-top: 4px solid var(--red);">
+  <div class="card-header" style="background: rgba(239, 68, 68, 0.05); padding: 24px 32px; border-bottom: 1px solid rgba(239, 68, 68, 0.1);">
+    <span class="card-title" style="font-size: 20px; color: var(--red); display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-exclamation-triangle"></i> Cancel {{ exam.get_exam_type_display }} Exam
+    </span>
+  </div>
+  
+  <div class="card-body" style="padding: 32px;">
+    <div style="background: var(--surface-1); padding: 16px 20px; border-radius: var(--radius); border-left: 4px solid var(--red); margin-bottom: 24px;">
+      <p style="margin: 0; color: var(--text-primary); font-size: 15px; line-height: 1.6;">
+        You are about to cancel the <strong>{{ exam.get_exam_type_display }}</strong> exam for <strong>{{ exam.course.name }}</strong> originally scheduled on <strong style="color: var(--red);">{{ exam.date|date:"d M Y" }}</strong>.
+      </p>
+      <p style="margin: 8px 0 0 0; color: var(--red); font-size: 13.5px; font-weight: 600;">
+        <i class="fas fa-info-circle"></i> This action is permanent and all enrolled students will be notified immediately.
+      </p>
+    </div>
+
     <form method="post">{% csrf_token %}
-      <div class="form-group"><label class="form-label">Reason for Cancellation</label><textarea name="reason" class="form-input" rows="3" placeholder="Optional reason..."></textarea></div>
-      <div style="display:flex; gap:12px;">
-        <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
-        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-outline">Go Back</a>
+      <div style="margin-bottom: 32px;">
+        <div class="form-group">
+          <label class="form-label" style="color: var(--text-primary); font-weight: 600;">Reason for Cancellation <span style="color: var(--text-muted); font-weight: normal;">(Optional but recommended)</span></label>
+          <textarea name="reason" class="form-input" rows="4" placeholder="Briefly state the reason for this cancellation for system logs and student notifications..." style="padding: 14px; border-radius: var(--radius); resize: vertical; font-size: 14.5px;"></textarea>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-danger" style="padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
+          <i class="fas fa-ban" style="margin-right: 8px;"></i> Confirm Cancellation
+        </button>
+        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
+          Abort
+        </a>
       </div>
     </form>
   </div>

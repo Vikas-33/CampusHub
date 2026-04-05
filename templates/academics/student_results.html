@@ -1,36 +1,132 @@
 {% extends 'base.html' %}
-{% block title %}My Results{% endblock %}
-{% block page_title %}My Exam Results{% endblock %}
-{% block page_subtitle %}{{ student.user.get_full_name }} · {{ student.department }} · Semester {{ student.semester }}{% endblock %}
+{% block title %}My Academic Results{% endblock %}
+{% block page_title %}Academic Performance{% endblock %}
+{% block page_subtitle %}Comprehensive overview for {{ student.user.get_full_name }} &bull; Semester {{ student.semester }}{% endblock %}
+
 {% block content %}
-<div class="stats-grid">
-  <div class="stat-card blue" style="position:relative;"><div class="stat-icon-wrap">📝</div><div class="stat-label" style="margin-bottom:6px;">Total Exams</div><div class="stat-value">{{ total_exams }}</div></div>
-  <div class="stat-card green" style="position:relative;"><div class="stat-icon-wrap">✅</div><div class="stat-label" style="margin-bottom:6px;">Passed</div><div class="stat-value">{{ passed }}</div></div>
-  <div class="stat-card red" style="position:relative;"><div class="stat-icon-wrap">❌</div><div class="stat-label" style="margin-bottom:6px;">Failed</div><div class="stat-value">{{ failed }}</div></div>
-  <div class="stat-card gold" style="position:relative;"><div class="stat-icon-wrap">📊</div><div class="stat-label" style="margin-bottom:6px;">Average Score</div><div class="stat-value">{{ average }}%</div></div>
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px;">
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--blue); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden;">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Total Exams</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ total_exams }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-file-alt"></i>
+    </div>
+  </div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--green); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden;">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Successfully Passed</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ passed }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-award"></i>
+    </div>
+  </div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--red); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden;">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Failed Modules</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ failed }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); color: var(--red); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+  </div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--amber); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden;">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Average Score</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ average|floatformat:1 }}%</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--amber-light); color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-chart-line"></i>
+    </div>
+  </div>
 </div>
-<div class="card">
-  <div class="card-header"><span class="card-title">All Results</span></div>
+
+<div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+  <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px;">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+      <i class="fas fa-list-ul"></i>
+    </div>
+    <div>
+      <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">Course Results History</span>
+      <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Comprehensive log of all published exam scores</div>
+    </div>
+  </div>
+
   <div class="table-container">
-    <table>
-      <thead><tr><th>Course</th><th>Exam Type</th><th>Date</th><th>Marks</th><th>Grade</th><th>Status</th></tr></thead>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: var(--surface-2); border-bottom: 2px solid var(--border-strong);">
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Curriculum Subject</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Assessment Type</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Date Evaluated</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; width: 140px;">Marks Achieved</th>
+          <th style="padding: 16px 24px; text-align: center; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Final Grade</th>
+          <th style="padding: 16px 24px; text-align: right; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Status</th>
+        </tr>
+      </thead>
       <tbody>
         {% for result in results %}
-        <tr>
-          <td><div style="font-weight:600;color:var(--text-primary);">{{ result.exam.course.name }}</div><div style="font-size:12px;color:var(--text-muted);">{{ result.exam.course.code }}</div></td>
-          <td><span class="badge {% if result.exam.exam_type == 'final' %}badge-danger{% elif result.exam.exam_type == 'midterm' %}badge-warning{% elif result.exam.exam_type == 'quiz' %}badge-info{% else %}badge-purple{% endif %}">{{ result.exam.get_exam_type_display }}</span></td>
-          <td>{{ result.exam.date|date:"M d, Y" }}</td>
-          <td>
-            <div style="font-weight:600;">{{ result.marks_obtained }} / {{ result.exam.total_marks }}</div>
-            <div class="progress-bar" style="margin-top:4px; width:80px;">
-              <div class="progress-fill" style="width:{% widthratio result.marks_obtained result.exam.total_marks 100 %}%; background:{% if result.marks_obtained >= result.exam.passing_marks %}var(--green){% else %}var(--red){% endif %};"></div>
+        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.backgroundColor='var(--surface-2)'" onmouseout="this.style.backgroundColor='transparent'">
+          <td style="padding: 16px 24px;">
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 15px; margin-bottom: 4px;">{{ result.exam.course.name }}</div>
+            <div style="font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+              <code style="background: var(--surface-2); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border);">{{ result.exam.course.code }}</code>
             </div>
           </td>
-          <td>{% if result.grade %}<span class="badge badge-purple">{{ result.grade }}</span>{% else %}<span style="color:var(--text-muted);">—</span>{% endif %}</td>
-          <td><span class="badge {% if result.marks_obtained >= result.exam.passing_marks %}badge-success{% else %}badge-danger{% endif %}">{% if result.marks_obtained >= result.exam.passing_marks %}Pass{% else %}Fail{% endif %}</span></td>
+          
+          <td style="padding: 16px 24px;">
+            <span class="badge {% if result.exam.exam_type == 'final' %}badge-danger{% elif result.exam.exam_type == 'midterm' %}badge-warning{% elif result.exam.exam_type == 'quiz' %}badge-info{% else %}badge-purple{% endif %}" style="padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase;">
+              {{ result.exam.get_exam_type_display }}
+            </span>
+          </td>
+          
+          <td style="padding: 16px 24px;">
+            <div style="color: var(--text-muted); font-size: 14px; font-weight: 500;">
+              {{ result.exam.date|date:"M d, Y" }}
+            </div>
+          </td>
+          
+          <td style="padding: 16px 24px;">
+            <div style="display: flex; align-items: baseline; gap: 4px; font-size: 16px;">
+              <strong style="color: {% if result.marks_obtained >= result.exam.passing_marks %}var(--green){% else %}var(--red){% endif %};">{{ result.marks_obtained }}</strong> 
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">/ {{ result.exam.total_marks }}</span>
+            </div>
+            <div style="height: 6px; background: var(--surface-2); border-radius: 4px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
+              <div style="height: 100%; border-radius: 4px; width:{% widthratio result.marks_obtained result.exam.total_marks 100 %}%; background:{% if result.marks_obtained >= result.exam.passing_marks %}var(--green){% else %}var(--red){% endif %}; transition: width 0.5s ease;"></div>
+            </div>
+          </td>
+          
+          <td style="padding: 16px 24px; text-align: center;">
+            {% if result.grade %}
+              <div style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(139, 92, 246, 0.1); color: rgb(124, 58, 237); border: 1px solid rgba(139, 92, 246, 0.2); font-weight: 700; font-size: 15px;">{{ result.grade }}</div>
+            {% else %}
+              <span style="color: var(--border-strong); font-size: 14px; font-weight: 600;">—</span>
+            {% endif %}
+          </td>
+          
+          <td style="padding: 16px 24px; text-align: right;">
+            <span class="badge {% if result.marks_obtained >= result.exam.passing_marks %}badge-success{% else %}badge-danger{% endif %}" style="padding: 6px 14px; border-radius: var(--radius); font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm);">
+              {% if result.marks_obtained >= result.exam.passing_marks %}<i class="fas fa-check"></i> Pass{% else %}<i class="fas fa-times"></i> Fail{% endif %}
+            </span>
+          </td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:48px;">No results published yet</td></tr>
+        <tr>
+          <td colspan="6" style="padding: 64px 24px; text-align: center;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+              <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--text-muted); margin-bottom: 20px; border: 2px dashed var(--border-strong);">
+                <i class="fas fa-award"></i>
+              </div>
+              <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 700;">No results published yet</h3>
+              <p style="margin: 0; font-size: 15px; max-width: 350px; line-height: 1.5;">Check back here later to see how you perform on your assessments.</p>
+            </div>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>

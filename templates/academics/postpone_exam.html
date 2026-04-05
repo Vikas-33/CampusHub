@@ -1,16 +1,44 @@
 {% extends 'base.html' %}
 {% block title %}Postpone Exam{% endblock %}
 {% block page_title %}Postpone Examination{% endblock %}
+{% block page_subtitle %}Reschedule an upcoming examination and notify all participants{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:600px;">
-  <div class="card-header"><span class="card-title" style="color:var(--amber);">Postpone Exam</span></div>
-  <div class="card-body">
-    <div class="alert alert-warning">You are postponing the <strong>{{ exam.get_exam_type_display }}</strong> exam for <strong>{{ exam.course.name }}</strong> currently on <strong>{{ exam.date|date:"d M Y" }}</strong>.</div>
+<div class="card" style="max-width: 600px; margin: 0 auto; box-shadow: var(--shadow-xl); border: 1px solid var(--amber); border-top: 4px solid var(--amber);">
+  <div class="card-header" style="background: rgba(245, 158, 11, 0.05); padding: 24px 32px; border-bottom: 1px solid rgba(245, 158, 11, 0.1);">
+    <span class="card-title" style="font-size: 20px; color: #b45309; display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-calendar-minus"></i> Reschedule {{ exam.get_exam_type_display }} Exam
+    </span>
+  </div>
+  
+  <div class="card-body" style="padding: 32px;">
+    <div style="background: var(--surface-1); padding: 16px 20px; border-radius: var(--radius); border-left: 4px solid var(--amber); margin-bottom: 24px;">
+      <p style="margin: 0; color: var(--text-primary); font-size: 15px; line-height: 1.6;">
+        You are postponing the <strong>{{ exam.get_exam_type_display }}</strong> exam for <strong>{{ exam.course.name }}</strong> currently scheduled on <strong style="color: var(--amber);">{{ exam.date|date:"d M Y" }}</strong>.
+      </p>
+      <p style="margin: 8px 0 0 0; color: #b45309; font-size: 13.5px; font-weight: 600;">
+        <i class="fas fa-info-circle"></i> Once submitted, the exam's status will change to Postponed and students will be notified.
+      </p>
+    </div>
+
     <form method="post">{% csrf_token %}
-      <div class="form-group"><label class="form-label">New Date <span style="font-weight:400;color:var(--text-muted);">(leave blank for TBD)</span></label><input type="date" name="new_date" class="form-input"></div>
-      <div style="display:flex; gap:12px;">
-        <button type="submit" class="btn btn-accent">Confirm Postpone</button>
-        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-outline">Go Back</a>
+      <div style="margin-bottom: 32px;">
+        <div class="form-group">
+          <label class="form-label" style="color: var(--text-primary); font-weight: 600;">New Rescheduled Date <span style="font-weight: 400; color: var(--text-muted);">(Leave blank to mark as TBD)</span></label>
+          <div style="position: relative;">
+            <div style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px;"><i class="fas fa-calendar-alt"></i></div>
+            <input type="date" name="new_date" class="form-input" style="padding: 12px 14px 12px 40px; border-radius: var(--radius); cursor: pointer; color: var(--text-primary); font-weight: 500;">
+          </div>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn" style="background: var(--amber); border-color: var(--amber); color: white; padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);">
+          <i class="fas fa-forward" style="margin-right: 8px;"></i> Confirm Postpone
+        </button>
+        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
+          Abort
+        </a>
       </div>
     </form>
   </div>

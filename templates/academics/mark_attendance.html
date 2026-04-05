@@ -1,62 +1,150 @@
 {% extends 'base.html' %}
-{% block title %}Mark Attendance{% endblock %}
-{% block page_title %}Mark Attendance{% endblock %}
-{% block page_subtitle %}{{ course.name }} — {{ course.code }}{% endblock %}
+{% block title %}Mark Attendance - {{ course.name }}{% endblock %}
+{% block page_title %}Mark Attendance Session{% endblock %}
+{% block page_subtitle %}Recording attendance for <strong>{{ course.name }}</strong> ({{ course.code }}){% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:800px;">
-  <div class="card-header"><span class="card-title">Students — {{ students.count }} enrolled</span></div>
-  <form method="post">{% csrf_token %}
-    <div style="padding:16px 20px; background:var(--surface-2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-      <label class="form-label" style="margin:0; white-space:nowrap;">Date *</label>
-      <input type="date" name="date" value="{{ today }}" class="form-input" style="width:180px;" required>
-      <button type="button" class="btn btn-sm btn-success" onclick="markAll('present')">✓ All Present</button>
-      <button type="button" class="btn btn-sm btn-danger" onclick="markAll('absent')">✗ All Absent</button>
+<div class="card" style="max-width: 900px; margin: 0 auto; box-shadow: var(--shadow-md); border: 1px solid var(--border);">
+  
+  <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 24px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+          <i class="fas fa-users-cog"></i>
+        </div>
+        <div>
+          <span class="card-title" style="margin: 0; font-size: 18px; color: var(--text-primary);">Student Roster</span>
+          <div style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">{{ students.count }} enrolled student{% if students.count != 1 %}s{% endif %}</div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <form method="post">{% csrf_token %}
+    <div style="padding: 16px 24px; background: var(--surface-2); border-bottom: 2px solid var(--border-strong); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 40px; height: 40px; border-radius: 8px; background: white; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+          <i class="far fa-calendar-check"></i>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label class="form-label" style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">Session Date</label>
+          <input type="date" name="date" value="{{ today }}" class="form-input" style="padding: 6px 12px; font-weight: 600; width: 150px; border-radius: var(--radius); cursor: pointer;" required>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 12px;">
+        <button type="button" class="btn btn-sm" style="background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); padding: 8px 16px; border-radius: var(--radius); font-weight: 600;" onclick="markAll('present')">
+          <i class="fas fa-check-double" style="margin-right: 6px;"></i> All Present
+        </button>
+        <button type="button" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 16px; border-radius: var(--radius); font-weight: 600;" onclick="markAll('absent')">
+          <i class="fas fa-times" style="margin-right: 6px;"></i> All Absent
+        </button>
+      </div>
+    </div>
+    
     <div class="table-container">
-      <table>
-        <thead><tr><th>#</th><th>Student</th><th>Roll No</th><th>Status</th></tr></thead>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: var(--surface-1); border-bottom: 2px solid var(--border-strong);">
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; width: 60px;">#</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Student Info</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; width: 140px;">Roll No</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; width: 320px;">Attendance Status</th>
+          </tr>
+        </thead>
         <tbody>
           {% for student in students %}
-          <tr>
-            <td style="color:var(--text-muted);">{{ forloop.counter }}</td>
-            <td><div class="avatar-cell"><div class="table-avatar">{{ student.user.first_name|first }}{{ student.user.last_name|first }}</div><div class="avatar-info"><div class="name">{{ student.user.get_full_name }}</div></div></div></td>
-            <td><code>{{ student.roll_number }}</code></td>
-            <td>
-              <div style="display:flex; gap:8px;">
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:6px;border:1.5px solid var(--green-border);background:var(--green-light);" onclick="selectStatus(this,'present')">
-                  <input type="radio" name="status_{{ student.id }}" value="present" checked style="display:none;"> ✓ Present
+          <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.backgroundColor='var(--surface-2)'" onmouseout="this.style.backgroundColor='transparent'">
+            <td style="padding: 16px 24px; color: var(--text-muted); font-weight: 500;">
+              {{ forloop.counter }}
+            </td>
+            <td style="padding: 16px 24px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  {{ student.user.first_name|first }}{{ student.user.last_name|first }}
+                </div>
+                <div>
+                  <div style="font-weight: 600; color: var(--text-primary); font-size: 15px;">{{ student.user.get_full_name }}</div>
+                </div>
+              </div>
+            </td>
+            <td style="padding: 16px 24px;">
+              <code style="background: var(--surface-2); padding: 6px 10px; border-radius: 6px; font-size: 13.5px; color: var(--text-secondary); border: 1px solid var(--border);">{{ student.roll_number }}</code>
+            </td>
+            <td style="padding: 16px 24px;">
+              <div style="display: flex; gap: 8px;">
+                <label style="flex: 1; text-align: center; font-size: 13.5px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: var(--radius); border: 2px solid var(--green-border); background: var(--green-light); color: var(--green); transition: all 0.2s;" onclick="selectStatus(this,'present')">
+                  <input type="radio" name="status_{{ student.id }}" value="present" checked style="display:none;">
+                  <i class="fas fa-check"></i> Present
                 </label>
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:6px;border:1.5px solid var(--border);background:white;" onclick="selectStatus(this,'absent')">
-                  <input type="radio" name="status_{{ student.id }}" value="absent" style="display:none;"> ✗ Absent
+                
+                <label style="flex: 1; text-align: center; font-size: 13.5px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: var(--radius); border: 2px solid var(--border); background: white; color: var(--text-secondary); transition: all 0.2s;" onclick="selectStatus(this,'absent')">
+                  <input type="radio" name="status_{{ student.id }}" value="absent" style="display:none;">
+                  <i class="fas fa-times"></i> Absent
                 </label>
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border-radius:6px;border:1.5px solid var(--amber-border);background:white;" onclick="selectStatus(this,'late')">
-                  <input type="radio" name="status_{{ student.id }}" value="late" style="display:none;"> ⏰ Late
+                
+                <label style="flex: 1; text-align: center; font-size: 13.5px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: var(--radius); border: 2px solid var(--border); background: white; color: var(--text-secondary); transition: all 0.2s;" onclick="selectStatus(this,'late')">
+                  <input type="radio" name="status_{{ student.id }}" value="late" style="display:none;">
+                  <i class="fas fa-clock"></i> Late
                 </label>
               </div>
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="4"><div class="empty-state"><span class="icon">👥</span><h3>No students in this course</h3></div></td></tr>
+          <tr>
+            <td colspan="4" style="padding: 48px; text-align: center;">
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-muted); margin-bottom: 16px;">
+                  <i class="fas fa-user-slash"></i>
+                </div>
+                <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 600;">No students enrolled</h3>
+                <p style="margin: 0; font-size: 15px; max-width: 400px; line-height: 1.5;">This course currently has no students assigned to it.</p>
+              </div>
+            </td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    
     {% if students %}
-    <div style="padding:18px 20px; display:flex; gap:12px; border-top:1px solid var(--border);">
-      <button type="submit" class="btn btn-accent">Save Attendance</button>
-      <a href="{% url 'attendance' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+    <div style="padding: 24px; background: var(--surface-1); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 16px;">
+      <a href="{% url 'attendance' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 24px; border-radius: var(--radius); font-weight: 600; font-size: 14.5px;">Cancel</a>
+      <button type="submit" class="btn btn-primary" style="padding: 12px 32px; border-radius: var(--radius); font-weight: 600; font-size: 14.5px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-save"></i> Save Attendance Session
+      </button>
     </div>
     {% endif %}
   </form>
 </div>
+
 <script>
 function selectStatus(label, status) {
   const group = label.parentNode;
-  group.querySelectorAll('label').forEach(l => { l.style.background='white'; l.style.borderColor='var(--border)'; });
-  if(status==='present'){ label.style.background='var(--green-light)'; label.style.borderColor='var(--green-border)'; }
-  else if(status==='absent'){ label.style.background='var(--red-light)'; label.style.borderColor='var(--red-border)'; }
-  else { label.style.background='var(--amber-light)'; label.style.borderColor='var(--amber-border)'; }
+  
+  // Reset all tags in this row
+  group.querySelectorAll('label').forEach(l => { 
+    l.style.background = 'white'; 
+    l.style.borderColor = 'var(--border)'; 
+    l.style.color = 'var(--text-secondary)';
+  });
+
+  // Apply specific styles for the selected state
+  if (status === 'present') { 
+    label.style.background = 'var(--green-light)'; 
+    label.style.borderColor = 'var(--green-border)'; 
+    label.style.color = 'var(--green)';
+  } else if (status === 'absent') { 
+    label.style.background = 'rgba(239, 68, 68, 0.1)'; 
+    label.style.borderColor = 'rgba(239, 68, 68, 0.3)'; 
+    label.style.color = 'var(--red)';
+  } else if (status === 'late') { 
+    label.style.background = 'var(--amber-light)'; 
+    label.style.borderColor = 'var(--amber-border)'; 
+    label.style.color = 'var(--amber)';
+  }
 }
+
 function markAll(status) {
   document.querySelectorAll('input[type=radio][value='+status+']').forEach(r => {
     r.checked = true;

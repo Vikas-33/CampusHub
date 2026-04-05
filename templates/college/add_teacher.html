@@ -1,48 +1,124 @@
 {% extends 'base.html' %}
 {% block title %}Add Teacher{% endblock %}
 {% block page_title %}Add Teacher{% endblock %}
-{% block page_subtitle %}Auto-generates employee ID and credentials{% endblock %}
+{% block page_subtitle %}Onboard a new faculty member and auto-generate credentials{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:800px;">
-  <div class="card-header"><span class="card-title">Teacher Information</span></div>
-  <div class="card-body">
-    <div class="alert alert-info">ℹ️ Employee ID and login credentials will be auto-generated. Default password = Employee ID.</div>
+<div class="card" style="max-width:900px; margin: 0 auto; box-shadow: var(--shadow-lg); border: none;">
+  <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 24px 32px;">
+    <span class="card-title" style="font-size: 20px; letter-spacing: -0.5px;">Teacher Information</span>
+    <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 6px;">Fill in the details below to add a new teacher to the college.</p>
+  </div>
+  
+  <div class="card-body" style="padding: 32px;">
+    <div class="alert alert-info" style="display: flex; align-items: center; gap: 12px; margin-bottom: 28px; border-radius: var(--radius-lg);">
+      <div style="font-size: 20px;">ℹ️</div>
+      <div>
+        <strong style="display: block; font-size: 14px; color: var(--text-primary);">Employee ID Auto-generation</strong>
+        <span style="font-size: 13px;">Login credentials will be automatically created. Default password is the generated Employee ID.</span>
+      </div>
+    </div>
+
     <form method="post">{% csrf_token %}
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">First Name *</label><input type="text" name="first_name" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Last Name *</label><input type="text" name="last_name" class="form-input" required></div>
-      </div>
-      <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-input" required></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Department *</label>
-          <select name="department" class="form-input" required>
-            <option value="">— Select Department —</option>
-            {% for dept in departments %}<option value="{{ dept.pk }}">{{ dept.name }} ({{ dept.code }})</option>{% endfor %}
-          </select>
+      
+      <!-- Section: Personal Details -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Personal & Contact Details</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">First Name <span style="color: var(--red);">*</span></label>
+            <input type="text" name="first_name" class="form-input" placeholder="e.g. Jane" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name <span style="color: var(--red);">*</span></label>
+            <input type="text" name="last_name" class="form-input" placeholder="e.g. Doe" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
         </div>
-        <div class="form-group"><label class="form-label">Designation *</label><input type="text" name="designation" class="form-input" placeholder="e.g. Associate Professor" required></div>
-      </div>
-      <div class="form-group"><label class="form-label">Assigned Courses</label>
-        <div style="border:1.5px solid var(--border);border-radius:8px;padding:12px;max-height:180px;overflow-y:auto;background:var(--surface-2);">
-          {% for course in courses %}
-          <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:14px;">
-            <input type="checkbox" name="courses" value="{{ course.pk }}">
-            {{ course.name }} <span style="color:var(--text-muted);">({{ course.department.code }})</span>
-          </label>
-          {% empty %}<p style="color:var(--text-muted);font-size:13px;">No courses available. Add courses first.</p>{% endfor %}
+        <div class="form-group">
+          <label class="form-label">Email Address <span style="color: var(--red);">*</span></label>
+          <input type="email" name="email" class="form-input" placeholder="jane.doe@college.edu" required style="padding: 10px 14px; border-radius: var(--radius);">
         </div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Qualification *</label><input type="text" name="qualification" class="form-input" placeholder="e.g. Ph.D. Computer Science" required></div>
-        <div class="form-group"><label class="form-label">Specialization</label><input type="text" name="specialization" class="form-input"></div>
+
+      <!-- Section: Academic Profile -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Academic Profile</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Department <span style="color: var(--red);">*</span></label>
+            <select name="department" class="form-input" required style="padding: 10px 14px; border-radius: var(--radius); cursor: pointer;">
+              <option value="">— Select Department —</option>
+              {% for dept in departments %}
+                <option value="{{ dept.pk }}">{{ dept.name }} ({{ dept.code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Designation <span style="color: var(--red);">*</span></label>
+            <input type="text" name="designation" class="form-input" placeholder="e.g. Associate Professor" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Highest Qualification <span style="color: var(--red);">*</span></label>
+            <input type="text" name="qualification" class="form-input" placeholder="e.g. Ph.D. Computer Science" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Specialization</label>
+            <input type="text" name="specialization" class="form-input" placeholder="e.g. Artificial Intelligence" style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
+        
+        <!-- Courses Assignment Widget -->
+        <div class="form-group" style="margin-top: 20px;">
+          <label class="form-label">Assign Courses <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
+          <div style="border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px; max-height: 220px; overflow-y: auto; background: var(--surface-1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
+              {% for course in courses %}
+              <label style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; cursor: pointer; font-size: 13.5px; background: var(--surface-2); border-radius: var(--radius-sm); transition: all 0.2s ease; border: 1px solid transparent;" onmouseover="this.style.borderColor='var(--blue-border)'; this.style.background='#fff';" onmouseout="this.style.borderColor='transparent'; this.style.background='var(--surface-2)';">
+                <input type="checkbox" name="courses" value="{{ course.pk }}" style="margin-top: 3px; accent-color: var(--blue); width: 16px; height: 16px;">
+                <div style="line-height: 1.4;">
+                  <strong style="display: block; color: var(--text-primary); font-weight: 600;">{{ course.name }}</strong>
+                  <span style="color: var(--text-muted); font-size: 12px;">Code: {{ course.department.code }}</span>
+                </div>
+              </label>
+              {% empty %}
+              <div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--text-muted); background: var(--surface-2); border-radius: var(--radius);">
+                <i class="fas fa-book-open" style="font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
+                <p style="font-size: 14px; margin: 0;">No courses added to the system yet.</p>
+                <small>You can assign courses later from the teacher's profile.</small>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Joining Date</label><input type="date" name="joining_date" class="form-input"></div>
-        <div class="form-group"><label class="form-label">Salary (₹)</label><input type="number" name="salary" class="form-input" step="0.01"></div>
+
+      <!-- Section: Employment Info -->
+      <div style="margin-bottom: 36px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Employment Details</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Joining Date</label>
+            <input type="date" name="joining_date" class="form-input" style="padding: 10px 14px; border-radius: var(--radius); color: var(--text-primary);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Base Salary (₹)</label>
+            <div style="position: relative;">
+              <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600;">₹</span>
+              <input type="number" name="salary" class="form-input" step="0.01" placeholder="0.00" style="padding: 10px 14px 10px 32px; border-radius: var(--radius);">
+            </div>
+          </div>
+        </div>
       </div>
-      <div style="display:flex; gap:12px; margin-top:8px;">
-        <button type="submit" class="btn btn-accent">Add Teacher</button>
-        <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+
+      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: var(--shadow-sm);">
+          <i class="fas fa-user-plus" style="margin-right: 8px;"></i> Complete Onboarding
+        </button>
+        <a href="{% url 'manage_teachers' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
+          Cancel & Return
+        </a>
       </div>
     </form>
   </div>

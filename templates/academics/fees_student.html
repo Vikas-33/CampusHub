@@ -1,24 +1,111 @@
 {% extends 'base.html' %}
 {% block title %}Fees{% endblock %}
 {% block page_title %}My Fee Payments{% endblock %}
+{% block page_subtitle %}Review your financial statements and payment history{% endblock %}
+
 {% block content %}
-<div class="card">
+<div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;">
+  <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px;">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+      <i class="fas fa-file-invoice-dollar"></i>
+    </div>
+    <div>
+      <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">Detailed Fee Records</span>
+      <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Track dues, settled amounts, and download receipts</div>
+    </div>
+  </div>
+
   <div class="table-container">
-    <table>
-      <thead><tr><th>Fee Type</th><th>Total</th><th>Paid</th><th>Status</th><th>Date</th><th>Receipt</th><th>Download</th></tr></thead>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: var(--surface-2); border-bottom: 2px solid var(--border-strong);">
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Fee Description</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Billed Total</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Amount Settled</th>
+          <th style="padding: 16px 24px; text-align: center; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Current Status</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Date of Trans.</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Ref / Receipt No.</th>
+          <th style="padding: 16px 24px; text-align: right; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Document</th>
+        </tr>
+      </thead>
       <tbody>
         {% for payment in payments %}
-        <tr>
-          <td>{{ payment.fee_structure.name }}</td>
-          <td>₹{{ payment.fee_structure.amount }}</td>
-          <td>₹{{ payment.amount_paid }}</td>
-          <td><span class="badge {% if payment.status == 'paid' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% elif payment.status == 'overdue' %}badge-danger{% else %}badge-info{% endif %}">{{ payment.status|capfirst }}</span></td>
-          <td>{{ payment.payment_date|date:"M d, Y"|default:"—" }}</td>
-          <td>{% if payment.receipt_number %}<code>{{ payment.receipt_number }}</code>{% else %}<span style="color:var(--text-muted);">—</span>{% endif %}</td>
-          <td>{% if payment.status == 'paid' %}<a href="{% url 'download_fee_receipt' college_slug=college_slug payment_id=payment.pk %}" class="btn btn-xs btn-outline">📄 Receipt</a>{% else %}<span style="font-size:12px;color:var(--text-muted);">Not paid</span>{% endif %}</td>
+        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.backgroundColor='var(--surface-2)'" onmouseout="this.style.backgroundColor='transparent'">
+          
+          <td style="padding: 16px 24px;">
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 15px; margin-bottom: 4px;">{{ payment.fee_structure.name }}</div>
+            <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+              <i class="fas fa-tags" style="font-size: 10px;"></i> Institutional Charge
+            </div>
+          </td>
+          
+          <td style="padding: 16px 24px;">
+            <div style="display: flex; align-items: baseline; gap: 2px;">
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">₹</span>
+              <strong style="color: var(--text-primary); font-size: 16px;">{{ payment.fee_structure.amount }}</strong>
+            </div>
+          </td>
+          
+          <td style="padding: 16px 24px;">
+            <div style="display: flex; align-items: baseline; gap: 2px;">
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">₹</span>
+              <strong style="color: {% if payment.amount_paid >= payment.fee_structure.amount %}var(--green){% else %}var(--blue){% endif %}; font-size: 16px;">{{ payment.amount_paid }}</strong>
+            </div>
+          </td>
+          
+          <td style="padding: 16px 24px; text-align: center;">
+            <span class="badge {% if payment.status == 'paid' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% elif payment.status == 'overdue' %}badge-danger{% else %}badge-info{% endif %}" style="padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; letter-spacing: 0.3px; text-transform: uppercase; box-shadow: var(--shadow-sm);">
+              {% if payment.status == 'paid' %}<i class="fas fa-check-circle" style="margin-right: 4px;"></i>
+              {% elif payment.status == 'pending' %}<i class="fas fa-hourglass-half" style="margin-right: 4px;"></i>
+              {% elif payment.status == 'overdue' %}<i class="fas fa-exclamation-circle" style="margin-right: 4px;"></i>
+              {% else %}<i class="fas fa-info-circle" style="margin-right: 4px;"></i>{% endif %}
+              {{ payment.status }}
+            </span>
+          </td>
+          
+          <td style="padding: 16px 24px;">
+            {% if payment.payment_date %}
+              <div style="color: var(--text-secondary); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px;">
+                {{ payment.payment_date|date:"M d, Y" }}
+              </div>
+            {% else %}
+              <span style="color: var(--text-muted); font-size: 13px; font-style: italic;">—</span>
+            {% endif %}
+          </td>
+          
+          <td style="padding: 16px 24px;">
+            {% if payment.receipt_number %}
+              <code style="background: var(--surface-2); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-strong); font-size: 13px; color: var(--blue); font-weight: 600; letter-spacing: 0.5px;">{{ payment.receipt_number }}</code>
+            {% else %}
+              <span style="color: var(--text-muted); font-size: 13px; padding: 4px 8px; background: rgba(0,0,0,0.03); border-radius: 4px;">Not Issued</span>
+            {% endif %}
+          </td>
+          
+          <td style="padding: 16px 24px; text-align: right;">
+            {% if payment.status == 'paid' %}
+              <a href="{% url 'download_fee_receipt' college_slug=college_slug payment_id=payment.pk %}" class="btn btn-xs btn-outline" style="padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-color: var(--border-strong); color: var(--text-primary); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--green)'; this.style.color='var(--green)';" onmouseout="this.style.borderColor='var(--border-strong)'; this.style.color='var(--text-primary)';">
+                <i class="fas fa-file-pdf" style="color: var(--red);"></i> Receipt
+              </a>
+            {% else %}
+              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; background: var(--surface-2); border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--text-muted);">
+                <i class="fas fa-lock"></i> Locked
+              </span>
+            {% endif %}
+          </td>
+          
         </tr>
         {% empty %}
-        <tr><td colspan="7"><div class="empty-state"><span class="icon">💰</span><h3>No fee records</h3></div></td></tr>
+        <tr>
+          <td colspan="7" style="padding: 64px 24px; text-align: center;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+              <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--text-muted); margin-bottom: 20px; border: 2px dashed var(--border-strong);">
+                <i class="fas fa-wallet"></i>
+              </div>
+              <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 700;">No Fee Records Found</h3>
+              <p style="margin: 0; font-size: 15px; max-width: 350px; line-height: 1.5;">You currently have no financial obligations or payment history on record.</p>
+            </div>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>

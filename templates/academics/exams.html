@@ -1,60 +1,111 @@
 {% extends 'base.html' %}
 {% block title %}Exams{% endblock %}
-{% block page_title %}Examinations{% endblock %}
+{% block page_title %}Examinations Hub{% endblock %}
+{% block page_subtitle %}Manage, review, and track all upcoming and past examination schedules{% endblock %}
+
 {% block topbar_actions %}
   {% if request.user.role != 'student' %}
-    <a href="{% url 'add_exam' college_slug=college_slug %}" class="btn btn-accent">+ Schedule Exam</a>
+    <a href="{% url 'add_exam' college_slug=college_slug %}" class="btn btn-primary" style="box-shadow: var(--shadow-sm);"><i class="fas fa-calendar-plus" style="margin-right: 6px;"></i> Schedule Exam</a>
   {% endif %}
   {% if request.user.role == 'student' %}
-    <a href="{% url 'student_results' college_slug=college_slug %}" class="btn btn-outline">📊 My Results</a>
+    <a href="{% url 'student_results' college_slug=college_slug %}" class="btn btn-outline"><i class="fas fa-chart-bar" style="margin-right: 6px;"></i> My Results</a>
   {% endif %}
 {% endblock %}
+
 {% block content %}
-<div class="grid-3">
+<div class="grid-3" style="gap: 20px;">
   {% for exam in exams %}
-  <div class="exam-card" style="{% if exam.status == 'cancelled' %}opacity:0.55;{% elif exam.status == 'postponed' %}border-left:3px solid var(--amber);{% endif %}">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
-      <div>
-        <div class="exam-date">{{ exam.date|date:"d" }}</div>
-        <div class="exam-month">{{ exam.date|date:"M Y" }}</div>
+  <div class="card exam-card" style="box-shadow: var(--shadow-md); border: 1px solid var(--border); padding: 24px; transition: transform 0.2s ease, box-shadow 0.2s ease; {% if exam.status == 'cancelled' %}opacity:0.6; filter: grayscale(1);{% elif exam.status == 'postponed' %}border-left: 4px solid var(--amber);{% else %}border-left: 4px solid var(--blue);{% endif %}">
+    
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="background: var(--surface-2); padding: 8px 12px; border-radius: var(--radius); text-align: center; border: 1px solid var(--border);">
+          <div style="font-size: 22px; font-weight: 800; color: var(--text-primary); line-height: 1;">{{ exam.date|date:"d" }}</div>
+          <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 4px;">{{ exam.date|date:"M Y" }}</div>
+        </div>
       </div>
-      <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
-        <span class="badge {% if exam.exam_type == 'final' %}badge-danger{% elif exam.exam_type == 'midterm' %}badge-warning{% elif exam.exam_type == 'quiz' %}badge-info{% else %}badge-purple{% endif %}">
+      
+      <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+        <span class="badge {% if exam.exam_type == 'final' %}badge-danger{% elif exam.exam_type == 'midterm' %}badge-warning{% elif exam.exam_type == 'quiz' %}badge-info{% else %}badge-purple{% endif %}" style="font-size: 11px; padding: 4px 10px;">
           {{ exam.get_exam_type_display }}
         </span>
-        {% if exam.status == 'cancelled' %}<span class="badge badge-danger">Cancelled</span>{% endif %}
-        {% if exam.status == 'postponed' %}<span class="badge badge-warning">Postponed</span>{% endif %}
+        {% if exam.status == 'cancelled' %}<span class="badge badge-danger" style="font-size: 11px; padding: 4px 10px;">Cancelled</span>{% endif %}
+        {% if exam.status == 'postponed' %}<span class="badge badge-warning" style="font-size: 11px; padding: 4px 10px;">Postponed</span>{% endif %}
       </div>
     </div>
-    <div class="exam-course">{{ exam.course.name }}</div>
-    {% if exam.semester %}<div class="exam-meta">📚 Semester {{ exam.semester }}</div>{% endif %}
-    <div class="exam-meta">⏰ {{ exam.start_time|time:"H:i" }} – {{ exam.end_time|time:"H:i" }}</div>
-    {% if exam.venue %}<div class="exam-meta">📍 {{ exam.venue }}</div>{% endif %}
-    <div class="exam-meta">📝 {{ exam.total_marks }} marks · Pass: {{ exam.passing_marks }}</div>
-    {% if exam.status == 'postponed' %}
-      <div class="exam-meta" style="color:var(--amber);">📅 New date: {% if exam.postponed_date %}{{ exam.postponed_date|date:"d M Y" }}{% else %}TBD{% endif %}</div>
-    {% endif %}
-    {% if exam.status == 'cancelled' and exam.cancellation_reason %}
-      <div class="exam-meta" style="color:var(--red);">{{ exam.cancellation_reason }}</div>
-    {% endif %}
-    <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
-      {% if request.user.role == 'student' %}
-          <a href="{% url 'student_exam_result' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-info">My Result</a>
-      {% else %}
-        <a href="{% url 'exam_results' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-accent">Results</a>
+    
+    <h3 style="font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; line-height: 1.3;">{{ exam.course.name }}</h3>
+    
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+      {% if exam.semester %}
+      <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-layer-group" style="color: var(--text-muted); width: 16px; text-align: center;"></i> Semester {{ exam.semester }}
+      </div>
+      {% endif %}
+      
+      <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+        <i class="far fa-clock" style="color: var(--text-muted); width: 16px; text-align: center;"></i> {{ exam.start_time|time:"H:i" }} – {{ exam.end_time|time:"H:i" }}
+      </div>
+      
+      {% if exam.venue %}
+      <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-map-marker-alt" style="color: var(--text-muted); width: 16px; text-align: center;"></i> {{ exam.venue }}
+      </div>
+      {% endif %}
+      
+      <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-check-double" style="color: var(--text-muted); width: 16px; text-align: center;"></i> Max: {{ exam.total_marks }} | Pass: {{ exam.passing_marks }}
+      </div>
 
+      {% if exam.status == 'postponed' %}
+      <div style="font-size: 13px; color: var(--amber); display: flex; align-items: center; gap: 8px; font-weight: 600; margin-top: 4px; padding: 6px; background: rgba(245, 158, 11, 0.1); border-radius: var(--radius);">
+        <i class="fas fa-calendar-day" style="width: 16px; text-align: center;"></i> Rescheduled: {% if exam.postponed_date %}{{ exam.postponed_date|date:"d M Y" }}{% else %}TBD{% endif %}
+      </div>
+      {% endif %}
+      
+      {% if exam.status == 'cancelled' and exam.cancellation_reason %}
+      <div style="font-size: 13px; color: var(--red); display: flex; align-items: flex-start; gap: 8px; font-weight: 500; margin-top: 4px; padding: 8px; background: rgba(239, 68, 68, 0.1); border-radius: var(--radius);">
+        <i class="fas fa-info-circle" style="width: 16px; text-align: center; margin-top: 2px;"></i> 
+        <span>{{ exam.cancellation_reason }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-top:auto; padding-top: 16px; border-top: 1px solid var(--border); display:flex; gap:8px; flex-wrap:wrap;">
+      {% if request.user.role == 'student' %}
+          <a href="{% url 'student_exam_result' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-outline" style="flex: 1; text-align: center;"><i class="fas fa-star" style="margin-right: 4px;"></i> View Score</a>
+      {% else %}
+        <a href="{% url 'exam_results' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-outline" style="flex: 1; text-align: center;"><i class="fas fa-clipboard-list" style="margin-right: 4px;"></i> Grade Results</a>
 
         {% if exam.status != 'cancelled' %}
-          <a href="{% url 'postpone_exam' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-warning">Postpone</a>
-          <a href="{% url 'cancel_exam' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-danger">Cancel</a>
+          <a href="{% url 'postpone_exam' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-outline" style="background: rgba(245, 158, 11, 0.1); color: var(--amber); border-color: transparent;" title="Postpone"><i class="fas fa-calendar-minus"></i></a>
+          <a href="{% url 'cancel_exam' college_slug=college_slug exam_id=exam.pk %}" class="btn btn-xs btn-outline" style="background: rgba(239, 68, 68, 0.1); color: var(--red); border-color: transparent;" title="Cancel"><i class="fas fa-ban"></i></a>
         {% endif %}
       {% endif %}
     </div>
   </div>
   {% empty %}
   <div style="grid-column:1/-1;">
-    <div class="empty-state"><span class="icon">📝</span><h3>No exams scheduled</h3><p>Schedule your first exam</p></div>
+    <div class="empty-state" style="padding: 60px 20px; background: var(--surface-1); border: 2px dashed var(--border); border-radius: var(--radius-lg);">
+      <div class="icon" style="font-size: 48px; margin-bottom: 20px; color: var(--blue); opacity: 0.8;">
+        <i class="fas fa-calendar-times"></i>
+      </div>
+      <h3 style="font-size: 18px; margin-bottom: 8px;">No exams scheduled</h3>
+      <p style="color: var(--text-muted); font-size: 14px;">There are no examination events registered in the system yet.</p>
+      {% if request.user.role != 'student' %}
+      <a href="{% url 'add_exam' college_slug=college_slug %}" class="btn btn-primary" style="margin-top: 20px;">
+        <i class="fas fa-plus"></i> Schedule First Exam
+      </a>
+      {% endif %}
+    </div>
   </div>
   {% endfor %}
 </div>
+
+<style>
+  .exam-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg) !important;
+  }
+</style>
 {% endblock %}

@@ -1,47 +1,171 @@
 {% extends 'base.html' %}
-{% block title %}Exam Results{% endblock %}
-{% block page_title %}Exam Results{% endblock %}
-{% block page_subtitle %}{{ exam.course.name }} — {{ exam.get_exam_type_display }} — {{ exam.date }}{% endblock %}
+{% block title %}Manage Exam Results{% endblock %}
+{% block page_title %}Evaluation & Grading{% endblock %}
+{% block page_subtitle %}{{ exam.course.name }} ({{ exam.course.code }}) — {{ exam.get_exam_type_display|upper }} — {{ exam.date|date:"M d, Y" }}{% endblock %}
+
 {% block content %}
 {% if request.user.role == 'student' %}
-  <a href="{% url 'student_exam_result' college_slug=college_slug exam_id=exam.pk %}">
-  {% else %}
-<div class="grid-2">
-  <div class="card">
-    <div class="card-header"><span class="card-title">Enter Result</span></div>
-    <div class="card-body">
+  <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+    <i class="fas fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 16px; color: var(--blue);"></i>
+    <p>Redirecting to your result view...</p>
+    <script>window.location.href="{% url 'student_exam_result' college_slug=college_slug exam_id=exam.pk %}";</script>
+  </div>
+{% else %}
+<div class="grid-2" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; align-items: flex-start;">
+  
+  <!-- Left Column: Enter Result Form -->
+  <div class="card" style="box-shadow: var(--shadow-md); border: 1px solid var(--border); position: sticky; top: 24px;">
+    <div class="card-header" style="background: var(--surface-1); border-bottom: 2px solid var(--border-strong); padding: 24px 32px; display: flex; align-items: center; gap: 12px;">
+      <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+        <i class="fas fa-edit"></i>
+      </div>
+      <div>
+        <span class="card-title" style="margin: 0; font-size: 18px; color: var(--text-primary);">Enter Grades</span>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Record student performance</div>
+      </div>
+    </div>
+    
+    <div class="card-body" style="padding: 32px;">
+      
+      <!-- Quick Stats Callout -->
+      <div style="background: var(--surface-2); padding: 16px 20px; border-radius: var(--radius); border-left: 4px solid var(--blue); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 4px;">Max Score</div>
+          <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);"><i class="fas fa-star" style="color: var(--amber); margin-right: 4px; font-size: 14px;"></i> {{ exam.total_marks }}</div>
+        </div>
+        <div style="width: 1px; height: 30px; background: var(--border);"></div>
+        <div>
+          <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 4px;">Pass Mark</div>
+          <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);"><i class="fas fa-check-circle" style="color: var(--green); margin-right: 4px; font-size: 14px;"></i> {{ exam.passing_marks }}</div>
+        </div>
+      </div>
+
       <form method="post">{% csrf_token %}
-        <div class="form-group"><label class="form-label">Student</label>
-          <select name="student_id" class="form-input" required>
-            <option value="">Select Student</option>
-            {% for student in students %}<option value="{{ student.pk }}">{{ student.user.get_full_name }} ({{ student.roll_number }})</option>{% endfor %}
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label" style="display: flex; align-items: center; gap: 6px;"><i class="fas fa-user-graduate" style="color: var(--text-muted);"></i> Select Student <span style="color: var(--red);">*</span></label>
+          <select name="student_id" class="form-input" required style="padding: 12px 14px; font-size: 14.5px; font-weight: 500; cursor: pointer;">
+            <option value="">-- Choose from roster --</option>
+            {% for student in students %}
+              <option value="{{ student.pk }}">{{ student.user.get_full_name }} ({{ student.roll_number }})</option>
+            {% endfor %}
           </select>
         </div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Marks Obtained</label><input type="number" name="marks" class="form-input" min="0" max="{{ exam.total_marks }}" required></div>
-          <div class="form-group"><label class="form-label">Grade</label>
-            <select name="grade" class="form-input"><option value="">Select</option><option>A+</option><option>A</option><option>B+</option><option>B</option><option>C</option><option>D</option><option>F</option></select>
+        
+        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <div class="form-group">
+            <label class="form-label" style="display: flex; align-items: center; gap: 6px;"><i class="fas fa-calculator" style="color: var(--text-muted);"></i> Score <span style="color: var(--red);">*</span></label>
+            <input type="number" name="marks" class="form-input" placeholder="e.g. 85" min="0" max="{{ exam.total_marks }}" required style="padding: 12px 14px; font-weight: 600; font-size: 16px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display: flex; align-items: center; gap: 6px;"><i class="fas fa-award" style="color: var(--text-muted);"></i> Letter Grade <span style="color: var(--text-muted); font-weight: normal;">(Opt)</span></label>
+            <select name="grade" class="form-input" style="padding: 12px 14px; font-weight: 600; font-size: 15px; cursor: pointer;">
+              <option value="">N/A</option>
+              <option>A+</option><option>A</option>
+              <option>B+</option><option>B</option>
+              <option>C+</option><option>C</option>
+              <option>D</option><option>F</option>
+            </select>
           </div>
         </div>
-        <button type="submit" class="btn btn-accent">Save Result</button>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label class="form-label" style="display: flex; align-items: center; gap: 6px;"><i class="fas fa-comment-dots" style="color: var(--text-muted);"></i> Evaluator Remarks <span style="color: var(--text-muted); font-weight: normal;">(Opt)</span></label>
+          <input type="text" name="remarks" class="form-input" placeholder="e.g. Excellent conceptual grasp" style="padding: 12px 14px;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; border-radius: var(--radius); box-shadow: var(--shadow-sm); display: flex; justify-content: center; align-items: center; gap: 8px;">
+          <i class="fas fa-save"></i> Publish Score
+        </button>
       </form>
     </div>
   </div>
-  <div class="card">
-    <div class="card-header"><span class="card-title">Results ({{ results.count }})</span></div>
+
+  <!-- Right Column: Results Ledger -->
+  <div class="card" style="box-shadow: var(--shadow-md); border: 1px solid var(--border);">
+    <div class="card-header" style="background: var(--surface-1); border-bottom: 2px solid var(--border-strong); padding: 24px 32px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+          <i class="fas fa-list-alt"></i>
+        </div>
+        <div>
+          <span class="card-title" style="margin: 0; font-size: 18px; color: var(--text-primary);">Evaluated Roster</span>
+          <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">{{ results.count }} / {{ students.count }} Graded</div>
+        </div>
+      </div>
+      
+      <!-- Progress visualizer in header -->
+      {% if students.count > 0 %}
+      <div style="width: 100px; text-align: right;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">COMPLETION</div>
+        <div style="height: 8px; background: var(--surface-2); border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
+          <div style="height: 100%; background: var(--green); width: {% widthratio results.count students.count 100 %}%;"></div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
     <div class="table-container">
-      <table>
-        <thead><tr><th>Student</th><th>Marks</th><th>Grade</th><th>Status</th></tr></thead>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: var(--surface-2); border-bottom: 2px solid var(--border-strong);">
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Candidate</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Score</th>
+            <th style="padding: 16px 24px; text-align: center; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Grade</th>
+            <th style="padding: 16px 24px; text-align: right; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Outcome</th>
+          </tr>
+        </thead>
         <tbody>
           {% for result in results %}
-          <tr>
-            <td><div style="font-weight:600;color:var(--text-primary);">{{ result.student.user.get_full_name }}</div><div style="font-size:12px;color:var(--text-muted);">{{ result.student.roll_number }}</div></td>
-            <td>{{ result.marks_obtained }} / {{ exam.total_marks }}</td>
-            <td><span class="badge badge-purple">{{ result.grade }}</span></td>
-            <td><span class="badge {% if result.marks_obtained >= exam.passing_marks %}badge-success{% else %}badge-danger{% endif %}">{% if result.marks_obtained >= exam.passing_marks %}Pass{% else %}Fail{% endif %}</span></td>
+          <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.backgroundColor='var(--surface-2)'" onmouseout="this.style.backgroundColor='transparent'">
+            <td style="padding: 16px 24px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  {{ result.student.user.first_name|first }}{{ result.student.user.last_name|first }}
+                </div>
+                <div>
+                  <div style="font-weight: 600; color: var(--text-primary); font-size: 15px;">{{ result.student.user.get_full_name }}</div>
+                  <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;"><code>{{ result.student.roll_number }}</code></div>
+                </div>
+              </div>
+            </td>
+            
+            <td style="padding: 16px 24px;">
+              <div style="display: flex; align-items: baseline; gap: 4px;">
+                <span style="font-size: 18px; font-weight: 700; color: {% if result.marks_obtained >= exam.passing_marks %}var(--text-primary){% else %}var(--red){% endif %};">{{ result.marks_obtained }}</span>
+                <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">/{{ exam.total_marks }}</span>
+              </div>
+            </td>
+            
+            <td style="padding: 16px 24px; text-align: center;">
+              {% if result.grade %}
+                <span class="badge" style="background: rgba(139, 92, 246, 0.1); color: rgb(124, 58, 237); border: 1px solid rgba(139, 92, 246, 0.2); padding: 6px 12px; font-weight: 700; font-size: 13px; border-radius: 6px;">{{ result.grade }}</span>
+              {% else %}
+                <span style="color: var(--border-strong); font-size: 14px; font-weight: 600;">—</span>
+              {% endif %}
+            </td>
+
+            <td style="padding: 16px 24px; text-align: right;">
+              <span class="badge {% if result.marks_obtained >= exam.passing_marks %}badge-success{% else %}badge-danger{% endif %}" style="padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px {% if result.marks_obtained >= exam.passing_marks %}rgba(16, 185, 129, 0.1){% else %}rgba(239, 68, 68, 0.1){% endif %};">
+                {% if result.marks_obtained >= exam.passing_marks %}
+                  <i class="fas fa-check-circle"></i> PASS
+                {% else %}
+                  <i class="fas fa-times-circle"></i> FAIL
+                {% endif %}
+              </span>
+            </td>
           </tr>
           {% empty %}
-          <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px;">No results entered yet</td></tr>
+          <tr>
+            <td colspan="4" style="padding: 64px 24px; text-align: center;">
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--text-muted); margin-bottom: 20px; border: 2px dashed var(--border-strong);">
+                  <i class="fas fa-file-signature"></i>
+                </div>
+                <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 700;">No scripts evaluated yet</h3>
+                <p style="margin: 0; font-size: 15px; max-width: 350px; line-height: 1.5;">Use the panel on the left to start entering grades for the enrolled students.</p>
+              </div>
+            </td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
@@ -49,4 +173,15 @@
   </div>
 </div>
 {% endif %}
+
+<style>
+  /* Base Select Patch */
+  select.form-input {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%236B7280" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px top 50%;
+    background-size: 20px auto;
+  }
+</style>
 {% endblock %}

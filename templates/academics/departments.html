@@ -1,28 +1,51 @@
 {% extends 'base.html' %}
 {% block title %}Departments{% endblock %}
-{% block page_title %}Departments{% endblock %}
+{% block page_title %}Academic Departments{% endblock %}
+{% block page_subtitle %}Manage college faculties, codes, and Head of Departments{% endblock %}
 {% block topbar_actions %}
-  <a href="{% url 'add_department' college_slug=college_slug %}" class="btn btn-accent">+ Add Department</a>
+  <a href="{% url 'add_department' college_slug=college_slug %}" class="btn btn-primary" style="padding: 10px 20px; font-weight: 600; border-radius: var(--radius); box-shadow: var(--shadow-sm);"><i class="fas fa-plus" style="margin-right: 6px;"></i> Add Department</a>
 {% endblock %}
 {% block content %}
 <div class="grid-3">
   {% for dept in departments %}
-  <div class="card">
-    <div class="card-body" style="padding:24px;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
-        <div style="width:44px; height:44px; border-radius:10px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; font-size:22px;">🏛️</div>
-        <span class="badge badge-info">{{ dept.code }}</span>
+  <div class="card" style="box-shadow: var(--shadow-sm); border: none; transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: var(--radius-lg); cursor: default;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+    <div class="card-body" style="padding:28px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+        <div style="width:48px; height:48px; border-radius:12px; background: linear-gradient(135deg, var(--blue-light), #e0eaff); color: var(--blue); display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);">
+          <i class="fas fa-building"></i>
+        </div>
+        <span class="badge" style="background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border); font-weight: 700; padding: 6px 12px; letter-spacing: 0.5px;">{{ dept.code }}</span>
       </div>
-      <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">{{ dept.name }}</h3>
-      {% if dept.head_of_department %}<p style="font-size:13px; color:var(--text-secondary);">HOD: {{ dept.head_of_department.user.get_full_name }}</p>{% endif %}
-      {% if dept.description %}<p style="font-size:12.5px; color:var(--text-muted); margin-top:8px; line-height:1.6;">{{ dept.description|truncatechars:80 }}</p>{% endif %}
-      <div style="margin-top:14px;">
-        <a href="{% url 'edit_department' college_slug=college_slug dept_id=dept.pk %}" class="btn btn-xs btn-outline">✏️ Edit</a>
+      
+      <h3 style="font-size:18px; font-weight:700; margin-bottom:8px; color: var(--text-primary); letter-spacing: -0.3px;">{{ dept.name }}</h3>
+      
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <i class="fas fa-user-tie" style="color: var(--text-muted); font-size: 13px;"></i>
+        {% if dept.head_of_department %}
+          <span style="font-size:13.5px; color:var(--text-secondary); font-weight: 500;">{{ dept.head_of_department.user.get_full_name }}</span>
+        {% else %}
+          <span style="font-size:13.5px; color:var(--text-muted); font-style: italic;">No HOD Assigned</span>
+        {% endif %}
+      </div>
+
+      {% if dept.description %}
+        <p style="font-size:13.5px; color:var(--text-muted); margin-top:12px; line-height:1.6; padding-top: 12px; border-top: 1px solid var(--border);">{{ dept.description|truncatechars:80 }}</p>
+      {% endif %}
+      
+      <div style="margin-top:20px; display: flex;">
+        <a href="{% url 'edit_department' college_slug=college_slug dept_id=dept.pk %}" class="btn btn-outline" style="width: 100%; justify-content: center; padding: 8px; font-size: 13px; font-weight: 600; border-radius: var(--radius);"><i class="fas fa-pencil-alt" style="margin-right: 6px; font-size: 12px;"></i> Quick Edit</a>
       </div>
     </div>
   </div>
   {% empty %}
-  <div style="grid-column:1/-1;"><div class="empty-state"><span class="icon">🏛️</span><h3>No departments yet</h3><p>Create your first department</p></div></div>
+  <div style="grid-column:1/-1;">
+    <div class="empty-state" style="padding: 80px 20px; box-shadow: var(--shadow-sm); border: dashed 2px var(--border-strong);">
+      <i class="fas fa-sitemap" style="font-size: 48px; color: var(--blue); opacity: 0.5; margin-bottom: 20px; display: block;"></i>
+      <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">No departments found</h3>
+      <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 15px;">Get started by establishing the first academic department.</p>
+      <a href="{% url 'add_department' college_slug=college_slug %}" class="btn btn-primary" style="padding: 10px 24px;"><i class="fas fa-plus" style="margin-right: 8px;"></i> Create Department</a>
+    </div>
+  </div>
   {% endfor %}
 </div>
 {% endblock %}

@@ -1,121 +1,197 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
-{% block page_title %}Welcome, {{ student.user.first_name }}{% endblock %}
-{% block page_subtitle %}{{ student.department }} &bull; Semester {{ student.semester }} &bull; Roll: {{ student.roll_number }}{% endblock %}
+{% block page_title %}Student Portal{% endblock %}
+{% block page_subtitle %}{{ student.department }} &bull; Semester {{ student.semester }} &bull; Roll Number: {{ student.roll_number }}{% endblock %}
 
 {% block content %}
-<div class="stats-grid">
-  <div class="stat-card blue">
-    <div class="stat-icon blue">📚</div>
-    <div class="stat-value">{{ courses.count }}</div>
-    <div class="stat-label">Enrolled Courses</div>
+<!-- Greeting -->
+<div style="margin-bottom: 32px;">
+  <h2 style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-primary); margin: 0 0 4px 0;">
+    Good {% now "G" as hour %}{% if hour < 12 %}morning{% elif hour < 17 %}afternoon{% else %}evening{% endif %}, {{ request.user.first_name }}! 👋
+  </h2>
+  <p style="color: var(--text-secondary); font-size: 15px; margin: 0;">Here's an overview of your academic progress.</p>
+</div>
+
+<!-- Stat cards -->
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 32px;">
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--blue); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)';">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Enrolled Courses</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ courses.count }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-book-open"></i>
+    </div>
   </div>
-  <div class="stat-card {% if attendance_percent >= 75 %}green{% elif attendance_percent >= 60 %}gold{% else %}red{% endif %}">
-    <div class="stat-icon {% if attendance_percent >= 75 %}green{% elif attendance_percent >= 60 %}gold{% else %}red{% endif %}">📋</div>
-    <div class="stat-value">{{ attendance_percent }}%</div>
-    <div class="stat-label">Attendance</div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid {% if attendance_percent >= 75 %}var(--green){% elif attendance_percent >= 60 %}var(--amber){% else %}var(--red){% endif %}; padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)';">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Attendance</div>
+      <div style="font-size: 32px; font-weight: 700; color: {% if attendance_percent >= 75 %}var(--green){% elif attendance_percent >= 60 %}var(--amber){% else %}var(--red){% endif %}; line-height: 1;">{{ attendance_percent }}%</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: {% if attendance_percent >= 75 %}var(--green-light){% elif attendance_percent >= 60 %}var(--amber-light){% else %}rgba(239, 68, 68, 0.1){% endif %}; color: {% if attendance_percent >= 75 %}var(--green){% elif attendance_percent >= 60 %}var(--amber){% else %}var(--red){% endif %}; display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-clipboard-check"></i>
+    </div>
   </div>
-  <div class="stat-card gold">
-    <div class="stat-icon gold">📄</div>
-    <div class="stat-value">{{ pending_assignments }}</div>
-    <div class="stat-label">Assignments</div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--amber); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)';">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Assignments</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;">{{ pending_assignments }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--amber-light); color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-tasks"></i>
+    </div>
   </div>
-  <div class="stat-card red">
-    <div class="stat-icon red">💰</div>
-    <div class="stat-value">{{ fee_dues }}</div>
-    <div class="stat-label">Pending Dues</div>
+
+  <div class="stat-card" style="background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); border-left: 5px solid var(--red); padding: 24px; box-shadow: var(--shadow-sm); display: flex; align-items: stretch; position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)';">
+    <div style="flex: 1;">
+      <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Pending Dues</div>
+      <div style="font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1;"><span style="font-size: 20px;">₹</span>{{ fee_dues }}</div>
+    </div>
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); color: var(--red); display: flex; align-items: center; justify-content: center; font-size: 20px; align-self: center;">
+      <i class="fas fa-wallet"></i>
+    </div>
   </div>
 </div>
 
 {% if attendance_percent < 75 %}
-<div class="alert alert-warning">⚠️ Your attendance is below 75%. You need to attend more classes to be eligible for exams.</div>
+<div class="alert" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-left: 4px solid var(--amber); padding: 16px 20px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; color: #b45309;">
+  <i class="fas fa-exclamation-triangle" style="margin-top: 2px;"></i>
+  <div>
+    <div style="font-weight: 600; margin-bottom: 4px;">Low Attendance Warning</div>
+    <div style="font-size: 14px;">Your current attendance is below the 75% threshold required to be eligible for final examinations.</div>
+  </div>
+</div>
 {% endif %}
 
-<div class="grid-2">
-  <div class="card mb-20">
-    <div class="card-header">
-      <span class="card-title">📚 My Courses</span>
+<div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px;">
+
+  <!-- Left Column: Courses -->
+  <div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+    <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 32px; height: 32px; background: var(--blue-light); color: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+          <i class="fas fa-book-reader"></i>
+        </div>
+        <span class="card-title" style="margin: 0; font-size: 16px;">My Courses</span>
+      </div>
+      <a href="{% url 'attendance' college_slug=college_slug %}" class="btn btn-outline btn-sm" style="font-size: 12px;">Detailed view</a>
     </div>
-    <div class="card-body">
+    
+    <div style="padding: 0;">
       {% if courses %}
         {% for course in courses %}
-          <div style="padding:12px 0; border-bottom:1px solid var(--border);">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div>
-                <div style="font-weight:600; font-size:14px;">{{ course.name }}</div>
-                <div style="font-size:12px; color:var(--text-secondary);">{{ course.code }} &bull; {{ course.credits }} credits</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='transparent'">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(59, 130, 246, 0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--blue); font-size: 14px;">
+                {{ course.code|slice:":3" }}
               </div>
-              {% if course.teacher %}
-                <div style="font-size:12px; color:var(--text-muted);">{{ course.teacher.user.get_full_name }}</div>
-              {% endif %}
+              <div>
+                <div style="font-weight: 600; font-size: 15px; color: var(--text-primary); margin-bottom: 4px;">{{ course.name }}</div>
+                <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                  <span style="background: var(--surface-2); padding: 2px 6px; border-radius: 4px;">{{ course.code }}</span> &bull; 
+                  <i class="fas fa-star" style="color: var(--amber); font-size: 10px;"></i> {{ course.credits }} Credits
+                </div>
+              </div>
             </div>
+            
+            {% if course.teacher %}
+            <div style="text-align: right;">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Instructor</div>
+              <div style="font-size: 13px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                <div style="width: 20px; height: 20px; border-radius: 50%; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold;">
+                  {{ course.teacher.user.first_name|make_list|first }}{{ course.teacher.user.last_name|make_list|first }}
+                </div>
+                {{ course.teacher.user.get_full_name }}
+              </div>
+            </div>
+            {% endif %}
           </div>
         {% endfor %}
       {% else %}
-        <div class="empty-state">
-          <div class="icon">📚</div>
-          <h3>No courses found</h3>
-          <p>Courses matching your department and semester will appear here</p>
+        <div style="padding: 48px 24px; text-align: center;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-muted); margin: 0 auto 16px auto; border: 2px dashed var(--border-strong);">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 16px; font-weight: 600;">No courses found</h3>
+          <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Courses matching your department and semester will appear here once assigned.</p>
         </div>
       {% endif %}
     </div>
   </div>
 
-  <div>
-    <div class="card mb-20">
-      <div class="card-header">
-        <span class="card-title">📝 Upcoming Exams</span>
-        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-sm btn-outline">View All</a>
+  <!-- Right Column: Exams & Notices -->
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+    
+    <!-- Scheduled Exams -->
+    <div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+      <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; background: rgba(139, 92, 246, 0.1); color: rgb(139, 92, 246); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-pen-nib"></i>
+          </div>
+          <span class="card-title" style="margin: 0; font-size: 16px;">Upcoming Exams</span>
+        </div>
+        <a href="{% url 'exams' college_slug=college_slug %}" class="btn btn-outline btn-sm" style="font-size: 12px; padding: 4px 10px;">View all</a>
       </div>
-      <div class="card-body">
+      <div style="padding: 0;">
         {% for exam in upcoming_exams %}
-          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
-            <div style="background:#0f172a; color:white; border-radius:8px; padding:8px 12px; text-align:center; min-width:48px;">
-              <div style="font-size:18px; font-weight:800; font-family:'Outfit',sans-serif;">{{ exam.date|date:"d" }}</div>
-              <div style="font-size:10px; opacity:0.7;">{{ exam.date|date:"M" }}</div>
+          <div style="display: flex; gap: 14px; align-items: stretch; padding: 16px 20px; border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='transparent'">
+            <div style="background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 56px; overflow: hidden; box-shadow: var(--shadow-sm);">
+              <div style="background: var(--blue); color: white; font-size: 10px; font-weight: 700; text-transform: uppercase; width: 100%; text-align: center; padding: 3px 0;">{{ exam.date|date:"M" }}</div>
+              <div style="font-size: 18px; font-weight: 800; color: var(--text-primary); padding: 4px 0;">{{ exam.date|date:"d" }}</div>
             </div>
-            <div>
-              <div style="font-weight:600; font-size:14px;">{{ exam.course.name }}</div>
-              <div style="font-size:12px; color:var(--text-secondary);">{{ exam.get_exam_type_display }} &bull; {{ exam.start_time }} - {{ exam.end_time }}</div>
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+              <div style="font-weight: 600; font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">{{ exam.course.name }}</div>
+              <div style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                <span class="badge badge-purple" style="font-size: 10px; padding: 2px 6px;">{{ exam.get_exam_type_display }}</span>
+                <span><i class="far fa-clock" style="margin-right: 3px;"></i> {{ exam.start_time|time:"H:i" }}</span>
+              </div>
             </div>
           </div>
         {% empty %}
-          <p style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">No upcoming exams 🎉</p>
+          <div style="padding: 24px 20px; text-align: center; color: var(--text-muted);">
+            <i class="fas fa-glass-cheers" style="font-size: 24px; margin-bottom: 12px; opacity: 0.5; color: var(--green);"></i>
+            <div style="font-size: 14px; font-weight: 500;">No upcoming exams. Enjoy!</div>
+          </div>
         {% endfor %}
       </div>
     </div>
-<p style="color:red; font-size:20px;">NOTICE COUNT: {{ recent_notices|length }}</p>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">📢 Notices</span>
-        <a href="{% url 'notices' college_slug=college_slug %}" class="btn btn-sm btn-outline">View All</a>
-      </div>
-      <div class="card-body" style="max-height:250px; overflow-y:auto;">
-        {% for notice in recent_notices %}
-          <div style="padding:10px 0; border-bottom:1px solid var(--border);">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-              <div>
-                <!-- Notice type badge -->
-                <span style="
-                  display:inline-block;
-                  font-size:10px;
-                  font-weight:600;
-                  padding:2px 8px;
-                  border-radius:20px;
-                  margin-bottom:4px;
-                  background:{% if notice.notice_type == 'urgent' %}#fee2e2; color:#dc2626;
-                  {% elif notice.notice_type == 'exam' %}#fef3c7; color:#d97706;
-                  {% elif notice.notice_type == 'academic' %}#dbeafe; color:#2563eb;
-                  {% elif notice.notice_type == 'event' %}#d1fae5; color:#059669;
-                  {% else %}#f3f4f6; color:#6b7280;{% endif %}
-                ">{{ notice.get_notice_type_display }}</span>
-                <div style="font-weight:600; font-size:14px; color:var(--text-primary);">{{ notice.title }}</div>
-              </div>
-              <div style="font-size:11px; color:var(--text-muted); white-space:nowrap;">{{ notice.created_at|date:"M d, Y" }}</div>
-            </div>
+
+    <!-- Campus Notices -->
+    <div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+      <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; background: rgba(16, 185, 129, 0.1); color: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-bullhorn"></i>
           </div>
+          <span class="card-title" style="margin: 0; font-size: 16px;">Campus Notices</span>
+        </div>
+        <a href="{% url 'notices' college_slug=college_slug %}" class="btn btn-outline btn-sm" style="font-size: 12px; padding: 4px 10px;">View all</a>
+      </div>
+      <div style="padding: 0; max-height: 280px; overflow-y: auto;">
+        {% for notice in recent_notices %}
+          <a href="{% url 'notices' college_slug=college_slug %}" style="display: block; padding: 16px 20px; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; transition: background 0.2s ease, padding-left 0.2s ease; position: relative;" onmouseover="this.style.background='var(--surface-2)'; this.style.paddingLeft='24px';" onmouseout="this.style.background='transparent'; this.style.paddingLeft='20px';">
+            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: {% if notice.notice_type == 'urgent' %}var(--red){% elif notice.notice_type == 'exam' %}var(--amber){% elif notice.notice_type == 'event' %}var(--green){% else %}var(--blue){% endif %};"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+              <div>
+                <span class="badge {% if notice.notice_type == 'urgent' %}badge-danger{% elif notice.notice_type == 'exam' %}badge-warning{% elif notice.notice_type == 'event' %}badge-success{% else %}badge-info{% endif %}" style="font-size: 10px; padding: 2px 8px; margin-bottom: 6px;">{{ notice.get_notice_type_display }}</span>
+                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary); line-height: 1.4;">{{ notice.title }}</div>
+              </div>
+              <div style="font-size: 11px; font-weight: 500; color: var(--text-muted); white-space: nowrap; margin-top: 2px;">
+                {{ notice.created_at|date:"M d" }}
+              </div>
+            </div>
+          </a>
         {% empty %}
-          <p style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">No notices 📭</p>
+          <div style="padding: 24px 20px; text-align: center; color: var(--text-muted);">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 12px auto; border: 2px dashed var(--border-strong);">
+              <i class="far fa-bell-slash"></i>
+            </div>
+            <div style="font-size: 14px; font-weight: 500;">No recent communications.</div>
+          </div>
         {% endfor %}
       </div>
     </div>

@@ -1,22 +1,70 @@
 {% extends 'base.html' %}
 {% block title %}Attendance{% endblock %}
-{% block page_title %}Attendance Overview{% endblock %}
+{% block page_title %}College Attendance Overview{% endblock %}
+{% block page_subtitle %}Recent attendance records across all courses in the college{% endblock %}
+
 {% block content %}
-<div class="card">
+<div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+  <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px;">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+      <i class="fas fa-clipboard-list"></i>
+    </div>
+    <div>
+      <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">Recent 50 Records</span>
+      <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Campus-wide attendance logs</div>
+    </div>
+  </div>
+
   <div class="table-container">
-    <table>
-      <thead><tr><th>Student</th><th>Course</th><th>Date</th><th>Status</th><th>Marked By</th></tr></thead>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: var(--surface-2); border-bottom: 2px solid var(--border-strong);">
+          <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Student</th>
+          <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Course</th>
+          <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Date</th>
+          <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Status</th>
+          <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Marked By</th>
+        </tr>
+      </thead>
       <tbody>
         {% for rec in attendance_records %}
-        <tr>
-          <td><div style="font-weight:600; color:var(--text-primary);">{{ rec.student.user.get_full_name }}</div></td>
-          <td>{{ rec.course.name }}</td>
-          <td>{{ rec.date }}</td>
-          <td><span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}">{{ rec.status|capfirst }}</span></td>
-          <td>{{ rec.marked_by.user.get_full_name|default:"—" }}</td>
+        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.backgroundColor='var(--surface-2)'" onmouseout="this.style.backgroundColor='transparent'">
+          <td style="padding: 16px 24px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
+                {{ rec.student.user.first_name|first }}{{ rec.student.user.last_name|first }}
+              </div>
+              <div style="font-weight: 600; color: var(--text-primary); font-size: 14.5px;">{{ rec.student.user.get_full_name }}</div>
+            </div>
+          </td>
+          <td style="padding: 16px 24px;">
+            <div style="font-size: 14.5px; color: var(--text-secondary); font-weight: 500;">{{ rec.course.name }}</div>
+          </td>
+          <td style="padding: 16px 24px;">
+            <div style="color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <i class="far fa-calendar-alt"></i> {{ rec.date|date:"M j, Y" }}
+            </div>
+          </td>
+          <td style="padding: 16px 24px;">
+            <span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}" style="padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+              {% if rec.status == 'present' %}<i class="fas fa-check-circle"></i>{% elif rec.status == 'absent' %}<i class="fas fa-times-circle"></i>{% else %}<i class="fas fa-clock"></i>{% endif %}
+              {{ rec.status|capfirst }}
+            </span>
+          </td>
+          <td style="padding: 16px 24px; color: var(--text-muted); font-size: 14px;">{{ rec.marked_by.user.get_full_name|default:"—" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5"><div class="empty-state"><span class="icon">📋</span><h3>No attendance records yet</h3></div></td></tr>
+        <tr>
+          <td colspan="5" style="padding: 48px; text-align: center;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+              <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-muted); margin-bottom: 16px;">
+                <i class="fas fa-clipboard-list"></i>
+              </div>
+              <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 600;">No attendance records found</h3>
+              <p style="margin: 0; font-size: 15px; max-width: 400px; line-height: 1.5;">No teachers have recorded attendance yet.</p>
+            </div>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>

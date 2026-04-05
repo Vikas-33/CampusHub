@@ -1,23 +1,84 @@
 {% extends 'base.html' %}
 {% block title %}Create Assignment{% endblock %}
 {% block page_title %}Create Assignment{% endblock %}
+{% block page_subtitle %}Set new coursework for your students{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:700px;">
-  <div class="card-header"><span class="card-title">Assignment Details</span></div>
-  <div class="card-body">
-    <form method="post">{% csrf_token %}
-      <div class="form-group"><label class="form-label">Course *</label>{{ form.course }}</div>
-      <div class="form-group"><label class="form-label">Title *</label><input type="text" name="title" class="form-input" required></div>
-      <div class="form-group"><label class="form-label">Description *</label><textarea name="description" class="form-input" rows="4" required></textarea></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Due Date *</label><input type="datetime-local" name="due_date" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Total Marks</label><input type="number" name="total_marks" class="form-input" value="100"></div>
+<div class="card" style="max-width: 700px; margin: 0 auto; box-shadow: var(--shadow-md); border: 1px solid var(--border); border-radius: var(--radius);">
+  <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-radius: var(--radius) var(--radius) 0 0;">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+      <i class="fas fa-file-contract"></i>
+    </div>
+    <div>
+      <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">Assignment Blueprint</span>
+      <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Enter the details and grading structure below</div>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding: 32px 24px;">
+    <form method="post" style="display: flex; flex-direction: column; gap: 20px;">
+      {% csrf_token %}
+      
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Target Course <span style="color: var(--red);">*</span></label>
+        <div style="position: relative;">
+          {{ form.course }}
+          <style>
+            select[name="course"] {
+              width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface-1); color: var(--text-primary); font-size: 15px; appearance: none; transition: border-color 0.2s, box-shadow 0.2s;
+            }
+            select[name="course"]:focus {
+              border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px var(--blue-light);
+            }
+          </style>
+          <div style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);">
+            <i class="fas fa-chevron-down"></i>
+          </div>
+        </div>
       </div>
-      <div style="display:flex; gap:12px;">
-        <button type="submit" class="btn btn-accent">Create Assignment</button>
-        <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Assignment Title <span style="color: var(--red);">*</span></label>
+        <input type="text" name="title" class="form-input" required placeholder="e.g., Midterm Project Presentation" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface-1); font-size: 15px; transition: all 0.2s;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Detailed Instructions <span style="color: var(--red);">*</span></label>
+        <textarea name="description" class="form-input" rows="5" required placeholder="Describe what the students need to accomplish..." style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface-1); font-size: 15px; resize: vertical; transition: all 0.2s;"></textarea>
+      </div>
+
+      <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Due Date & Time <span style="color: var(--red);">*</span></label>
+          <div style="position: relative;">
+            <i class="far fa-calendar-alt" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); z-index: 1;"></i>
+            <input type="datetime-local" name="due_date" class="form-input" required style="width: 100%; padding: 12px 14px 12px 40px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface-1); font-size: 15px; transition: all 0.2s;">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Total Points</label>
+          <div style="position: relative;">
+            <i class="fas fa-gem" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--amber); z-index: 1;"></i>
+            <input type="number" name="total_marks" class="form-input" value="100" min="1" style="width: 100%; padding: 12px 14px 12px 40px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface-1); font-size: 15px; font-weight: 600; transition: all 0.2s;">
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 16px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-accent" style="padding: 12px 24px; font-size: 15px; font-weight: 600; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
+          <i class="fas fa-paper-plane"></i> Publish Assignment
+        </button>
+        <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 24px; font-size: 15px; font-weight: 600; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); border: 1px solid var(--border-strong); background: var(--surface-1);">
+          Cancel
+        </a>
       </div>
     </form>
+    <style>
+      .form-input:focus {
+        border-color: var(--blue) !important; outline: none; box-shadow: 0 0 0 3px var(--blue-light) !important;
+      }
+    </style>
   </div>
 </div>
 {% endblock %}

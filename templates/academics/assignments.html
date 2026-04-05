@@ -1,51 +1,142 @@
 {% extends 'base.html' %}
 {% block title %}Assignments{% endblock %}
 {% block page_title %}Assignments{% endblock %}
+{% block page_subtitle %}Manage coursework, deadlines, and submissions{% endblock %}
+
 {% block topbar_actions %}
   {% if request.user.role == 'teacher' %}
-    <a href="{% url 'add_assignment' college_slug=college_slug %}" class="btn btn-accent">+ Create Assignment</a>
+    <a href="{% url 'add_assignment' college_slug=college_slug %}" class="btn btn-accent" style="display: inline-flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
+      <i class="fas fa-plus"></i> Create Assignment
+    </a>
   {% endif %}
 {% endblock %}
+
 {% block content %}
-<div class="card">
+<div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+  <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px;">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+      <i class="fas fa-tasks"></i>
+    </div>
+    <div>
+      <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">Coursework Overview</span>
+      <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Track assignments and submissions across your classes</div>
+    </div>
+  </div>
+
   <div class="table-container">
-    <table>
+    <table style="width: 100%; border-collapse: collapse;">
       <thead>
-        <tr>
-          <th>Assignment</th><th>Course</th><th>Due Date</th><th>Marks</th>
-          {% if request.user.role == 'student' %}<th>Status</th><th>Score</th>{% elif request.user.role == 'teacher' %}<th>Submissions</th>{% endif %}
-          <th>Action</th>
+        <tr style="background: var(--surface-2); border-bottom: 2px solid var(--border-strong);">
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Assignment Details</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Subject</th>
+          <th style="padding: 16px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Deadline</th>
+          <th style="padding: 16px 24px; text-align: center; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Total Marks</th>
+          {% if request.user.role == 'student' %}
+            <th style="padding: 16px 24px; text-align: center; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Status</th>
+            <th style="padding: 16px 24px; text-align: center; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Score</th>
+          {% elif request.user.role == 'teacher' %}
+            <th style="padding: 16px 24px; text-align: center; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Submissions</th>
+          {% endif %}
+          <th style="padding: 16px 24px; text-align: right; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Action</th>
         </tr>
       </thead>
       <tbody>
         {% for assignment in page_obj %}
-        <tr>
-          <td><div style="font-weight:600; color:var(--text-primary);">{{ assignment.title }}</div><div style="font-size:12px; color:var(--text-muted);">{{ assignment.description|truncatechars:60 }}</div></td>
-          <td>{{ assignment.course.name }}</td>
-          <td>{% if assignment.is_overdue %}<span class="badge badge-danger">{{ assignment.due_date|date:"M d, Y" }} — Overdue</span>{% else %}<span class="badge badge-warning">{{ assignment.due_date|date:"M d, Y" }}</span>{% endif %}</td>
-          <td>{{ assignment.total_marks }}</td>
+        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.backgroundColor='var(--surface-2)'" onmouseout="this.style.backgroundColor='transparent'">
+          <td style="padding: 16px 24px; max-width: 250px;">
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 15px; margin-bottom: 4px;">{{ assignment.title }}</div>
+            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">{{ assignment.description|truncatechars:60 }}</div>
+          </td>
+          
+          <td style="padding: 16px 24px; color: var(--text-secondary); font-size: 14px; font-weight: 500;">
+            {{ assignment.course.name }}
+          </td>
+          
+          <td style="padding: 16px 24px;">
+            {% if assignment.is_overdue %}
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-size: 14px; color: var(--text-primary); font-weight: 500;">{{ assignment.due_date|date:"M d, Y" }}</span>
+                <span class="badge badge-danger" style="align-self: flex-start; padding: 4px 8px; border-radius: 4px; font-size: 11px;"><i class="fas fa-clock" style="margin-right: 4px;"></i>Overdue</span>
+              </div>
+            {% else %}
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-size: 14px; color: var(--text-primary); font-weight: 500;">{{ assignment.due_date|date:"M d, Y" }}</span>
+                <span class="badge badge-warning" style="align-self: flex-start; padding: 4px 8px; border-radius: 4px; font-size: 11px; background: var(--amber-light); color: var(--amber);"><i class="far fa-clock" style="margin-right: 4px;"></i>Upcoming</span>
+              </div>
+            {% endif %}
+          </td>
+          
+          <td style="padding: 16px 24px; text-align: center;">
+            <span style="background: var(--surface-2); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--border);">{{ assignment.total_marks }}</span>
+          </td>
+          
           {% if request.user.role == 'student' %}
-            <td>{% if assignment.pk in submitted_ids %}<span class="badge badge-success">Submitted</span>{% elif assignment.is_overdue %}<span class="badge badge-danger">Missed</span>{% else %}<span class="badge badge-secondary">Pending</span>{% endif %}</td>
-            <td>{% for sub in submissions %}{% if sub.assignment_id == assignment.pk %}{% if sub.marks_obtained is not None %}<strong style="color:var(--green);">{{ sub.marks_obtained }}/{{ assignment.total_marks }}</strong>{% else %}<span style="color:var(--text-muted);">Not graded</span>{% endif %}{% endif %}{% endfor %}</td>
+            <td style="padding: 16px 24px; text-align: center;">
+              {% if assignment.pk in submitted_ids %}
+                <span class="badge badge-success" style="padding: 6px 12px; border-radius: 20px;"><i class="fas fa-check-circle" style="margin-right: 4px;"></i>Submitted</span>
+              {% elif assignment.is_overdue %}
+                <span class="badge badge-danger" style="padding: 6px 12px; border-radius: 20px;"><i class="fas fa-times-circle" style="margin-right: 4px;"></i>Missed</span>
+              {% else %}
+                <span class="badge badge-secondary" style="padding: 6px 12px; border-radius: 20px;"><i class="fas fa-hourglass-half" style="margin-right: 4px;"></i>Pending</span>
+              {% endif %}
+            </td>
+            <td style="padding: 16px 24px; text-align: center;">
+              {% for sub in submissions %}
+                {% if sub.assignment_id == assignment.pk %}
+                  {% if sub.marks_obtained is not None %}
+                    <div style="display: inline-flex; align-items: baseline; gap: 2px;">
+                      <strong style="color: var(--green); font-size: 15px;">{{ sub.marks_obtained }}</strong>
+                      <span style="color: var(--text-muted); font-size: 12px;">/{{ assignment.total_marks }}</span>
+                    </div>
+                  {% else %}
+                    <span style="color: var(--text-muted); font-size: 13px; font-style: italic;">Not graded</span>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            </td>
           {% elif request.user.role == 'teacher' %}
-            <td><span class="badge badge-info">{{ assignment.submission_count }} submitted</span></td>
+            <td style="padding: 16px 24px; text-align: center;">
+              <span class="badge badge-info" style="padding: 6px 12px; border-radius: 20px; font-weight: 600;">
+                <i class="fas fa-inbox" style="margin-right: 6px;"></i>{{ assignment.submission_count }} Submitted
+              </span>
+            </td>
           {% endif %}
-          <td>
+          
+          <td style="padding: 16px 24px; text-align: right;">
             {% if request.user.role == 'student' %}
-              {% if assignment.pk in submitted_ids %}<span style="font-size:13px; color:var(--text-muted);">Done ✓</span>
-              {% elif not assignment.is_overdue %}<a href="{% url 'submit_assignment' college_slug=college_slug pk=assignment.pk %}" class="btn btn-xs btn-success">Submit</a>
-              {% else %}<span style="font-size:13px; color:var(--red);">Closed</span>{% endif %}
+              {% if assignment.pk in submitted_ids %}
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: var(--green-light); color: var(--green);" title="Completed">
+                  <i class="fas fa-check"></i>
+                </span>
+              {% elif not assignment.is_overdue %}
+                <a href="{% url 'submit_assignment' college_slug=college_slug pk=assignment.pk %}" class="btn btn-xs btn-success" style="padding: 8px 16px; border-radius: 6px; box-shadow: var(--shadow-sm);">Submit <i class="fas fa-arrow-right" style="margin-left: 4px;"></i></a>
+              {% else %}
+                <span style="font-size: 13px; font-weight: 600; color: var(--red); background: rgba(239,68,68,0.1); padding: 6px 12px; border-radius: 6px;">Closed</span>
+              {% endif %}
             {% elif request.user.role == 'teacher' %}
-              <a href="{% url 'grade_submissions' college_slug=college_slug pk=assignment.pk %}" class="btn btn-xs btn-info">Grade</a>
+              <a href="{% url 'grade_submissions' college_slug=college_slug pk=assignment.pk %}" class="btn btn-xs btn-info" style="padding: 8px 16px; border-radius: 6px; box-shadow: var(--shadow-sm);">Grade <i class="fas fa-edit" style="margin-left: 4px;"></i></a>
             {% endif %}
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="7"><div class="empty-state"><span class="icon">📄</span><h3>No assignments yet</h3></div></td></tr>
+        <tr>
+          <td colspan="{% if request.user.role == 'student' %}7{% else %}6{% endif %}" style="padding: 64px 24px; text-align: center;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+              <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--text-muted); margin-bottom: 20px; border: 2px dashed var(--border-strong);">
+                <i class="fas fa-sticky-note"></i>
+              </div>
+              <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 700;">No assignments available</h3>
+              <p style="margin: 0; font-size: 15px; max-width: 350px; line-height: 1.5;">There are no active assignments published for your courses at this time.</p>
+            </div>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  {% include 'includes/pagination.html' %}
+  
+  <div style="padding: 16px 24px; border-top: 1px solid var(--border);">
+    {% include 'includes/pagination.html' %}
+  </div>
 </div>
 {% endblock %}

@@ -1,25 +1,63 @@
 {% extends 'base.html' %}
 {% block title %}Edit Department{% endblock %}
 {% block page_title %}Edit Department{% endblock %}
+{% block page_subtitle %}Modify structural details and leadership assignments{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:600px;">
-  <div class="card-header"><span class="card-title">Edit — {{ dept.name }}</span></div>
-  <div class="card-body">
+<div class="card" style="max-width:700px; margin: 0 auto; box-shadow: var(--shadow-lg); border: none;">
+  <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 24px 32px;">
+    <span class="card-title" style="font-size: 20px; letter-spacing: -0.5px;">{{ dept.name }} ({{ dept.code }})</span>
+    <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 6px;">Manage branch structure metrics and assigned HODs.</p>
+  </div>
+  
+  <div class="card-body" style="padding: 32px;">
     <form method="post">{% csrf_token %}
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Department Name *</label><input type="text" name="name" class="form-input" value="{{ dept.name }}" required></div>
-        <div class="form-group"><label class="form-label">Department Code *</label><input type="text" name="code" class="form-input" value="{{ dept.code }}" required></div>
+      
+      <!-- Section: General Identification -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Identity & Scope</h4>
+        
+        <div class="form-group">
+          <label class="form-label">Department Name <span style="color: var(--red);">*</span></label>
+          <input type="text" name="name" class="form-input" value="{{ dept.name }}" required style="padding: 10px 14px; border-radius: var(--radius); font-weight: 500; font-size: 15px;">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Department Code <span style="color: var(--red);">*</span></label>
+            <input type="text" name="code" class="form-input" value="{{ dept.code }}" required style="text-transform: uppercase; padding: 10px 14px; border-radius: var(--radius); font-weight: 700; letter-spacing: 1px;">
+            <small style="color: var(--text-muted); font-size: 12px; margin-top: 6px; display: block;">2-6 Character Unique Prefix</small>
+          </div>
+        </div>
       </div>
-      <div class="form-group"><label class="form-label">Head of Department</label>
-        <select name="head_of_department" class="form-input">
-          <option value="">— None —</option>
-          {% for teacher in teachers %}<option value="{{ teacher.pk }}" {% if dept.head_of_department and dept.head_of_department.pk == teacher.pk %}selected{% endif %}>{{ teacher.user.get_full_name }} ({{ teacher.employee_id }})</option>{% endfor %}
-        </select>
+
+      <!-- Section: Leadership & Info -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Configuration</h4>
+        
+        <div class="form-group">
+          <label class="form-label">Head of Department <span style="font-weight: normal; color: var(--text-muted);">(Optional)</span></label>
+          <select name="head_of_department" class="form-input" style="padding: 10px 14px; border-radius: var(--radius); cursor: pointer;">
+            <option value="">— Unassigned (None) —</option>
+            {% for teacher in teachers %}
+              <option value="{{ teacher.pk }}" {% if dept.head_of_department and dept.head_of_department.pk == teacher.pk %}selected{% endif %}>{{ teacher.user.get_full_name }} ({{ teacher.employee_id|default:"TCH" }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <label class="form-label">Overview & Description</label>
+          <textarea name="description" class="form-input" rows="4" style="padding: 12px 14px; border-radius: var(--radius); resize: vertical; line-height: 1.5;">{{ dept.description }}</textarea>
+        </div>
       </div>
-      <div class="form-group"><label class="form-label">Description</label><textarea name="description" class="form-input" rows="3">{{ dept.description }}</textarea></div>
-      <div style="display:flex; gap:12px;">
-        <button type="submit" class="btn btn-accent">Save Changes</button>
-        <a href="{% url 'departments' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+
+      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: var(--shadow-sm);">
+          <i class="fas fa-save" style="margin-right: 8px;"></i> Save Changes
+        </button>
+        <a href="{% url 'departments' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
+          Cancel & Return
+        </a>
       </div>
     </form>
   </div>

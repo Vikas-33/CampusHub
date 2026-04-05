@@ -1,28 +1,98 @@
 {% extends 'base.html' %}
 {% block title %}Add Fee Structure{% endblock %}
-{% block page_title %}Add Fee Structure{% endblock %}
+{% block page_title %}New Fee Structure{% endblock %}
+{% block page_subtitle %}Define financial obligations, tuitions, or auxiliary charges for students{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:600px;">
-  <div class="card-header"><span class="card-title">Fee Structure Details</span></div>
-  <div class="card-body">
+<div class="card" style="max-width: 700px; margin: 0 auto; box-shadow: var(--shadow-lg); border: none;">
+  <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 24px 32px;">
+    <span class="card-title" style="font-size: 20px; letter-spacing: -0.5px;">Fee Configuration</span>
+    <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 6px;">Configure amounts, deadlines, and scoping criteria for this fee.</p>
+  </div>
+  
+  <div class="card-body" style="padding: 32px;">
     <form method="post">{% csrf_token %}
-      <div class="form-group"><label class="form-label">Name *</label><input type="text" name="name" class="form-input" placeholder="e.g. Tuition Fee Sem 1" required></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Amount (₹) *</label><input type="number" name="amount" class="form-input" step="0.01" required></div>
-        <div class="form-group"><label class="form-label">Due Date</label><input type="date" name="due_date" class="form-input"></div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Department (blank = all)</label><input type="text" name="department" class="form-input"></div>
-        <div class="form-group"><label class="form-label">Semester</label>
-          <select name="semester" class="form-input"><option value="">All</option>{% for i in "12345678" %}<option value="{{ i }}">Sem {{ i }}</option>{% endfor %}</select>
+      
+      <!-- Basics Section -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Core Details</h4>
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">Structure Name / Title <span style="color: var(--red);">*</span></label>
+          <input type="text" name="name" class="form-input" placeholder="e.g. Tuition Fee Sem 1, Library Deposit..." required style="padding: 10px 14px; border-radius: var(--radius); font-weight: 500; font-size: 15px;">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Total Amount (₹) <span style="color: var(--red);">*</span></label>
+            <div style="position: relative;">
+               <div style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--green); font-weight: bold;">₹</div>
+               <input type="number" name="amount" class="form-input" step="0.01" required style="padding: 10px 14px 10px 32px; border-radius: var(--radius); font-weight: 700; font-size: 16px; color: var(--text-primary);">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Due Date</label>
+            <input type="date" name="due_date" class="form-input" style="padding: 10px 14px; border-radius: var(--radius); color: var(--text-secondary); cursor: pointer;">
+          </div>
         </div>
       </div>
-      <div class="form-group"><label class="form-label">Description</label><textarea name="description" class="form-input" rows="2"></textarea></div>
-      <div style="display:flex; gap:12px;">
-        <button type="submit" class="btn btn-accent">Add Structure</button>
-        <a href="{% url 'fees' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+
+      <!-- Scope Section -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Target Audience</h4>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Applicable Department</label>
+            <input type="text" name="department" class="form-input" placeholder="Leave blank to apply to all departments" style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Applicable Semester</label>
+            <select name="semester" class="form-input" style="padding: 10px 14px; border-radius: var(--radius); cursor: pointer;">
+              <option value="">All Semesters</option>
+              {% for i in "12345678" %}
+              <option value="{{ i }}">Semester {{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 16px;">
+          <label class="form-label">Term Description & Notes</label>
+          <textarea name="description" class="form-input" rows="3" placeholder="Additional details about breakdown, late fees, or internal references..." style="padding: 12px 14px; border-radius: var(--radius); resize: vertical; line-height: 1.5;"></textarea>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: var(--shadow-sm);">
+          <i class="fas fa-save" style="margin-right: 8px;"></i> Publish Fee Structure
+        </button>
+        <a href="{% url 'fees' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
+          Cancel & Return
+        </a>
       </div>
     </form>
   </div>
 </div>
+
+<style>
+  /* Patch any rogue forms */
+  select[name="semester"] {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background-color: var(--surface-1);
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
+    font-size: 14.5px;
+    transition: all 0.2s ease;
+  }
+  select[name="semester"]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-light);
+  }
+</style>
 {% endblock %}

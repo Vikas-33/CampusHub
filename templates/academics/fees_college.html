@@ -1,44 +1,141 @@
 {% extends 'base.html' %}
-{% block title %}Fees{% endblock %}
-{% block page_title %}Fee Management{% endblock %}
+{% block title %}Fees Management{% endblock %}
+{% block page_title %}Financial Management{% endblock %}
+{% block page_subtitle %}Monitor fee structures, collected payments, and student financial records{% endblock %}
+
 {% block topbar_actions %}
-  <a href="{% url 'add_fee_structure' college_slug=college_slug %}" class="btn btn-outline">+ Fee Structure</a>
-  <a href="{% url 'record_payment' college_slug=college_slug %}" class="btn btn-accent">+ Record Payment</a>
+  <div style="display: flex; gap: 12px;">
+    <a href="{% url 'add_fee_structure' college_slug=college_slug %}" class="btn btn-outline" style="box-shadow: var(--shadow-sm);"><i class="fas fa-file-invoice-dollar" style="margin-right: 6px;"></i> Add Structure</a>
+    <a href="{% url 'record_payment' college_slug=college_slug %}" class="btn btn-primary" style="box-shadow: var(--shadow-sm);"><i class="fas fa-hand-holding-usd" style="margin-right: 6px;"></i> Record Payment</a>
+  </div>
 {% endblock %}
+
 {% block content %}
-<div class="stats-grid" style="margin-bottom:20px;">
-  <div class="stat-card green" style="position:relative;"><div class="stat-icon-wrap">✅</div><div class="stat-label" style="margin-bottom:6px;">Paid</div><div class="stat-value">{{ paid_count }}</div></div>
-  <div class="stat-card red" style="position:relative;"><div class="stat-icon-wrap">⏳</div><div class="stat-label" style="margin-bottom:6px;">Pending</div><div class="stat-value">{{ pending_count }}</div></div>
+<!-- Stats Overview -->
+<div class="stats-grid" style="margin-bottom: 32px; gap: 24px;">
+  <div class="stat-card" style="position: relative; background: var(--surface-1); border-left: 4px solid var(--green); box-shadow: var(--shadow-md); padding: 24px; border-radius: var(--radius-lg); overflow: hidden;">
+    <div style="position: absolute; top: 20px; right: 20px; font-size: 28px; color: var(--green); opacity: 0.2;"><i class="fas fa-check-circle"></i></div>
+    <div class="stat-label" style="font-size: 14px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px;">Fully Paid</div>
+    <div class="stat-value" style="font-size: 36px; font-weight: 800; color: var(--text-primary); letter-spacing: -1px;">{{ paid_count }}</div>
+    <div style="font-size: 13px; color: var(--green); margin-top: 8px; font-weight: 500;"><i class="fas fa-arrow-up" style="margin-right: 4px;"></i> Students Settled</div>
+  </div>
+  
+  <div class="stat-card" style="position: relative; background: var(--surface-1); border-left: 4px solid var(--red); box-shadow: var(--shadow-md); padding: 24px; border-radius: var(--radius-lg); overflow: hidden;">
+    <div style="position: absolute; top: 20px; right: 20px; font-size: 28px; color: var(--red); opacity: 0.2;"><i class="fas fa-exclamation-circle"></i></div>
+    <div class="stat-label" style="font-size: 14px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px;">Payments Pending</div>
+    <div class="stat-value" style="font-size: 36px; font-weight: 800; color: var(--text-primary); letter-spacing: -1px;">{{ pending_count }}</div>
+    <div style="font-size: 13px; color: var(--red); margin-top: 8px; font-weight: 500;"><i class="fas fa-exclamation-triangle" style="margin-right: 4px;"></i> Action Required</div>
+  </div>
 </div>
-<div class="grid-2">
-  <div class="card">
-    <div class="card-header"><span class="card-title">Fee Structures</span></div>
-    <div class="table-container">
-      <table>
-        <thead><tr><th>Name</th><th>Amount</th><th>Department</th><th>Due Date</th></tr></thead>
+
+<div class="grid-2" style="gap: 24px;">
+  <!-- Fee Structures Table -->
+  <div class="card" style="box-shadow: var(--shadow-lg); border: none; display: flex; flex-direction: column;">
+    <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+      <span class="card-title" style="font-size: 18px; font-weight: 700; color: var(--text-primary);">
+        <i class="fas fa-layer-group" style="color: var(--blue); margin-right: 8px;"></i> Active Fee Structures
+      </span>
+    </div>
+    <div class="table-container" style="flex: 1;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background: var(--surface-1); border-bottom: 2px solid var(--border);">
+          <tr>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Structure Name</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Amount</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Department</th>
+            <th style="padding: 16px 24px; text-align: right; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Due Date</th>
+          </tr>
+        </thead>
         <tbody>
           {% for fs in fee_structures %}
-          <tr><td>{{ fs.name }}</td><td><strong>₹{{ fs.amount }}</strong></td><td>{{ fs.department|default:"All" }}</td><td>{{ fs.due_date|date:"M d, Y"|default:"—" }}</td></tr>
-          {% empty %}<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-muted);">No structures defined</td></tr>{% endfor %}
+          <tr style="border-bottom: 1px solid var(--border); transition: background-color 0.2s;">
+            <td style="padding: 16px 24px;">
+              <div style="font-weight: 600; color: var(--text-primary);">{{ fs.name }}</div>
+            </td>
+            <td style="padding: 16px 24px;">
+              <span style="font-weight: 700; color: var(--green); background: rgba(34, 197, 94, 0.1); padding: 4px 10px; border-radius: var(--radius); font-size: 13.5px;">₹{{ fs.amount }}</span>
+            </td>
+            <td style="padding: 16px 24px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-building" style="color: var(--text-muted); font-size: 12px;"></i>
+                <span style="color: var(--text-secondary); font-size: 14px;">{{ fs.department|default:"All Departments" }}</span>
+              </div>
+            </td>
+            <td style="padding: 16px 24px; text-align: right; color: var(--text-secondary); font-size: 14px; font-weight: 500;">
+              {% if fs.due_date %}
+                <i class="far fa-calendar-alt" style="margin-right: 4px; color: var(--text-muted);"></i> {{ fs.due_date|date:"M d, Y" }}
+              {% else %}
+                <span style="color: var(--text-muted);">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state" style="padding: 40px 20px; text-align: center;">
+                <div style="font-size: 40px; color: var(--text-muted); opacity: 0.5; margin-bottom: 16px;"><i class="fas fa-folder-open"></i></div>
+                <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">No Structures Defined</h4>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">Create a fee structure to begin recording payments.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-  <div class="card">
-    <div class="card-header"><span class="card-title">Recent Payments</span></div>
-    <div class="table-container">
-      <table>
-        <thead><tr><th>Student</th><th>Fee</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+
+  <!-- Recent Payments Table -->
+  <div class="card" style="box-shadow: var(--shadow-lg); border: none; display: flex; flex-direction: column;">
+    <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+      <span class="card-title" style="font-size: 18px; font-weight: 700; color: var(--text-primary);">
+        <i class="fas fa-history" style="color: var(--blue); margin-right: 8px;"></i> Recent Transactions
+      </span>
+    </div>
+    <div class="table-container" style="flex: 1;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background: var(--surface-1); border-bottom: 2px solid var(--border);">
+          <tr>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Student</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Amount Paid</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+            <th style="padding: 16px 24px; text-align: right; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Date</th>
+          </tr>
+        </thead>
         <tbody>
           {% for payment in payments %}
-          <tr>
-            <td>{{ payment.student.user.get_full_name }}</td>
-            <td>{{ payment.fee_structure.name }}</td>
-            <td>₹{{ payment.amount_paid }}</td>
-            <td><span class="badge {% if payment.status == 'paid' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% elif payment.status == 'overdue' %}badge-danger{% else %}badge-info{% endif %}">{{ payment.status|capfirst }}</span></td>
-            <td>{{ payment.payment_date|date:"M d"|default:"—" }}</td>
+          <tr style="border-bottom: 1px solid var(--border); transition: background-color 0.2s;">
+            <td style="padding: 16px 24px;">
+              <div style="font-weight: 600; color: var(--text-primary);">{{ payment.student.user.get_full_name }}</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">{{ payment.fee_structure.name|truncatechars:25 }}</div>
+            </td>
+            <td style="padding: 16px 24px;">
+              <span style="font-weight: 700; color: var(--text-primary); font-size: 14px;">₹{{ payment.amount_paid }}</span>
+            </td>
+            <td style="padding: 16px 24px;">
+              <span class="badge {% if payment.status == 'paid' %}badge-success{% elif payment.status == 'pending' %}badge-warning{% elif payment.status == 'overdue' %}badge-danger{% else %}badge-info{% endif %}" style="font-size: 11px; padding: 4px 10px; font-weight: 700;">
+                {{ payment.status|upper }}
+              </span>
+            </td>
+            <td style="padding: 16px 24px; text-align: right; color: var(--text-secondary); font-size: 14px;">
+              {% if payment.payment_date %}
+                <div style="font-weight: 500;">{{ payment.payment_date|date:"M d, Y" }}</div>
+              {% else %}
+                <span style="color: var(--text-muted);">—</span>
+              {% endif %}
+            </td>
           </tr>
-          {% empty %}<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--text-muted);">No payments recorded</td></tr>{% endfor %}
+          {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state" style="padding: 40px 20px; text-align: center;">
+                <div style="font-size: 40px; color: var(--text-muted); opacity: 0.5; margin-bottom: 16px;"><i class="fas fa-receipt"></i></div>
+                <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">No Payments Found</h4>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">Transactions will appear here once recorded.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>

@@ -1,28 +1,107 @@
 {% extends 'base.html' %}
-{% block title %}Post Notice{% endblock %}
-{% block page_title %}Post Notice{% endblock %}
+{% block title %}Add Notice{% endblock %}
+{% block page_title %}New Notice / Announcement{% endblock %}
+{% block page_subtitle %}Broadcast important information to students and faculty{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:700px;">
-  <div class="card-header"><span class="card-title">Notice Details</span></div>
-  <div class="card-body">
-    {% if form.errors %}<div class="alert alert-error">❌ Please fix the errors below.</div>{% endif %}
+<div class="card" style="max-width: 750px; margin: 0 auto; box-shadow: var(--shadow-lg); border: none;">
+  <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 24px 32px;">
+    <span class="card-title" style="font-size: 20px; letter-spacing: -0.5px;">Notice Composer</span>
+    <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 6px;">Draft announcements, set visibility rules, and publish to the campus board.</p>
+  </div>
+  
+  <div class="card-body" style="padding: 32px;">
+    {% if form.errors %}
+    <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--red); padding: 16px; border-radius: var(--radius); margin-bottom: 24px; color: var(--red); font-weight: 500;">
+      <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i> Please review the fields below to correct errors.
+    </div>
+    {% endif %}
+    
     <form method="post">{% csrf_token %}
-      <div class="form-group"><label class="form-label">Title *</label><input type="text" name="title" class="form-input" value="{{ form.title.value|default:'' }}" required></div>
-      <div class="form-group"><label class="form-label">Content *</label><textarea name="content" class="form-input" rows="5" required>{{ form.content.value|default:'' }}</textarea></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Type</label>{{ form.notice_type }}</div>
-        <div class="form-group"><label class="form-label">Target Audience</label>{{ form.target_audience }}</div>
+      
+      <!-- Broadcast Details Section -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Content Settings</h4>
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">Notice Headline <span style="color: var(--red);">*</span></label>
+          <input type="text" name="title" class="form-input" placeholder="e.g. End of Semester Examinations Update" value="{{ form.title.value|default:'' }}" required style="padding: 10px 14px; border-radius: var(--radius); font-weight: 500; font-size: 16px;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Main Announcement Body <span style="color: var(--red);">*</span></label>
+          <textarea name="content" class="form-input" rows="6" placeholder="Type the full message here. Be clear and concise..." required style="padding: 14px; border-radius: var(--radius); resize: vertical; line-height: 1.6; font-size: 14.5px;">{{ form.content.value|default:'' }}</textarea>
+        </div>
       </div>
-      <div class="form-group"><label class="form-label">Expiry Date (optional)</label><input type="datetime-local" name="expires_at" class="form-input" value="{{ form.expires_at.value|default:'' }}"></div>
-      <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-        <input type="checkbox" name="is_active" id="is_active" checked>
-        <label for="is_active" class="form-label" style="margin:0;">Active <span style="font-weight:400; color:var(--text-muted);">(uncheck to save as draft)</span></label>
+
+      <!-- Visibility and Scoping Section -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Targeting & Lifecycle</h4>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Notice Category <span style="color: var(--red);">*</span></label>
+            <div style="border-radius: var(--radius);">
+              {{ form.notice_type }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Broadcast Audience <span style="color: var(--red);">*</span></label>
+            <div style="border-radius: var(--radius);">
+              {{ form.target_audience }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 16px;">
+          <div class="form-group">
+            <label class="form-label">Auto-Expiry Date <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
+            <input type="datetime-local" name="expires_at" class="form-input" value="{{ form.expires_at.value|default:'' }}" style="padding: 10px 14px; border-radius: var(--radius); cursor: pointer;">
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 24px; padding: 16px; background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <input type="checkbox" name="is_active" id="is_active" checked style="width: 18px; height: 18px; accent-color: var(--blue); cursor: pointer;">
+            <div>
+              <label for="is_active" style="margin: 0; font-weight: 600; color: var(--text-primary); cursor: pointer;">Publish Immediately</label>
+              <div style="color: var(--text-muted); font-size: 13px; margin-top: 2px;">If unchecked, this notice will be saved as a draft and hidden from users.</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div style="display:flex; gap:12px; margin-top:8px;">
-        <button type="submit" class="btn btn-accent">Post Notice</button>
-        <a href="{% url 'notices' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: var(--shadow-sm);">
+          <i class="fas fa-bullhorn" style="margin-right: 8px;"></i> Broadcast Notice
+        </button>
+        <a href="{% url 'notices' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
+          Cancel & Exit
+        </a>
       </div>
     </form>
   </div>
 </div>
+
+<style>
+  /* Patch for form select widgets */
+  select[name="notice_type"], select[name="target_audience"] {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background-color: var(--surface-1);
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  select[name="notice_type"]:focus, select[name="target_audience"]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-light);
+  }
+</style>
 {% endblock %}

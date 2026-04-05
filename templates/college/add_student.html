@@ -1,39 +1,128 @@
 {% extends 'base.html' %}
 {% block title %}Enroll Student{% endblock %}
 {% block page_title %}Enroll Student{% endblock %}
-{% block page_subtitle %}Auto-generates roll number and credentials{% endblock %}
+{% block page_subtitle %}Register a new student and auto-generate credentials{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:780px;">
-  <div class="card-header"><span class="card-title">Student Information</span></div>
-  <div class="card-body">
-    <div class="alert alert-info">ℹ️ Roll number, enrollment number and login credentials will be auto-generated.</div>
+<div class="card" style="max-width:900px; margin: 0 auto; box-shadow: var(--shadow-lg); border: none;">
+  <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 24px 32px;">
+    <span class="card-title" style="font-size: 20px; letter-spacing: -0.5px;">Student Registration</span>
+    <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 6px;">Fill in the details below to enroll a new student to the institution.</p>
+  </div>
+  
+  <div class="card-body" style="padding: 32px;">
+    <div class="alert alert-info" style="display: flex; align-items: center; gap: 12px; margin-bottom: 28px; border-radius: var(--radius-lg);">
+      <div style="font-size: 20px;">ℹ️</div>
+      <div>
+        <strong style="display: block; font-size: 14px; color: var(--text-primary);">Automated Enrollment Credentials</strong>
+        <span style="font-size: 13px;">Roll number, enrollment number, and login credentials will be automatically generated upon submission. Default password is the generated Roll Number.</span>
+      </div>
+    </div>
+
     <form method="post">{% csrf_token %}
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">First Name *</label><input type="text" name="first_name" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Last Name *</label><input type="text" name="last_name" class="form-input" required></div>
+      
+      <!-- Section: Personal & Contact Details -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Personal & Contact Details</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">First Name <span style="color: var(--red);">*</span></label>
+            <input type="text" name="first_name" class="form-input" placeholder="e.g. John" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name <span style="color: var(--red);">*</span></label>
+            <input type="text" name="last_name" class="form-input" placeholder="e.g. Smith" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Email Address <span style="color: var(--red);">*</span></label>
+            <input type="email" name="email" class="form-input" placeholder="john.smith@example.com" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" name="phone" class="form-input" placeholder="+1 (555) 000-0000" style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of Birth</label>
+          <input type="date" name="date_of_birth" class="form-input" style="padding: 10px 14px; border-radius: var(--radius); color: var(--text-primary);">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Residential Address</label>
+          <textarea name="address" class="form-input" rows="2" placeholder="123 Campus Street, City..." style="padding: 10px 14px; border-radius: var(--radius);"></textarea>
+        </div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-input"></div>
+
+      <!-- Section: Academic Details -->
+      <div style="margin-bottom: 32px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Academic Enrollment</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Department <span style="color: var(--red);">*</span></label>
+            <!-- Using custom style on form.department -->
+            <div style="border-radius: var(--radius);">
+              {{ form.department }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Current Semester <span style="color: var(--red);">*</span></label>
+            <input type="number" name="semester" class="form-input" value="1" min="1" max="8" required style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr; /* Takes full width of parent by default */">
+          <div class="form-group">
+            <label class="form-label">Batch Year <span style="color: var(--red);">*</span></label>
+            <input type="number" name="batch_year" class="form-input" placeholder="e.g. 2024" required style="padding: 10px 14px; border-radius: var(--radius); width: 50%;">
+          </div>
+        </div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Department *</label>{{ form.department }}</div>
-        <div class="form-group"><label class="form-label">Semester *</label><input type="number" name="semester" class="form-input" min="1" max="8" required></div>
+
+      <!-- Section: Guardian Info -->
+      <div style="margin-bottom: 36px;">
+        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Guardian / Emergency Contact</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Guardian Name</label>
+            <input type="text" name="guardian_name" class="form-input" placeholder="e.g. Michael Smith" style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Guardian Phone</label>
+            <input type="text" name="guardian_phone" class="form-input" placeholder="+1 (555) 123-4567" style="padding: 10px 14px; border-radius: var(--radius);">
+          </div>
+        </div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Batch Year *</label><input type="number" name="batch_year" class="form-input" placeholder="e.g. 2024" required></div>
-        <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" name="date_of_birth" class="form-input"></div>
-      </div>
-      <div class="form-group"><label class="form-label">Address</label><textarea name="address" class="form-input" rows="2"></textarea></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Guardian Name</label><input type="text" name="guardian_name" class="form-input"></div>
-        <div class="form-group"><label class="form-label">Guardian Phone</label><input type="text" name="guardian_phone" class="form-input"></div>
-      </div>
-      <div style="display:flex; gap:12px; margin-top:8px;">
-        <button type="submit" class="btn btn-accent">Enroll Student</button>
-        <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+
+      <!-- Actions -->
+      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: var(--shadow-sm);">
+          <i class="fas fa-user-graduate" style="margin-right: 8px;"></i> Enroll Student
+        </button>
+        <a href="{% url 'manage_students' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
+          Cancel & Return
+        </a>
       </div>
     </form>
   </div>
 </div>
+<style>
+  /* Patch for form.department django widget */
+  select[name="department"] {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background-color: var(--surface-1);
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  select[name="department"]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-light);
+  }
+</style>
 {% endblock %}

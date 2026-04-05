@@ -1,50 +1,129 @@
 {% extends 'base.html' %}
 {% block title %}Attendance{% endblock %}
 {% block page_title %}Attendance Management{% endblock %}
+{% block page_subtitle %}Manage and track attendance for the courses you teach{% endblock %}
+
 {% block topbar_actions %}
   {% if selected_course %}
-    <a href="{% url 'export_attendance_teacher' college_slug=college_slug selected_course.pk %}" class="btn btn-outline">📥 Export CSV</a>
+    <a href="{% url 'export_attendance_teacher' college_slug=college_slug course_id=selected_course.pk %}" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); font-weight: 600; box-shadow: var(--shadow-sm);"><i class="fas fa-file-download"></i> Export CSV</a>
   {% endif %}
 {% endblock %}
+
 {% block content %}
-<div class="grid-2">
-  <div class="card">
-    <div class="card-header"><span class="card-title">My Courses</span></div>
-    <div class="card-body" style="padding:0;">
+<div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+  
+  <div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+    <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px;">
+      <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+        <i class="fas fa-chalkboard-teacher"></i>
+      </div>
+      <div>
+        <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">My Courses</span>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Select a course to view records</div>
+      </div>
+    </div>
+    
+    <div class="card-body" style="padding: 0;">
       {% for course in courses %}
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 20px;border-bottom:1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); transition: background 0.2s ease; {% if course == selected_course %}background: var(--blue-light); border-left: 4px solid var(--blue);{% else %}border-left: 4px solid transparent;{% endif %}" onmouseover="this.style.backgroundColor='{% if course == selected_course %}var(--blue-light){% else %}var(--surface-2){% endif %}'" onmouseout="this.style.backgroundColor='{% if course == selected_course %}var(--blue-light){% else %}transparent{% endif %}'">
         <div>
-          <div style="font-weight:600; color:var(--text-primary);">{{ course.name }}</div>
-          <div style="font-size:12px;color:var(--text-muted);">{{ course.code }} · Sem {{ course.semester }}</div>
+          <div style="font-weight: 600; color: var(--text-primary); font-size: 15px; display: flex; align-items: center; gap: 8px;">
+            {{ course.name }}
+          </div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-tag"></i> {{ course.code }} <span style="color: var(--border-strong);">|</span> 
+            <i class="fas fa-layer-group"></i> Sem {{ course.semester }}
+          </div>
         </div>
-        <div style="display:flex;gap:8px;">
-          <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-sm btn-success">Mark Today</a>
-          <a href="?course={{ course.pk }}" class="btn btn-sm btn-outline">Records</a>
+        <div style="display: flex; gap: 8px;">
+          <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-sm btn-success" style="padding: 8px 12px; border-radius: var(--radius); font-weight: 600; display: flex; gap: 6px; align-items: center; font-size: 12.5px;">
+            <i class="fas fa-check-double"></i> Mark Today
+          </a>
+          <a href="?course={{ course.pk }}" class="btn btn-sm btn-outline" style="padding: 8px 12px; border-radius: var(--radius); font-weight: 600; display: flex; gap: 6px; align-items: center; font-size: 12.5px;">
+            <i class="fas fa-list"></i> Records
+          </a>
         </div>
       </div>
       {% empty %}
-      <div class="empty-state"><span class="icon">📚</span><h3>No courses assigned</h3></div>
+      <div style="padding: 48px; text-align: center;">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-muted); margin-bottom: 16px;">
+            <i class="fas fa-book"></i>
+          </div>
+          <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 18px; font-weight: 600;">No courses assigned</h3>
+          <p style="margin: 0; font-size: 15px; max-width: 400px; line-height: 1.5;">You are not assigned to any active courses.</p>
+        </div>
+      </div>
       {% endfor %}
     </div>
   </div>
+
   {% if selected_course %}
-  <div class="card">
-    <div class="card-header"><span class="card-title">Records: {{ selected_course.name }}</span></div>
+  <div class="card" style="box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+    <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px;">
+      <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--amber-light); color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+        <i class="fas fa-history"></i>
+      </div>
+      <div>
+        <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">Records: {{ selected_course.name }}</span>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Recent attendance specific to this course</div>
+      </div>
+    </div>
     <div class="table-container">
-      <table>
-        <thead><tr><th>Student</th><th>Date</th><th>Status</th></tr></thead>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: var(--surface-2); border-bottom: 2px solid var(--border-strong);">
+            <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Student</th>
+            <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Date</th>
+            <th style="padding: 14px 24px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Status</th>
+          </tr>
+        </thead>
         <tbody>
           {% for rec in attendance_records %}
-          <tr>
-            <td>{{ rec.student.user.get_full_name }}</td>
-            <td>{{ rec.date }}</td>
-            <td><span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}">{{ rec.status|capfirst }}</span></td>
+          <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s ease;" onmouseover="this.style.backgroundColor='var(--surface-2)'" onmouseout="this.style.backgroundColor='transparent'">
+            <td style="padding: 16px 24px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px;">
+                  {{ rec.student.user.first_name|first }}{{ rec.student.user.last_name|first }}
+                </div>
+                <div style="font-weight: 600; color: var(--text-primary); font-size: 14.5px;">{{ rec.student.user.get_full_name }}</div>
+              </div>
+            </td>
+            <td style="padding: 16px 24px;">
+              <div style="color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                <i class="far fa-calendar-alt"></i> {{ rec.date|date:"M j, Y" }}
+              </div>
+            </td>
+            <td style="padding: 16px 24px;">
+              <span class="badge {% if rec.status == 'present' %}badge-success{% elif rec.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}" style="padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                {% if rec.status == 'present' %}<i class="fas fa-check-circle"></i>{% elif rec.status == 'absent' %}<i class="fas fa-times-circle"></i>{% else %}<i class="fas fa-clock"></i>{% endif %}
+                {{ rec.status|capfirst }}
+              </span>
+            </td>
           </tr>
           {% empty %}
-          <tr><td colspan="3" style="text-align:center;padding:32px;color:var(--text-muted);">No records</td></tr>
+          <tr>
+            <td colspan="3" style="padding: 48px; text-align: center;">
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text-muted); margin-bottom: 12px;">
+                  <i class="fas fa-clipboard"></i>
+                </div>
+                <h3 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 16px; font-weight: 600;">No records found</h3>
+                <p style="margin: 0; font-size: 14px; max-width: 300px; line-height: 1.5;">You haven't recorded any attendance for this course yet.</p>
+              </div>
+            </td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
+    </div>
+  </div>
+  {% else %}
+  <div style="display: flex; align-items: center; justify-content: center; height: 100%; min-height: 300px; border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface-1);">
+    <div style="text-align: center; color: var(--text-muted);">
+      <div style="font-size: 40px; margin-bottom: 16px; opacity: 0.5;"><i class="fas fa-mouse-pointer"></i></div>
+      <h3 style="margin: 0 0 8px 0; font-size: 18px; color: var(--text-secondary);">Select a course</h3>
+      <p style="margin: 0; font-size: 14.5px;">Click on a course's "Records" button to view details here.</p>
     </div>
   </div>
   {% endif %}

@@ -1,27 +1,84 @@
 {% extends 'base.html' %}
 {% block title %}Submit Assignment{% endblock %}
 {% block page_title %}Submit Assignment{% endblock %}
-{% block page_subtitle %}{{ assignment.title }}{% endblock %}
+{% block page_subtitle %}Upload your completed work for review{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:600px;">
-  <div class="card-header"><span class="card-title">{{ assignment.course.name }}</span></div>
-  <div class="card-body">
-    <div style="padding:16px; background:var(--surface-2); border-radius:8px; margin-bottom:24px; border:1px solid var(--border);">
-      <h4 style="font-size:15px; margin-bottom:8px;">{{ assignment.title }}</h4>
-      <p style="font-size:14px; color:var(--text-secondary);">{{ assignment.description }}</p>
-      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-        <span class="badge badge-warning">Due: {{ assignment.due_date|date:"M d, Y H:i" }}</span>
-        <span class="badge badge-info">{{ assignment.total_marks }} marks</span>
+<div class="card" style="max-width: 650px; margin: 0 auto; box-shadow: var(--shadow-md); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;">
+  <div class="card-header" style="background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 12px;">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+      <i class="fas fa-file-upload"></i>
+    </div>
+    <div>
+      <span class="card-title" style="margin: 0; font-size: 17px; color: var(--text-primary);">{{ assignment.course.name }}</span>
+      <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">{{ assignment.course.code|default:"Course Assignment" }}</div>
+    </div>
+  </div>
+  
+  <div class="card-body" style="padding: 24px;">
+    <div style="padding: 20px; background: var(--surface-2); border-radius: 10px; margin-bottom: 32px; border: 1px solid var(--border-strong); border-left: 4px solid var(--blue); position: relative; overflow: hidden;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+        <div style="flex: 1;">
+          <h4 style="font-size: 18px; margin: 0 0 10px 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+            {{ assignment.title }}
+          </h4>
+          <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin: 0; white-space: pre-line;">{{ assignment.description }}</p>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; gap: 12px; flex-wrap: wrap;">
+        <span class="badge" style="background: var(--amber-light); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.2); padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="far fa-clock"></i> Due: {{ assignment.due_date|date:"M d, Y H:i" }}
+        </span>
+        <span class="badge" style="background: var(--blue-light); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.2); padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fas fa-star"></i> {{ assignment.total_marks }} Points Possible
+        </span>
       </div>
     </div>
-    <form method="post" enctype="multipart/form-data">{% csrf_token %}
-      <div class="form-group"><label class="form-label">Upload File</label><input type="file" name="file" class="form-input"></div>
-      <div class="form-group"><label class="form-label">Remarks</label><textarea name="remarks" class="form-input" rows="3" placeholder="Add any notes..."></textarea></div>
-      <div style="display:flex; gap:12px;">
-        <button type="submit" class="btn btn-success">Submit Assignment</button>
-        <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
+
+    <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
+      {% csrf_token %}
+      
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); display: block; margin-bottom: 12px;">
+          Attachment <span style="font-size: 11px; text-transform: none; font-weight: normal; color: var(--text-muted);">(Max 50MB)</span>
+        </label>
+        
+        <div style="position: relative; overflow: hidden; border: 2px dashed var(--border-strong); border-radius: 12px; background: var(--surface-1); transition: all 0.2s ease;" class="file-upload-area" onmouseover="this.style.borderColor='var(--blue)'; this.style.backgroundColor='var(--blue-light)';" onmouseout="this.style.borderColor='var(--border-strong)'; this.style.backgroundColor='var(--surface-1)';">
+          <input type="file" name="file" class="form-input" id="assignment_file" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;" onchange="document.getElementById('file-name-display').innerText = this.files.length > 0 ? this.files[0].name : 'Browse files to upload'; document.getElementById('file-icon').className = this.files.length > 0 ? 'fas fa-file-check' : 'fas fa-cloud-upload-alt';">
+          <div style="padding: 32px 20px; text-align: center; pointer-events: none;">
+            <div style="width: 48px; height: 48px; background: var(--surface-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: var(--text-secondary); font-size: 20px; box-shadow: var(--shadow-sm);">
+              <i id="file-icon" class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div style="font-weight: 600; font-size: 15px; color: var(--text-primary); margin-bottom: 4px;">Click to upload a file</div>
+            <div id="file-name-display" style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Browse files to upload</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); display: block; margin-bottom: 8px;">
+          Student Remarks <span style="font-size: 11px; text-transform: none; font-weight: normal; color: var(--text-muted);">(Optional)</span>
+        </label>
+        <textarea name="remarks" class="form-input" rows="4" placeholder="Add any comments or context for your teacher..." style="width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--surface-1); font-size: 15px; resize: vertical; transition: all 0.2s ease;"></textarea>
+      </div>
+      
+      <div style="display: flex; gap: 12px; margin-top: 12px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-success" style="padding: 12px 28px; font-size: 15px; font-weight: 600; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm); flex: 1; justify-content: center;">
+          <i class="fas fa-check-circle"></i> Hand In Assignment
+        </button>
+        <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 24px; font-size: 15px; font-weight: 600; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); border: 1px solid var(--border-strong); background: var(--surface-1); justify-content: center;">
+          Cancel
+        </a>
       </div>
     </form>
+    
+    <style>
+      textarea.form-input:focus {
+        border-color: var(--blue) !important; outline: none; box-shadow: 0 0 0 3px var(--blue-light) !important;
+      }
+    </style>
   </div>
 </div>
 {% endblock %}
