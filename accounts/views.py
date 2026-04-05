@@ -298,8 +298,16 @@ def edit_teacher(request, college_slug, pk):
             'last_name': teacher.user.last_name,
             'email': teacher.user.email,
         })
-    return render(request, 'college/edit_teacher.html', {'form': form, 'teacher': teacher})
-
+    from academics.models import Department, Course
+    departments = Department.objects.filter(college=request.user.college_profile)
+    courses = Course.objects.filter(department__college=request.user.college_profile)
+    return render(request, 'college/edit_teacher.html', {
+        'form': form,
+        'teacher': teacher,
+        'departments': departments,
+        'courses': courses,
+        'college_slug': college_slug,
+    })
 
 @login_required
 def delete_teacher(request, college_slug, pk):
