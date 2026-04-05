@@ -39,6 +39,7 @@
           <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-sm btn-success" style="padding: 8px 12px; border-radius: var(--radius); font-weight: 600; display: flex; gap: 6px; align-items: center; font-size: 12.5px;">
             <i class="fas fa-check-double"></i> Mark Today
           </a>
+          <a href="{% url 'smart_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-sm btn-info">🤖 Smart Upload</a>
           <a href="?course={{ course.pk }}" class="btn btn-sm btn-outline" style="padding: 8px 12px; border-radius: var(--radius); font-weight: 600; display: flex; gap: 6px; align-items: center; font-size: 12.5px;">
             <i class="fas fa-list"></i> Records
           </a>

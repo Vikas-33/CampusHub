@@ -10,7 +10,7 @@ class Department(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"{self.name} - {self.college.college_name}"
+        return f"{self.name} - ({self.code})"
 
 class Course(models.Model):
     college = models.ForeignKey(CollegeProfile, on_delete=models.CASCADE, related_name='courses')

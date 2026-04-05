@@ -16,7 +16,10 @@ from .models import Department, Course, Attendance, Assignment, AssignmentSubmis
 from .forms import DepartmentForm, CourseForm, AttendanceForm, AssignmentForm, AssignmentSubmissionForm, ExamForm, ExamResultForm, NoticeForm, FeeStructureForm, FeePaymentForm
 from .utils import send_notice_email, send_assignment_email, send_result_email
 from accounts.models import StudentProfile, TeacherProfile
-import csv
+import csv, io, base64, json
+import openpyxl
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
 
 
 # --- DEPARTMENTS ---
@@ -31,7 +34,6 @@ def departments(request, college_slug):
     )
     return render(request, 'academics/departments.html', {'departments': depts})
 
-
 @login_required
 def add_department(request, college_slug):
     if not request.user.is_college():
@@ -41,15 +43,47 @@ def add_department(request, college_slug):
         form = DepartmentForm(request.POST)
         form.fields['head_of_department'].queryset = TeacherProfile.objects.filter(college=college)
         if form.is_valid():
-            dept = form.save(commit=False)
-            dept.college = college
-            dept.save()
-            messages.success(request, 'Department added!')
-            return redirect('departments', college_slug=college_slug)
+            code = form.cleaned_data['code'].strip().upper()
+            if Department.objects.filter(college=college, code=code).exists():
+                form.add_error('code', 'A department with this code already exists in your college.')
+            else:
+                dept = form.save(commit=False)
+                dept.college = college
+                dept.code = code
+                dept.save()
+                messages.success(request, 'Department added!')
+                return redirect('departments', college_slug=college_slug)
     else:
         form = DepartmentForm()
         form.fields['head_of_department'].queryset = TeacherProfile.objects.filter(college=college)
-    return render(request, 'academics/add_department.html', {'form': form})
+    return render(request, 'academics/add_department.html', {'form': form, 'college_slug': college_slug})
+
+
+@login_required
+def edit_department(request, college_slug, dept_id):
+    if not request.user.is_college():
+        return redirect('dashboard', college_slug=college_slug)
+    college = request.user.college_profile
+    dept = get_object_or_404(Department, pk=dept_id, college=college)
+    teachers = TeacherProfile.objects.filter(college=college)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        code = request.POST.get('code', '').strip().upper()
+        if Department.objects.filter(college=college, code=code).exclude(pk=dept_id).exists():
+            messages.error(request, 'A department with this code already exists in your college.')
+        else:
+            dept.name = name
+            dept.code = code
+            dept.description = request.POST.get('description', '').strip()
+            hod_id = request.POST.get('head_of_department')
+            dept.head_of_department = TeacherProfile.objects.filter(pk=hod_id).first() if hod_id else None
+            dept.save()
+            messages.success(request, 'Department updated.')
+            return redirect('departments', college_slug=college_slug)
+    return render(request, 'academics/edit_department.html', {
+        'dept': dept, 'teachers': teachers, 'college_slug': college_slug
+    })
+
 
 
 # --- COURSES ---
@@ -73,7 +107,6 @@ def courses(request, college_slug):
         college = student.college
     return render(request, 'academics/courses.html', {'courses': course_list})
 
-
 @login_required
 def add_course(request, college_slug):
     if not request.user.is_college():
@@ -84,16 +117,68 @@ def add_course(request, college_slug):
         form.fields['department'].queryset = Department.objects.filter(college=college)
         form.fields['teacher'].queryset = TeacherProfile.objects.filter(college=college)
         if form.is_valid():
-            course = form.save(commit=False)
-            course.college = college
-            course.save()
-            messages.success(request, 'Course added!')
-            return redirect('courses', college_slug=college_slug)
+            code = form.cleaned_data['code'].strip().upper()
+            if Course.objects.filter(college=college, code=code).exists():
+                messages.error(request, 'A course with this code already exists in your college.')
+            else:
+                course = form.save(commit=False)
+                course.college = college
+                course.code = code
+                course.save()
+                messages.success(request, 'Course added!')
+                return redirect('courses', college_slug=college_slug)
     else:
         form = CourseForm()
         form.fields['department'].queryset = Department.objects.filter(college=college)
         form.fields['teacher'].queryset = TeacherProfile.objects.filter(college=college)
-    return render(request, 'academics/add_course.html', {'form': form})
+    return render(request, 'academics/add_course.html', {'form': form, 'college_slug': college_slug})
+
+
+@login_required
+def edit_course(request, college_slug, course_id):
+    if not request.user.is_college():
+        return redirect('dashboard', college_slug=college_slug)
+    college = request.user.college_profile
+    course = get_object_or_404(Course, pk=course_id, college=college)
+    if request.method == 'POST':
+        form = CourseForm(request.POST, instance=course)
+        form.fields['department'].queryset = Department.objects.filter(college=college)
+        form.fields['teacher'].queryset = TeacherProfile.objects.filter(college=college)
+        if form.is_valid():
+            code = form.cleaned_data['code'].strip().upper()
+            if Course.objects.filter(college=college, code=code).exclude(pk=course_id).exists():
+                messages.error(request, 'A course with this code already exists in your college.')
+            else:
+                course = form.save(commit=False)
+                course.code = code
+                course.save()
+                messages.success(request, 'Course updated!')
+                return redirect('courses', college_slug=college_slug)
+    else:
+        form = CourseForm(instance=course)
+        form.fields['department'].queryset = Department.objects.filter(college=college)
+        form.fields['teacher'].queryset = TeacherProfile.objects.filter(college=college)
+    return render(request, 'academics/edit_course.html', {
+        'form': form,
+        'course': course,
+        'college_slug': college_slug,
+    })
+
+@login_required
+def delete_course(request, college_slug, course_id):
+    if not request.user.is_college():
+        return redirect('dashboard', college_slug=college_slug)
+    college = request.user.college_profile
+    course = get_object_or_404(Course, pk=course_id, college=college)
+    if request.method == 'POST':
+        course.delete()
+        messages.success(request, 'Course deleted.')
+        return redirect('courses', college_slug=college_slug)
+    return render(request, 'college/confirm_delete.html', {
+        'object': course,
+        'cancel_url': f'/{college_slug}/courses/',
+        'college_slug': college_slug,
+    })
 
 
 # --- ATTENDANCE ---
@@ -146,7 +231,7 @@ def mark_attendance(request, college_slug, course_id):
     if not request.user.is_teacher():
         return redirect('dashboard', college_slug=college_slug)
     teacher = request.user.teacher_profile
-    course = get_object_or_404(Course, pk=course_id, teacher=teacher)
+    course = get_object_or_404(Course, pk=course_id, college=teacher.college)
     students = StudentProfile.objects.filter(
         college=teacher.college,
         department=course.department,
@@ -166,6 +251,209 @@ def mark_attendance(request, college_slug, course_id):
     return render(request, 'academics/mark_attendance.html', {
         'course': course, 'students': students, 'today': d.today()
     })
+
+
+
+
+@login_required
+def smart_attendance(request, college_slug, course_id):
+    if not (request.user.is_college() or request.user.is_teacher()):
+        return redirect('dashboard', college_slug=college_slug)
+
+    course = get_object_or_404(Course, pk=course_id)
+    enrolled_students = StudentProfile.objects.filter(
+        college=course.college,
+        department=course.department,
+        semester=course.semester,
+    )
+    enrolled_roll_numbers = {s.roll_number: s for s in enrolled_students}
+
+    result = None  # will hold processing result to display
+
+    if request.method == 'POST':
+        upload_type = request.POST.get('upload_type')  # 'file' or 'image'
+        date = request.POST.get('date')
+
+        if not date:
+            messages.error(request, 'Please select a date.')
+            return redirect('smart_attendance', college_slug=college_slug, course_id=course_id)
+
+        # ── CSV / Excel upload ────────────────────────────────
+        if upload_type == 'file':
+            uploaded_file = request.FILES.get('attendance_file')
+            if not uploaded_file:
+                messages.error(request, 'Please upload a file.')
+                return redirect('smart_attendance', college_slug=college_slug, course_id=course_id)
+
+            filename = uploaded_file.name.lower()
+            rows = []
+
+            try:
+                if filename.endswith('.csv'):
+                    decoded = uploaded_file.read().decode('utf-8-sig')
+                    reader = csv.DictReader(io.StringIO(decoded))
+                    for row in reader:
+                        rows.append({k.strip().lower(): v.strip() for k, v in row.items()})
+
+                elif filename.endswith(('.xlsx', '.xls')):
+                    wb = openpyxl.load_workbook(uploaded_file)
+                    ws = wb.active
+                    headers = [str(cell.value).strip().lower() for cell in ws[1]]
+                    for row in ws.iter_rows(min_row=2, values_only=True):
+                        rows.append({headers[i]: (str(v).strip() if v is not None else '') for i, v in enumerate(row)})
+                else:
+                    messages.error(request, 'Unsupported file format. Please upload CSV or Excel.')
+                    return redirect('smart_attendance', college_slug=college_slug, course_id=course_id)
+
+            except Exception as e:
+                messages.error(request, f'Error reading file: {str(e)}')
+                return redirect('smart_attendance', college_slug=college_slug, course_id=course_id)
+
+            result = _process_attendance_rows(rows, enrolled_roll_numbers, course, date)
+
+        # ── Image / AI scan ───────────────────────────────────
+        elif upload_type == 'image':
+            image_file = request.FILES.get('attendance_image')
+            if not image_file:
+                messages.error(request, 'Please upload an image.')
+                return redirect('smart_attendance', college_slug=college_slug, course_id=course_id)
+
+            try:
+                image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                mime_type = image_file.content_type or 'image/jpeg'
+
+                import urllib.request
+                import urllib.parse
+
+                payload = json.dumps({
+                    "model": "claude-sonnet-4-20250514",
+                    "max_tokens": 1000,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "image",
+                                    "source": {
+                                        "type": "base64",
+                                        "media_type": mime_type,
+                                        "data": image_data,
+                                    }
+                                },
+                                {
+                                    "type": "text",
+                                    "text": (
+                                        "This is a handwritten or printed attendance sheet. "
+                                        "Extract all roll numbers and their attendance status. "
+                                        "Return ONLY a JSON array like this, no other text:\n"
+                                        '[{"roll_number": "ABC123", "status": "present"}, ...]\n'
+                                        "Status must be exactly 'present', 'absent', or 'late'. "
+                                        "If status is unclear or missing, use empty string ''."
+                                    )
+                                }
+                            ]
+                        }
+                    ]
+                }).encode('utf-8')
+
+                req = urllib.request.Request(
+                    'https://api.anthropic.com/v1/messages',
+                    data=payload,
+                    headers={
+                        'Content-Type': 'application/json',
+                        'anthropic-version': '2023-06-01',
+                    },
+                    method='POST'
+                )
+
+                with urllib.request.urlopen(req) as resp:
+                    response_data = json.loads(resp.read().decode('utf-8'))
+
+                raw_text = response_data['content'][0]['text'].strip()
+
+                # Strip markdown code blocks if present
+                if raw_text.startswith('```'):
+                    raw_text = raw_text.split('```')[1]
+                    if raw_text.startswith('json'):
+                        raw_text = raw_text[4:]
+
+                rows = json.loads(raw_text.strip())
+                rows = [{k.strip().lower(): str(v).strip().lower() for k, v in r.items()} for r in rows]
+                result = _process_attendance_rows(rows, enrolled_roll_numbers, course, date)
+                result['source'] = 'image'
+
+            except Exception as e:
+                messages.error(request, f'AI scan failed: {str(e)}. Please try CSV/Excel upload.')
+                return redirect('smart_attendance', college_slug=college_slug, course_id=course_id)
+
+    return render(request, 'academics/smart_attendance.html', {
+        'course': course,
+        'enrolled_count': enrolled_students.count(),
+        'result': result,
+        'college_slug': college_slug,
+    })
+
+
+def _process_attendance_rows(rows, enrolled_roll_numbers, course, date):
+    """
+    Process parsed rows, mark attendance, return result summary.
+    """
+    from .models import Attendance
+
+    marked = []          # successfully marked
+    empty_status = []    # enrolled student but status missing
+    not_enrolled = []    # roll number not in enrolled list
+    already_marked = []  # attendance already exists for this date
+
+    valid_statuses = {'present', 'absent', 'late'}
+
+    for row in rows:
+        roll = str(row.get('roll_number', '')).strip()
+        status = str(row.get('status', '')).strip().lower()
+
+        if not roll:
+            continue
+
+        if roll in enrolled_roll_numbers:
+            student = enrolled_roll_numbers[roll]
+
+            # Check if already marked for this date
+            if Attendance.objects.filter(student=student, course=course, date=date).exists():
+                already_marked.append(roll)
+                continue
+
+            if not status or status not in valid_statuses:
+                # Enrolled student but status is empty/invalid
+                empty_status.append(roll)
+                continue
+
+            # Mark attendance
+            Attendance.objects.create(
+                student=student,
+                course=course,
+                date=date,
+                status=status,
+            )
+            marked.append({'roll': roll, 'name': student.user.get_full_name(), 'status': status})
+
+        else:
+            # Not enrolled — fake/dummy data
+            not_enrolled.append(roll)
+
+    return {
+        'marked': marked,
+        'empty_status': empty_status,
+        'not_enrolled': not_enrolled,
+        'already_marked': already_marked,
+        'date': date,
+        'course': course.name,
+        'source': 'file',
+    }
+
+
+
+
+
 
 
 @login_required
@@ -909,22 +1197,3 @@ def postpone_exam(request, college_slug, exam_id):
     return render(request, 'academics/postpone_exam.html', {'exam': exam, 'college_slug': college_slug})
 
 
-@login_required
-def edit_department(request, college_slug, dept_id):
-    if not request.user.is_college():
-        return redirect('dashboard', college_slug=college_slug)
-    college = request.user.college_profile
-    dept = get_object_or_404(Department, pk=dept_id, college=college)
-    teachers = TeacherProfile.objects.filter(college=college)
-    if request.method == 'POST':
-        dept.name = request.POST.get('name', '').strip()
-        dept.code = request.POST.get('code', '').strip().upper()
-        dept.description = request.POST.get('description', '').strip()
-        hod_id = request.POST.get('head_of_department')
-        dept.head_of_department = TeacherProfile.objects.filter(pk=hod_id).first() if hod_id else None
-        dept.save()
-        messages.success(request, 'Department updated.')
-        return redirect('departments', college_slug=college_slug)
-    return render(request, 'academics/edit_department.html', {
-        'dept': dept, 'teachers': teachers, 'college_slug': college_slug
-    })

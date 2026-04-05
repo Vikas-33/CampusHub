@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% block title %}Smart Attendance{% endblock %}
+{% block page_title %}Smart Attendance Upload{% endblock %}
+{% block page_subtitle %}{{ course.name }} — {{ course.code }}{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'mark_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-outline">✏️ Manual Entry</a>
+{% endblock %}
+
+{% block content %}
+
+{% if not result %}
+<!-- Upload Form -->
+<div style="max-width:700px;">
+
+  <!-- Info banner -->
+  <div style="background:var(--blue-light); border:1px solid var(--blue-border); border-radius:var(--radius); padding:16px 20px; margin-bottom:24px; display:flex; gap:14px; align-items:flex-start;">
+    <div style="font-size:22px;">ℹ️</div>
+    <div>
+      <div style="font-weight:700; color:var(--blue); margin-bottom:4px;">How it works</div>
+      <div style="font-size:13px; color:var(--text-secondary); line-height:1.7;">
+        Upload a <strong>CSV/Excel file</strong> with <code>roll_number</code> and <code>status</code> columns,
+        or <strong>scan a handwritten sheet</strong> using AI. Attendance will only be marked for enrolled students.
+        Unrecognized entries will be flagged.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab selector -->
+  <div style="display:flex; gap:0; margin-bottom:24px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
+    <button onclick="showTab('file')" id="tab-file"
+      style="flex:1; padding:12px; font-size:14px; font-weight:600; border:none; cursor:pointer; background:var(--blue); color:white; font-family:'Outfit',sans-serif; transition:all 0.15s;">
+      📄 CSV / Excel Upload
+    </button>
+    <button onclick="showTab('image')" id="tab-image"
+      style="flex:1; padding:12px; font-size:14px; font-weight:600; border:none; cursor:pointer; background:var(--surface-2); color:var(--text-secondary); font-family:'Outfit',sans-serif; transition:all 0.15s;">
+      🤖 AI Image Scan
+    </button>
+  </div>
+
+  <!-- File upload tab -->
+  <div id="panel-file">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Upload CSV / Excel</span></div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="upload_type" value="file">
+
+          <div class="form-group">
+            <label class="form-label">Attendance Date *</label>
+            <input type="date" name="date" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Upload File *</label>
+            <div style="border:2px dashed var(--border); border-radius:var(--radius); padding:32px; text-align:center; background:var(--surface-2); cursor:pointer; transition:border-color 0.15s;"
+              onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'"
+              onclick="document.getElementById('file-input').click()">
+              <div style="font-size:36px; margin-bottom:10px;">📂</div>
+              <div style="font-weight:600; color:var(--text-primary); margin-bottom:4px;">Click to choose file</div>
+              <div style="font-size:12.5px; color:var(--text-muted);">Supports .csv, .xlsx, .xls</div>
+              <div id="file-name" style="margin-top:10px; font-size:13px; color:var(--blue); font-weight:600;"></div>
+            </div>
+            <input type="file" id="file-input" name="attendance_file" accept=".csv,.xlsx,.xls" style="display:none;"
+              onchange="document.getElementById('file-name').textContent = this.files[0]?.name || ''">
+          </div>
+
+          <!-- CSV format guide -->
+          <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:20px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Required Format</div>
+            <table style="font-size:12.5px; width:100%; border-collapse:collapse;">
+              <thead>
+                <tr style="background:var(--border);">
+                  <th style="padding:6px 10px; text-align:left; border-radius:4px 0 0 0;">roll_number</th>
+                  <th style="padding:6px 10px; text-align:left; border-radius:0 4px 0 0;">status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td style="padding:5px 10px; border-bottom:1px solid var(--border);">TCO2024001</td><td style="padding:5px 10px; border-bottom:1px solid var(--border); color:var(--green);">present</td></tr>
+                <tr><td style="padding:5px 10px; border-bottom:1px solid var(--border);">TCO2024002</td><td style="padding:5px 10px; border-bottom:1px solid var(--border); color:var(--red);">absent</td></tr>
+                <tr><td style="padding:5px 10px;">TCO2024003</td><td style="padding:5px 10px; color:var(--amber);">late</td></tr>
+              </tbody>
+            </table>
+            <div style="font-size:11.5px; color:var(--text-muted); margin-top:8px;">Status must be: <strong>present</strong>, <strong>absent</strong>, or <strong>late</strong></div>
+          </div>
+
+          <button type="submit" class="btn btn-accent" style="width:100%; justify-content:center; padding:12px;">
+            Process Attendance File
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image scan tab -->
+  <div id="panel-image" style="display:none;">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🤖 AI Scan Handwritten Sheet</span>
+        <span class="badge badge-info">Powered by Claude AI</span>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info" style="margin-bottom:20px;">
+          Take a clear photo of your handwritten or printed attendance sheet. The AI will extract roll numbers and attendance status automatically.
+        </div>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="upload_type" value="image">
+
+          <div class="form-group">
+            <label class="form-label">Attendance Date *</label>
+            <input type="date" name="date" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Upload Attendance Sheet Photo *</label>
+            <div style="border:2px dashed var(--border); border-radius:var(--radius); padding:32px; text-align:center; background:var(--surface-2); cursor:pointer; transition:border-color 0.15s;"
+              onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'"
+              onclick="document.getElementById('image-input').click()">
+              <div style="font-size:36px; margin-bottom:10px;">📸</div>
+              <div style="font-weight:600; color:var(--text-primary); margin-bottom:4px;">Click to upload photo</div>
+              <div style="font-size:12.5px; color:var(--text-muted);">JPG, PNG, WEBP — Keep the sheet flat and well-lit</div>
+              <div id="image-name" style="margin-top:10px; font-size:13px; color:var(--blue); font-weight:600;"></div>
+              <img id="image-preview" style="max-height:180px; margin-top:14px; border-radius:8px; display:none; border:1px solid var(--border);">
+            </div>
+            <input type="file" id="image-input" name="attendance_image" accept="image/*" style="display:none;"
+              onchange="
+                document.getElementById('image-name').textContent = this.files[0]?.name || '';
+                const reader = new FileReader();
+                reader.onload = e => { const img = document.getElementById('image-preview'); img.src = e.target.result; img.style.display='block'; };
+                reader.readAsDataURL(this.files[0]);
+              ">
+          </div>
+
+          <button type="submit" class="btn btn-accent" style="width:100%; justify-content:center; padding:12px; margin-top:20px;">
+            🤖 Scan & Process
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% else %}
+<!-- Result Report -->
+<div style="max-width:800px;">
+
+  <!-- Summary cards -->
+  <div class="stats-grid" style="margin-bottom:24px;">
+    <div class="stat-card green" style="position:relative;">
+      <div class="stat-icon-wrap">✅</div>
+      <div class="stat-label" style="margin-bottom:6px;">Marked</div>
+      <div class="stat-value">{{ result.marked|length }}</div>
+    </div>
+    <div class="stat-card gold" style="position:relative;">
+      <div class="stat-icon-wrap">⚠️</div>
+      <div class="stat-label" style="margin-bottom:6px;">Empty Status</div>
+      <div class="stat-value">{{ result.empty_status|length }}</div>
+    </div>
+    <div class="stat-card red" style="position:relative;">
+      <div class="stat-icon-wrap">❌</div>
+      <div class="stat-label" style="margin-bottom:6px;">Not Enrolled</div>
+      <div class="stat-value">{{ result.not_enrolled|length }}</div>
+    </div>
+    <div class="stat-card blue" style="position:relative;">
+      <div class="stat-icon-wrap">🔁</div>
+      <div class="stat-label" style="margin-bottom:6px;">Already Marked</div>
+      <div class="stat-value">{{ result.already_marked|length }}</div>
+    </div>
+  </div>
+
+  <!-- Source badge -->
+  <div style="margin-bottom:16px; display:flex; align-items:center; gap:10px;">
+    <span class="badge {% if result.source == 'image' %}badge-purple{% else %}badge-info{% endif %}">
+      {% if result.source == 'image' %}🤖 AI Scan{% else %}📄 File Upload{% endif %}
+    </span>
+    <span style="font-size:13px; color:var(--text-muted);">Date: <strong>{{ result.date }}</strong> · Course: <strong>{{ result.course }}</strong></span>
+  </div>
+
+  <!-- Successfully marked -->
+  {% if result.marked %}
+  <div class="card mb-20">
+    <div class="card-header" style="background:var(--green-light);">
+      <span class="card-title" style="color:var(--green);">✅ Successfully Marked ({{ result.marked|length }})</span>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Roll Number</th><th>Student Name</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for entry in result.marked %}
+          <tr>
+            <td><code>{{ entry.roll }}</code></td>
+            <td style="font-weight:600; color:var(--text-primary);">{{ entry.name }}</td>
+            <td>
+              <span class="badge {% if entry.status == 'present' %}badge-success{% elif entry.status == 'absent' %}badge-danger{% else %}badge-warning{% endif %}">
+                {{ entry.status|capfirst }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Empty status — enrolled but no status -->
+  {% if result.empty_status %}
+  <div class="card mb-20">
+    <div class="card-header" style="background:var(--amber-light);">
+      <span class="card-title" style="color:var(--amber);">⚠️ Missing Status — Enrolled Students ({{ result.empty_status|length }})</span>
+    </div>
+    <div style="padding:16px 20px;">
+      <p style="font-size:13.5px; color:var(--text-secondary); margin-bottom:12px;">These students are enrolled but their status was empty or invalid in the file. Attendance was NOT marked for them.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        {% for roll in result.empty_status %}
+          <code style="background:var(--amber-light); border:1px solid var(--amber-border); color:var(--amber); padding:4px 10px; border-radius:6px;">{{ roll }}</code>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Not enrolled — fake/dummy -->
+  {% if result.not_enrolled %}
+  <div class="card mb-20">
+    <div class="card-header" style="background:var(--red-light);">
+      <span class="card-title" style="color:var(--red);">❌ Not Enrolled — Unrecognized Entries ({{ result.not_enrolled|length }})</span>
+    </div>
+    <div style="padding:16px 20px;">
+      <p style="font-size:13.5px; color:var(--text-secondary); margin-bottom:12px;">These roll numbers were in the file but are not enrolled in this course. No attendance was marked for them.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        {% for roll in result.not_enrolled %}
+          <code style="background:var(--red-light); border:1px solid var(--red-border); color:var(--red); padding:4px 10px; border-radius:6px;">{{ roll }}</code>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Already marked -->
+  {% if result.already_marked %}
+  <div class="card mb-20">
+    <div class="card-header">
+      <span class="card-title">🔁 Already Marked ({{ result.already_marked|length }})</span>
+    </div>
+    <div style="padding:16px 20px;">
+      <p style="font-size:13.5px; color:var(--text-secondary); margin-bottom:12px;">Attendance for these students was already recorded for this date. Skipped to avoid duplicates.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        {% for roll in result.already_marked %}
+          <code style="padding:4px 10px; border-radius:6px;">{{ roll }}</code>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div style="display:flex; gap:12px; margin-top:8px;">
+    <a href="{% url 'smart_attendance' college_slug=college_slug course_id=course.pk %}" class="btn btn-accent">Upload Another</a>
+    <a href="{% url 'attendance' college_slug=college_slug %}" class="btn btn-outline">Back to Attendance</a>
+  </div>
+
+</div>
+{% endif %}
+
+<script>
+function showTab(tab) {
+  document.getElementById('panel-file').style.display = tab === 'file' ? 'block' : 'none';
+  document.getElementById('panel-image').style.display = tab === 'image' ? 'block' : 'none';
+  document.getElementById('tab-file').style.background = tab === 'file' ? 'var(--blue)' : 'var(--surface-2)';
+  document.getElementById('tab-file').style.color = tab === 'file' ? 'white' : 'var(--text-secondary)';
+  document.getElementById('tab-image').style.background = tab === 'image' ? 'var(--blue)' : 'var(--surface-2)';
+  document.getElementById('tab-image').style.color = tab === 'image' ? 'white' : 'var(--text-secondary)';
+}
+</script>
+{% endblock %}

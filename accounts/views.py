@@ -275,34 +275,41 @@ def add_teacher(request, college_slug):
     return render(request, 'college/add_teacher.html', {'departments': departments, 'courses': courses, 'college_slug': college_slug})
 
 
-
 @login_required
 def edit_teacher(request, college_slug, pk):
     if not request.user.is_college():
         return redirect('dashboard', college_slug=college_slug)
-    teacher = get_object_or_404(TeacherProfile, pk=pk, college=request.user.college_profile)
-    if request.method == 'POST':
-        form = TeacherForm(request.POST, instance=teacher)
-        if form.is_valid():
-            cd = form.cleaned_data
-            teacher.user.first_name = cd['first_name']
-            teacher.user.last_name = cd['last_name']
-            teacher.user.email = cd['email']
-            teacher.user.save()
-            form.save()
-            messages.success(request, 'Teacher updated successfully!')
-            return redirect('manage_teachers', college_slug=college_slug)
-    else:
-        form = TeacherForm(instance=teacher, initial={
-            'first_name': teacher.user.first_name,
-            'last_name': teacher.user.last_name,
-            'email': teacher.user.email,
-        })
+    college = request.user.college_profile
+    teacher = get_object_or_404(TeacherProfile, pk=pk, college=college)
     from academics.models import Department, Course
-    departments = Department.objects.filter(college=request.user.college_profile)
-    courses = Course.objects.filter(department__college=request.user.college_profile)
+    departments = Department.objects.filter(college=college)
+    courses = Course.objects.filter(department__college=college)
+
+    if request.method == 'POST':
+        teacher.user.first_name = request.POST.get('first_name', '').strip()
+        teacher.user.last_name  = request.POST.get('last_name', '').strip()
+        teacher.user.email      = request.POST.get('email', '').strip()
+        teacher.user.save()
+
+        dept_id = request.POST.get('department')
+        teacher.department    = Department.objects.filter(pk=dept_id, college=college).first() if dept_id else None
+        teacher.designation   = request.POST.get('designation', '').strip()
+        teacher.qualification = request.POST.get('qualification', '').strip()
+        teacher.specialization= request.POST.get('specialization', '').strip()
+        joining_date = request.POST.get('joining_date')
+        teacher.joining_date  = joining_date if joining_date else None
+        salary = request.POST.get('salary')
+        teacher.salary        = salary if salary else 0
+        teacher.save()
+
+        # Save courses M2M
+        course_ids = request.POST.getlist('courses')
+        teacher.courses.set(Course.objects.filter(pk__in=course_ids, department__college=college))
+
+        messages.success(request, 'Teacher updated successfully!')
+        return redirect('manage_teachers', college_slug=college_slug)
+
     return render(request, 'college/edit_teacher.html', {
-        'form': form,
         'teacher': teacher,
         'departments': departments,
         'courses': courses,
