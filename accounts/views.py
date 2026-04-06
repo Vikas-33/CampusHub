@@ -9,6 +9,7 @@ from academics.models import Course, Notice, Attendance, FeePayment, Exam, Assig
 from accounts.models import StudentProfile
 from django.core.paginator import Paginator
 from academics.utils import send_teacher_credentials, send_student_credentials
+from datetime import date as date_today
 
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
@@ -71,7 +72,6 @@ def logout_view(request):
 
 
 # ─── Dashboard ───────────────────────────────────────────────────────────────
-
 @login_required
 def dashboard(request, college_slug):
     user = request.user
@@ -83,6 +83,10 @@ def dashboard(request, college_slug):
         except CollegeProfile.DoesNotExist:
             messages.error(request, 'College profile not found.')
             return redirect('login')
+
+        # Auto-update student semesters every Jan/Jul
+        auto_update_semesters(college)
+
         context.update({
             'college': college,
             'total_students': StudentProfile.objects.filter(college=college).count(),
@@ -453,3 +457,17 @@ def delete_student(request, college_slug, pk):
         messages.success(request, 'Student deleted.')
         return redirect('manage_students', college_slug=college_slug)
     return render(request, 'college/confirm_delete.html', {'object': student, 'type': 'Student'})
+
+
+
+def auto_update_semesters(college):
+    today = date_today.today()
+    # Jan-Jun = first half, Jul-Dec = second half
+    current_period_start = date_today(today.year, 7 if today.month >= 7 else 1, 1)
+    students = StudentProfile.objects.filter(college=college, semester__lt=8)
+    for student in students:
+        if (student.last_semester_update is None or
+                student.last_semester_update < current_period_start):
+            student.semester += 1
+            student.last_semester_update = today
+            student.save(update_fields=['semester', 'last_semester_update'])

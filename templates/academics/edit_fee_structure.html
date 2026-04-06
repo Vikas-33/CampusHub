@@ -1,22 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Add Fee Structure{% endblock %}
-{% block page_title %}New Fee Structure{% endblock %}
-{% block page_subtitle %}Define financial obligations, tuitions, or auxiliary charges for students{% endblock %}
-
+{% block title %}Edit Fee Structure{% endblock %}
+{% block page_title %}Edit Fee Structure{% endblock %}
 {% block content %}
 <div class="card" style="max-width:640px;">
-  <div class="card-header"><span class="card-title">Fee Configuration</span></div>
+  <div class="card-header"><span class="card-title">{{ fs.name }}</span></div>
   <div class="card-body">
     <form method="post">{% csrf_token %}
       <div class="form-group"><label class="form-label">Structure Name / Title *</label>
-        <input type="text" name="name" class="form-input" placeholder="e.g. Tuition Fee Sem 1, Library Deposit..." required>
+        <input type="text" name="name" class="form-input" value="{{ fs.name }}" required>
       </div>
       <div class="form-grid">
         <div class="form-group"><label class="form-label">Total Amount (₹) *</label>
-          <input type="number" name="amount" class="form-input" step="0.01" required>
+          <input type="number" name="amount" class="form-input" value="{{ fs.amount }}" step="0.01" required>
         </div>
         <div class="form-group"><label class="form-label">Payment Due Date</label>
-          <input type="date" name="due_date" class="form-input">
+          <input type="date" name="due_date" class="form-input" value="{{ fs.due_date|date:'Y-m-d' }}">
         </div>
       </div>
       <div class="form-grid">
@@ -24,7 +22,7 @@
           <select name="department" class="form-input">
             <option value="">— All Departments —</option>
             {% for dept in departments %}
-              <option value="{{ dept.pk }}">{{ dept.name }} ({{ dept.code }})</option>
+              <option value="{{ dept.pk }}" {% if fs.department == dept.name %}selected{% endif %}>{{ dept.name }} ({{ dept.code }})</option>
             {% endfor %}
           </select>
         </div>
@@ -32,17 +30,17 @@
           <select name="semester" class="form-input">
             <option value="">— All Semesters —</option>
             {% for i in semester_choices %}
-              <option value="{{ i }}">Semester {{ i }}</option>
+              <option value="{{ i }}" {% if fs.semester == i %}selected{% endif %}>Semester {{ i }}</option>
             {% endfor %}
           </select>
         </div>
       </div>
       <div class="form-group"><label class="form-label">Description & Notes</label>
-        <textarea name="description" class="form-input" rows="3" placeholder="Additional details about breakdown, late fees..."></textarea>
+        <textarea name="description" class="form-input" rows="3">{{ fs.description }}</textarea>
       </div>
       <div style="display:flex; gap:12px;">
-        <button type="submit" class="btn btn-accent">Publish Fee Structure</button>
-        <a href="{% url 'fees' college_slug=college_slug %}" class="btn btn-outline">Cancel & Return</a>
+        <button type="submit" class="btn btn-accent">Save Changes</button>
+        <a href="{% url 'fees' college_slug=college_slug %}" class="btn btn-outline">Cancel</a>
       </div>
     </form>
   </div>

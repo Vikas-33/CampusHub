@@ -19,6 +19,7 @@ from accounts.models import StudentProfile, TeacherProfile
 import csv, io, base64, json
 import openpyxl
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from datetime import date as date_today
 
 
 
@@ -965,37 +966,138 @@ def add_fee_structure(request, college_slug):
     if not request.user.is_college():
         return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
+    departments = Department.objects.filter(college=college)
     if request.method == 'POST':
-        form = FeeStructureForm(request.POST)
-        if form.is_valid():
-            fs = form.save(commit=False)
-            fs.college = college
-            fs.save()
+        name        = request.POST.get('name', '').strip()
+        amount      = request.POST.get('amount')
+        due_date    = request.POST.get('due_date') or None
+        dept_id     = request.POST.get('department')
+        semester    = request.POST.get('semester') or None
+        description = request.POST.get('description', '').strip()
+
+        if not name or not amount:
+            messages.error(request, 'Name and amount are required.')
+        else:
+            dept_name = ''
+            if dept_id:
+                dept = Department.objects.filter(pk=dept_id, college=college).first()
+                dept_name = dept.name if dept else ''
+            FeeStructure.objects.create(
+                college=college, name=name, amount=amount,
+                due_date=due_date, department=dept_name,
+                semester=semester, description=description,
+            )
             messages.success(request, 'Fee structure added!')
             return redirect('fees', college_slug=college_slug)
-    else:
-        form = FeeStructureForm()
-    return render(request, 'academics/add_fee_structure.html', {'form': form})
+    return render(request, 'academics/add_fee_structure.html', {
+        'departments': departments,
+        'semester_choices': range(1, 9),
+        'college_slug': college_slug,
+    })
 
 
+@login_required
+def edit_fee_structure(request, college_slug, fs_id):
+    if not request.user.is_college():
+        return redirect('dashboard', college_slug=college_slug)
+    college = request.user.college_profile
+    fs = get_object_or_404(FeeStructure, pk=fs_id, college=college)
+    departments = Department.objects.filter(college=college)
+    if request.method == 'POST':
+        fs.name        = request.POST.get('name', '').strip()
+        fs.amount      = request.POST.get('amount')
+        fs.due_date    = request.POST.get('due_date') or None
+        fs.description = request.POST.get('description', '').strip()
+        fs.semester    = request.POST.get('semester') or None
+        dept_id = request.POST.get('department')
+        if dept_id:
+            dept = Department.objects.filter(pk=dept_id, college=college).first()
+            fs.department = dept.name if dept else ''
+        else:
+            fs.department = ''
+        fs.save()
+        messages.success(request, 'Fee structure updated!')
+        return redirect('fees', college_slug=college_slug)
+    return render(request, 'academics/edit_fee_structure.html', {
+        'fs': fs,
+        'departments': departments,
+        'semester_choices': range(1, 9),
+        'college_slug': college_slug,
+    })
+
+
+@login_required
+def delete_fee_structure(request, college_slug, fs_id):
+    if not request.user.is_college():
+        return redirect('dashboard', college_slug=college_slug)
+    college = request.user.college_profile
+    fs = get_object_or_404(FeeStructure, pk=fs_id, college=college)
+    if request.method == 'POST':
+        fs.delete()
+        messages.success(request, 'Fee structure deleted.')
+        return redirect('fees', college_slug=college_slug)
+    return render(request, 'academics/confirm_delete.html', {
+        'object': fs,
+        'cancel_url': f'/{college_slug}/fees/',
+        'college_slug': college_slug,
+    })
 @login_required
 def record_payment(request, college_slug):
     if not request.user.is_college():
         return redirect('dashboard', college_slug=college_slug)
     college = request.user.college_profile
+    students = StudentProfile.objects.filter(college=college)
+    fee_structures = FeeStructure.objects.filter(college=college)
+
     if request.method == 'POST':
-        form = FeePaymentForm(request.POST)
-        form.fields['student'].queryset = StudentProfile.objects.filter(college=college)
-        form.fields['fee_structure'].queryset = FeeStructure.objects.filter(college=college)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Payment recorded!')
-            return redirect('fees', college_slug=college_slug)
-    else:
-        form = FeePaymentForm()
-        form.fields['student'].queryset = StudentProfile.objects.filter(college=college)
-        form.fields['fee_structure'].queryset = FeeStructure.objects.filter(college=college)
-    return render(request, 'academics/record_payment.html', {'form': form})
+        student_id   = request.POST.get('student')
+        fs_id        = request.POST.get('fee_structure')
+        amount_paid  = request.POST.get('amount_paid')
+        payment_date = request.POST.get('payment_date') or None
+        status       = request.POST.get('status', 'pending')
+        transaction_id  = request.POST.get('transaction_id', '').strip()
+        receipt_number  = request.POST.get('receipt_number', '').strip()
+        semester     = request.POST.get('semester') or None
+
+        student = StudentProfile.objects.filter(pk=student_id, college=college).first()
+        fs      = FeeStructure.objects.filter(pk=fs_id, college=college).first()
+
+        if not student or not fs or not amount_paid:
+            messages.error(request, 'Please fill all required fields.')
+        else:
+            # Duplicate check — same student + same fee structure + same semester
+            if FeePayment.objects.filter(
+                student=student,
+                fee_structure=fs,
+                status='paid',
+            ).exists():
+                messages.error(request, f'{student.user.get_full_name()} has already paid for "{fs.name}". Cannot record duplicate payment.')
+            elif transaction_id and FeePayment.objects.filter(transaction_id=transaction_id).exists():
+                messages.error(request, f'Transaction ID "{transaction_id}" already exists. Please verify.')
+            else:
+                if not receipt_number:
+                    count = FeePayment.objects.filter(student__college=college).count() + 1
+                    receipt_number = f'RCP-{college.slug.upper()}-{count:04d}'
+
+                FeePayment.objects.create(
+                    student=student,
+                    fee_structure=fs,
+                    amount_paid=amount_paid,
+                    payment_date=payment_date,
+                    status=status,
+                    transaction_id=transaction_id,
+                    receipt_number=receipt_number,
+                )
+                messages.success(request, f'Payment recorded! Receipt No: {receipt_number}')
+                return redirect('fees', college_slug=college_slug)
+
+    return render(request, 'academics/record_payment.html', {
+        'students': students,
+        'fee_structures': fee_structures,
+        'college_slug': college_slug,
+        'today': date_today.today().strftime('%Y-%m-%d'),
+    })
+
 
 
 @login_required

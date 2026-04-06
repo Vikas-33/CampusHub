@@ -4,109 +4,97 @@
 {% block page_subtitle %}Process student payments and generate system receipts against fee structures{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 750px; margin: 0 auto; box-shadow: var(--shadow-lg); border: none;">
-  <div class="card-header" style="background: var(--surface-2); border-bottom: 1px solid var(--border-strong); padding: 24px 32px;">
-    <span class="card-title" style="font-size: 20px; letter-spacing: -0.5px;">Transaction Details</span>
-    <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 6px;">Register successful payments, amounts, and settlement statuses.</p>
-  </div>
-  
-  <div class="card-body" style="padding: 32px;">
+<div class="card" style="max-width:680px;">
+  <div class="card-header"><span class="card-title">Transaction Details</span></div>
+  <div class="card-body">
     <form method="post">{% csrf_token %}
-      
-      <!-- Profile Section -->
-      <div style="margin-bottom: 32px;">
-        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Party Details</h4>
-        
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Student Record <span style="color: var(--red);">*</span></label>
-            <div style="border-radius: var(--radius);">
-              {{ form.student }}
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Linked Fee Structure <span style="color: var(--red);">*</span></label>
-            <div style="border-radius: var(--radius);">
-              {{ form.fee_structure }}
-            </div>
-          </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Student Record *</label>
+          <select name="student" class="form-input" required id="student-select" onchange="updateSemesters()">
+            <option value="">— Select Student —</option>
+            {% for s in students %}
+              <option value="{{ s.pk }}" data-semester="{{ s.semester }}">
+                {{ s.user.get_full_name }} ({{ s.roll_number }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Linked Fee Structure *</label>
+          <select name="fee_structure" class="form-input" required>
+            <option value="">— Select Fee Structure —</option>
+            {% for fs in fee_structures %}
+              <option value="{{ fs.pk }}">{{ fs.name }} — ₹{{ fs.amount }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
 
-      <!-- Financials Section -->
-      <div style="margin-bottom: 32px;">
-        <h4 style="font-size: 15px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Remittance Data</h4>
-        
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Amount Paid (₹) <span style="color: var(--red);">*</span></label>
-            <div style="position: relative;">
-               <div style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--green); font-weight: bold;">₹</div>
-               <input type="number" name="amount_paid" class="form-input" step="0.01" placeholder="0.00" required style="padding: 10px 14px 10px 32px; border-radius: var(--radius); font-weight: 700; font-size: 18px; color: var(--text-primary);">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Settlement Status</label>
-            <div style="border-radius: var(--radius);">
-              {{ form.status }}
-            </div>
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label">Semester</label>
+        <select name="semester" class="form-input" id="semester-select">
+          <option value="">— Select Student First —</option>
+        </select>
+      </div>
 
-        <div class="form-grid" style="margin-top: 16px;">
-          <div class="form-group">
-            <label class="form-label">Bank Transaction ID <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
-            <div style="position: relative;">
-               <div style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px;"><i class="fas fa-barcode"></i></div>
-               <input type="text" name="transaction_id" class="form-input" placeholder="e.g. TXN-982347ACx9" style="padding: 10px 14px 10px 36px; border-radius: var(--radius); text-transform: uppercase; font-family: monospace;">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">System Receipt No. <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
-            <div style="position: relative;">
-               <div style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px;"><i class="fas fa-receipt"></i></div>
-               <input type="text" name="receipt_number" class="form-input" placeholder="e.g. RCP-2420" style="padding: 10px 14px 10px 36px; border-radius: var(--radius); text-transform: uppercase;">
-            </div>
-          </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Amount Paid (₹) *</label>
+          <input type="number" name="amount_paid" class="form-input" step="0.01" required>
         </div>
-        
-        <div class="form-group" style="margin-top: 16px;">
-          <label class="form-label">Date of Processing</label>
-          <input type="date" name="payment_date" class="form-input" style="padding: 10px 14px; border-radius: var(--radius); cursor: pointer;">
+        <div class="form-group">
+          <label class="form-label">Settlement Status</label>
+          <select name="status" class="form-input">
+            <option value="pending">Pending</option>
+            <option value="paid" selected>Paid</option>
+            <option value="partial">Partial</option>
+            <option value="overdue">Overdue</option>
+            <option value="overpaid">Overpaid</option>
+          </select>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div style="display: flex; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
-        <button type="submit" class="btn btn-primary" style="background: var(--green); border-color: var(--green); padding: 12px 28px; font-weight: 600; letter-spacing: 0.3px; border-radius: var(--radius); flex: 1; justify-content: center; box-shadow: var(--shadow-sm);">
-          <i class="fas fa-check-circle" style="margin-right: 8px;"></i> Commit Payment Record
-        </button>
-        <a href="{% url 'fees' college_slug=college_slug %}" class="btn btn-outline" style="padding: 12px 28px; font-weight: 600; border-radius: var(--radius); flex: 1; justify-content: center; text-align: center;">
-          Cancel & Return
-        </a>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Bank Transaction ID <span style="color:var(--text-muted); font-weight:400;">(Optional)</span></label>
+          <input type="text" name="transaction_id" class="form-input" placeholder="e.g. TXN-982347ACX9">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Receipt No <span style="color:var(--text-muted); font-weight:400;">(Auto-generated if blank)</span></label>
+          <input type="text" name="receipt_number" class="form-input" placeholder="e.g. RCP-TCO-0001">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date of Processing</label>
+        <input type="date" name="payment_date" class="form-input" value="{{ today }}">
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <button type="submit" class="btn btn-accent">Commit Payment Record</button>
+        <a href="{% url 'fees' college_slug=college_slug %}" class="btn btn-outline">Cancel & Return</a>
       </div>
     </form>
   </div>
 </div>
 
-<style>
-  /* Patch for form select widgets rendered unstyled by Django */
-  select[name="student"], select[name="fee_structure"], select[name="status"] {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background-color: var(--surface-1);
-    color: var(--text-primary);
-    outline: none;
-    font-family: inherit;
-    font-size: 14.5px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+<script>
+function updateSemesters() {
+  const select = document.getElementById('student-select');
+  const semSelect = document.getElementById('semester-select');
+  const option = select.options[select.selectedIndex];
+  const currentSem = parseInt(option.dataset.semester) || 0;
+
+  semSelect.innerHTML = '<option value="">— Select Semester —</option>';
+  for (let i = 1; i <= currentSem; i++) {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = 'Semester ' + i;
+    if (i === currentSem) opt.selected = true;
+    semSelect.appendChild(opt);
   }
-  select[name="student"]:focus, select[name="fee_structure"]:focus, select[name="status"]:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px var(--blue-light);
-  }
-</style>
+}
+</script>
 {% endblock %}

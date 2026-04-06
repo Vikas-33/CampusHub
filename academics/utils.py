@@ -158,10 +158,10 @@ Please do not reply to this email.
 def send_teacher_credentials(teacher):
     from django.core.mail import send_mail
     from django.conf import settings
-    subject = f'Your EduCore Account Credentials'
+    subject = f'Your CampusHub Account Credentials'
     message = f"""Dear {teacher.user.get_full_name()},
 
-Your faculty account has been created on EduCore.
+Your faculty account has been created on CampusHub.
 
 Your login credentials:
   Username : {teacher.employee_id}
@@ -172,7 +172,7 @@ Login at: http://127.0.0.1:8000/
 Please change your password after first login.
 
 Regards,
-EduCore Team
+CampusHub Team
 """
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL,
               [teacher.user.email], fail_silently=True)
@@ -181,10 +181,10 @@ EduCore Team
 def send_student_credentials(student):
     from django.core.mail import send_mail
     from django.conf import settings
-    subject = f'Your EduCore Account Credentials'
+    subject = f'Your CampusHub Account Credentials'
     message = f"""Dear {student.user.get_full_name()},
 
-Your student account has been created on EduCore.
+Your student account has been created on CampusHub.
 
 Your login credentials:
   Username : {student.roll_number}
@@ -196,7 +196,7 @@ Login at: http://127.0.0.1:8000/
 Please change your password after first login.
 
 Regards,
-EduCore Team
+CampusHub Team
 """
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL,
               [student.user.email], fail_silently=True)

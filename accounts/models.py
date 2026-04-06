@@ -107,6 +107,7 @@ class StudentProfile(models.Model):
     address = models.TextField(blank=True)
     guardian_name = models.CharField(max_length=100, blank=True)
     guardian_phone = models.CharField(max_length=15, blank=True)
+    last_semester_update = models.DateField(null=True, blank=True)
 
     def _generate_student_ids(self):
         from datetime import date

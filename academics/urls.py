@@ -33,4 +33,6 @@ urlpatterns = [
     path('fees/structure/add/', views.add_fee_structure, name='add_fee_structure'),
     path('fees/payment/record/', views.record_payment, name='record_payment'),
     path('fees/receipt/<int:payment_id>/', views.download_fee_receipt, name='download_fee_receipt'),
+    path('fees/structure/<int:fs_id>/edit/', views.edit_fee_structure, name='edit_fee_structure'),
+    path('fees/structure/<int:fs_id>/delete/', views.delete_fee_structure, name='delete_fee_structure'),
 ]
