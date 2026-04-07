@@ -113,6 +113,7 @@ def dashboard(request, college_slug):
             'teacher': teacher,
             'courses': courses,
             'total_students': StudentProfile.objects.filter(college=teacher.college).count(),
+            'total_course_students': StudentProfile.objects.filter(college=teacher.college,semester__in=teacher.courses.values_list('semester', flat=True)).count(),
             'assignments': Assignment.objects.filter(course__teacher=teacher).count(),
             'recent_notices': Notice.objects.filter(
                 college=teacher.college, is_active=True,
