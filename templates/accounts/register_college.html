@@ -5,130 +5,168 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register College — CampusHub</title>
-<link rel="stylesheet" href="{% static 'css/main.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<style>
+/* Adjustments for the slightly longer registration form */
+.auth-page {
+  height: auto;
+  min-height: 100vh;
+}
+.auth-right {
+  padding: 40px;
+}
+.auth-form {
+  max-width: 600px;
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+@media(max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+</style>
 </head>
 <body>
 <div class="auth-page">
   <div class="auth-left">
     <div class="auth-brand">
-      <h1>Join <span>CampusHub</span> Today</h1>
-      <p>Register your college and start managing everything from one unified platform. Free to get started.</p>
+      <h1>Empower Your <br><span>Institution</span> Today</h1>
+      <p>Join thousands of colleges modernizing their daily operations and delivering better experiences for their students and faculty.</p>
     </div>
-    <div class="auth-features">
+    <div class="auth-features" style="opacity: 0.9;">
       <div class="auth-feature">
-        <div class="feature-icon">⚡</div>
-        <div class="feature-text"><h4>Quick Setup</h4><p>Get your college portal running in minutes</p></div>
+        <div class="feature-icon"><i class="fas fa-magic"></i></div>
+        <div class="feature-text">
+          <h4>Zero Setup Cost</h4>
+          <p>Get your college online instantly with absolutely no upfront investment needed.</p>
+        </div>
       </div>
       <div class="auth-feature">
-        <div class="feature-icon">🔒</div>
-        <div class="feature-text"><h4>Secure & Private</h4><p>Your data is protected with enterprise-grade security</p></div>
+        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+        <div class="feature-text">
+          <h4>Secure Data</h4>
+          <p>Enterprise-grade security standards to keep your academic records safe.</p>
+        </div>
       </div>
       <div class="auth-feature">
-        <div class="feature-icon">📱</div>
-        <div class="feature-text"><h4>Multi-Device</h4><p>Access from desktop, tablet, or mobile</p></div>
+        <div class="feature-icon"><i class="fas fa-headset"></i></div>
+        <div class="feature-text">
+          <h4>Priority Support</h4>
+          <p>Dedicated account managers to help your staff succeed.</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="auth-right" style="overflow-y: auto; align-items: flex-start; padding-top: 40px;">
-    <div class="auth-form" style="max-height: none;">
+  <div class="auth-right">
+    <div class="auth-form" style="margin: 20px auto;">
       <div class="auth-logo">
-        <div class="icon">E</div>
-        <span>CampusHub</span>
+         <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+        CampusHub
       </div>
       <h2>Register Your College</h2>
-      <p>Create your college administrator account</p>
+      <p>Create an administrator account to setup your institution</p>
 
-      <form method="post">
+      {% for message in messages %}
+        <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> {{ message }}</div>
+      {% endfor %}
+
+      <form method="post" action="{% url 'register_college' %}">
         {% csrf_token %}
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">First Name</label>
-            <input type="text" name="first_name" class="form-input" placeholder="First name" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Last Name</label>
-            <input type="text" name="last_name" class="form-input" placeholder="Last name" required>
-          </div>
+        
+        <h4 style="margin: 20px 0 10px; font-weight: 600; color: var(--text);">Admin Details</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">First Name *</label>
+                <input type="text" name="first_name" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Last Name *</label>
+                <input type="text" name="last_name" class="form-input" required>
+            </div>
         </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Admin Username *</label>
+                <input type="text" name="username" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input type="email" name="email" class="form-input" required>
+            </div>
+        </div>
+
+        <h4 style="margin: 20px 0 10px; font-weight: 600; color: var(--text);">Institution Details</h4>
         <div class="form-group">
-          <label class="form-label">College Name</label>
-          <input type="text" name="college_name" class="form-input" placeholder="e.g. Array College of Engineering" required>
+            <label class="form-label">College Name *</label>
+            <input type="text" name="college_name" id="id_college_name" class="form-input" required>
         </div>
+
+        <!-- Hidden Slug Field synced via JS -->
+        <input type="hidden" name="slug" id="id_slug" required>
+
         <div class="form-group">
-          <label class="form-label">College Short Code *
-            <small style="font-weight:400; color:var(--text-muted);">— used in your URL e.g. ACE, NIT, DIT</small>
-          </label>
-          <input type="text" name="slug" class="form-input" placeholder="e.g. ACE"
-            style="text-transform:uppercase; letter-spacing:2px;"
-            maxlength="20" required>
-          <small style="color:var(--text-muted); font-size:12px; margin-top:4px; display:block;">
-            Your portal will be at: <code>127.0.0.1:8000/<strong>ACE</strong>/dashboard/</code>
-          </small>
+            <label class="form-label">College Address *</label>
+            <textarea name="address" class="form-input" rows="2" required></textarea>
         </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Established Year *</label>
+                <input type="number" name="established_year" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Contact Phone *</label>
+                <input type="text" name="phone" class="form-input" required>
+            </div>
+        </div>
+
         <div class="form-group">
-          <label class="form-label">Address</label>
-          <textarea name="address" class="form-input" rows="2" placeholder="College address" required></textarea>
+            <label class="form-label">Website (Optional)</label>
+            <input type="url" name="website" class="form-input">
         </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Established Year</label>
-            <input type="number" name="established_year" class="form-input" placeholder="e.g. 1990">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Website</label>
-            <input type="url" name="website" class="form-input" placeholder="https://...">
-          </div>
+
+        <h4 style="margin: 20px 0 10px; font-weight: 600; color: var(--text);">Security</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Password *</label>
+                <input type="password" name="password" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password *</label>
+                <input type="password" name="confirm_password" class="form-input" required>
+            </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Admin Username</label>
-          <input type="text" name="username" class="form-input" placeholder="Choose a username" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-input" placeholder="admin@college.edu" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Phone</label>
-          <input type="text" name="phone" class="form-input" placeholder="+91 98765 43210">
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <input type="password" name="password1" class="form-input" placeholder="Choose password" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Confirm Password</label>
-            <input type="password" name="password2" class="form-input" placeholder="Confirm password" required>
-          </div>
-        </div>
-        {% if form.errors %}
-          <div class="alert alert-error">
-            ❌
-            {% for field, errors in form.errors.items %}
-              {% for error in errors %}
-                <div>{{ error }}</div>
-              {% endfor %}
-            {% endfor %}
-          </div>
-        {% endif %}
-        <button type="submit" class="btn btn-accent" style="width:100%; justify-content:center; padding:12px; font-size:15px;">
-          Register College →
+
+        <button type="submit" class="btn-primary" style="margin-top: 20px;">
+            Create College Account <i class="fas fa-arrow-right" style="margin-top:2px;"></i>
         </button>
       </form>
-      <p style="margin-top: 20px; text-align: center; font-size: 14px; color: var(--text-secondary);">
-        Already registered? <a href="{% url 'login' %}" style="color: var(--highlight); font-weight: 600;">Sign in</a>
+
+      <p class="bottom-link">
+        Already registered? <a href="{% url 'login' %}">Sign in here</a>
       </p>
     </div>
   </div>
 </div>
 
 <script>
-  // Auto uppercase the slug field
-  document.querySelector('input[name="slug"]').addEventListener('input', function() {
-    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  });
+    // Automatically generate slug from college name
+    document.getElementById('id_college_name').addEventListener('keyup', function() {
+        var title = this.value;
+        var slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        document.getElementById('id_slug').value = slug;
+    });
 </script>
-
 </body>
 </html>

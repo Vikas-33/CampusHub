@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusHub — The Modern College Management System</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+</head>
+<body>
+
+  <header>
+    <a href="#" class="logo">
+      <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+      CampusHub
+    </a>
+    
+    <nav class="nav-center">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it Works</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="nav-links">
+      {% if request.user.is_authenticated %}
+        {% if request.college %}
+          <a href="{% url 'dashboard' college_slug=request.college.slug %}" class="btn btn-primary">
+            Go to Dashboard <i class="fas fa-arrow-right"></i>
+          </a>
+        {% else %}
+          <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline">Logout</button>
+          </form>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline" style="border:none; color:var(--text-main);">Log In</a>
+        <a href="{% url 'register_college' %}" class="btn btn-primary">Get Started</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    
+    <div class="hero-content">
+      <div class="hero-badge">🚀 The #1 College Operating System</div>
+      <h1>Modernize Your Institution <span>Intelligently</span></h1>
+      <p>Transform how your campus runs with a unified digital ecosystem. Empower your students, faculty, and administrators with cutting-edge tools for academics, attendance, and administration.</p>
+      
+      <div class="hero-buttons">
+        {% if not request.user.is_authenticated %}
+          <a href="{% url 'register_college' %}" class="btn btn-primary btn-lg">
+            Create Free Account <i class="fas fa-sparkles"></i>
+          </a>
+          <a href="#how-it-works" class="btn btn-outline btn-lg">See How It Works</a>
+        {% else %}
+          <a href="#features" class="btn btn-primary btn-lg">Explore Features</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stats-container">
+      <div class="stat-item">
+        <h4>100%</h4>
+        <p>Paperless Admin</p>
+      </div>
+      <div class="stat-item">
+        <h4>24/7</h4>
+        <p>Cloud Accessibility</p>
+      </div>
+      <div class="stat-item">
+        <h4>Unlimited</h4>
+        <p>Student Profiles</p>
+      </div>
+      <div class="stat-item">
+        <h4>Secure</h4>
+        <p>Data Infrastructure</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="section-header">
+      <h2>Everything you need. <br/>All in one place.</h2>
+      <p>Stop juggling between multiple tools. CampusHub combines all aspects of academic and administrative management into one seamless platform.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-book-open"></i></div>
+        <h3>Academic Hub</h3>
+        <p>Organize departments, structure detailed syllabi, and streamline course allocations. Let teachers upload assignments and students submit work effortlessly.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);"><i class="fas fa-fingerprint"></i></div>
+        <h3>Smart Attendance</h3>
+        <p>Say goodbye to roll-call sheets. Teachers can mark daily attendance digitally while students track their analytics and stay above the requirement line.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);"><i class="fas fa-wallet"></i></div>
+        <h3>Instant Fee Processing</h3>
+        <p>Track tuition, hostel, and miscellaneous fees. Generate digital receipts, push automatic payment reminders, and keep the institution financially healthy.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);"><i class="fas fa-bell"></i></div>
+        <h3>Campus-wide Broadcasts</h3>
+        <p>Need to announce a holiday or emergency schedule? Send real-time notices directly to the dashboard of every relevant student and staff member.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);"><i class="fas fa-chart-pie"></i></div>
+        <h3>Assessment & Grading</h3>
+        <p>Schedule term exams, map out subjects, and publish results digitally. Students get private access to their academic report cards instantly upon release.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #3B82F6 0%, #4338CA 100%);"><i class="fas fa-user-shield"></i></div>
+        <h3>Role-Based Security</h3>
+        <p>Enterprise-grade security ensures that principals, professors, and pupils only access exactly what they are supposed to. Complete data privacy guaranteed.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps-section" id="how-it-works">
+    <div class="section-header">
+      <h2>Transform your college in days</h2>
+      <p>Migrating from paper or legacy systems takes minimal effort with CampusHub's intuitive onboarding workflow.</p>
+    </div>
+
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-content">
+          <span class="step-number">Step 01</span>
+          <h3>Register your Institution</h3>
+          <p>Create your college profile in seconds. Claim your unique institution URL (e.g., campushub.com/berkeley/) and brand it with your logo and details.</p>
+        </div>
+        <div class="step-image">
+          <i class ="fas fa-university"></i>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <span class="step-number">Step 02</span>
+          <h3>Onboard Staff & Departments</h3>
+          <p>Set up your academic structure: create departments, define courses, and assign credential access to your teaching staff and administration.</p>
+        </div>
+        <div class="step-image">
+          <i class="fas fa-sitemap"></i>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <span class="step-number">Step 03</span>
+          <h3>Import Students & Go Live</h3>
+          <p>Add your student batches. Once they log in with their secure credentials, they can instantly view notices, submit fees, and track their attendance.</p>
+        </div>
+        <div class="step-image">
+          <i class="fas fa-rocket"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta-content">
+      <h2>Ready to build the campus of tomorrow?</h2>
+      <p>Join visionary educators and modern institutions globally who trust CampusHub to deliver the ultimate academic experience.</p>
+      <div class="hero-buttons" style="margin-top: 2rem;">
+        {% if not request.user.is_authenticated %}
+          <a href="{% url 'register_college' %}" class="btn btn-primary btn-lg">Get Started Free</a>
+          <a href="{% url 'login' %}" class="btn btn-outline btn-lg">Sign In to Dashboard</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-icon" style="width: 30px; height: 30px; font-size: 1rem;"><i class="fas fa-graduation-cap"></i></div>
+          CampusHub
+        </a>
+        <p>The operating system driving the top educational institutions to excellence with zero friction and maximum efficiency.</p>
+        <!-- <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-github"></i></a>
+        </div> -->
+      </div>
+
+      <div class="footer-links">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="#features">Features overview</a></li>
+          <li><a href="#how-it-works">How it works</a></li>
+          <li><a href="#">Pricing plans</a></li>
+          <!-- <li><a href="#">Security & Privacy</a></li> -->
+        </ul>
+      </div>
+
+      <!-- contact details -->
+        <div class="footer-links">
+            <h4>Contact Us</h4>
+            <ul>
+            <li><a href="mailto:sakshamagarwal330@gmail.com"><i class="fas fa-envelope"></i> sakshamagarwal330@gmail.com</a></li>
+            <li><a href="tel:+91-7023094219"><i class="fas fa-phone"></i> +91-7023094219</a></li>
+            <li><a href="#"><i class="fas fa-map-marker-alt"></i> Jaipur, Rajasthan</a></li>
+            </ul>
+        </div>
+
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; {% now "Y" %} CampusHub Technologies. All rights reserved. Designed for educational excellence.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -26,13 +26,11 @@
             {% elif request.user.role == 'student' %}
               <a href="{% url 'assignments' college_slug=college_slug %}" class="btn btn-xs btn-info">Assignments</a>
             {% endif %}
-          </td>
-          <td>
             {% if request.user.role == 'college' %}
               <a href="{% url 'edit_course' college_slug=college_slug course_id=course.pk %}" class="btn btn-xs btn-outline">Edit</a>
               <a href="{% url 'delete_course' college_slug=college_slug course_id=course.pk %}" class="btn btn-xs btn-danger">Delete</a>
             {% endif %}
-           </td>
+          </td>
         </tr>
         {% empty %}
         <tr><td colspan="7"><div class="empty-state"><span class="icon">📚</span><h3>No courses found</h3></div></td></tr>

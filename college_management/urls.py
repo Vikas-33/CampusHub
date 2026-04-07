@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 
 
 urlpatterns = [
@@ -26,7 +26,7 @@ urlpatterns = [
         template_name='registration/password_reset_complete.html'
     ), name='password_reset_complete'),
 
-    path('', RedirectView.as_view(url='/accounts/login/'), name='home'),
+    path('', TemplateView.as_view(template_name='home.html'), name='home'), 
 
     # All college-scoped URLs under /<slug>/
     path('<slug:college_slug>/', include('accounts.slug_urls')),

@@ -5,7 +5,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login — CampusHub</title>
-<link rel="stylesheet" href="{% static 'css/main.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
 </head>
 <body>
 <div class="auth-page">
@@ -16,21 +20,21 @@
     </div>
     <div class="auth-features">
       <div class="auth-feature">
-        <div class="feature-icon">🎓</div>
+        <div class="feature-icon"><i class="fas fa-user-graduate"></i></div>
         <div class="feature-text">
           <h4>Student Management</h4>
           <p>Track enrollments, attendance, grades, and fee payments</p>
         </div>
       </div>
       <div class="auth-feature">
-        <div class="feature-icon">👨‍🏫</div>
+        <div class="feature-icon"><i class="fas fa-chalkboard-teacher"></i></div>
         <div class="feature-text">
           <h4>Faculty Portal</h4>
           <p>Manage courses, assignments, attendance and exams</p>
         </div>
       </div>
       <div class="auth-feature">
-        <div class="feature-icon">📊</div>
+        <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
         <div class="feature-text">
           <h4>Analytics & Reports</h4>
           <p>Real-time insights into academic performance and operations</p>
@@ -42,36 +46,36 @@
   <div class="auth-right">
     <div class="auth-form">
       <div class="auth-logo">
-        <div class="icon">E</div>
-        <span>CampusHub</span>
+         <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+        CampusHub
       </div>
       <h2>Welcome back</h2>
       <p>Sign in to your account to continue</p>
 
       {% for message in messages %}
-        <div class="alert alert-error">❌ {{ message }}</div>
+        <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> {{ message }}</div>
       {% endfor %}
 
       <form method="post">
         {% csrf_token %}
         <div class="form-group">
           <label class="form-label">Username</label>
-          <input type="text" name="username" class="form-input" placeholder="Enter your username" required>
+          <input type="text" name="username" class="form-input" placeholder="Enter your username" required>       
         </div>
         <div class="form-group">
-          <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">     
             Password
-            <a href="{% url 'password_reset' %}" style="font-size:12px; color:var(--highlight); font-weight:500;">Forgot password?</a>
+            <a href="{% url 'password_reset' %}" style="font-size:13px; font-weight:600;">Forgot password?</a>
           </label>
-          <input type="password" name="password" class="form-input" placeholder="Enter your password" required>
+          <input type="password" name="password" class="form-input" placeholder="Enter your password" required>   
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:15px; margin-top:8px;">
-          Sign In →
+        <button type="submit" class="btn-primary">
+            Sign In <i class="fas fa-arrow-right" style="margin-top:2px;"></i>
         </button>
       </form>
 
-      <p style="margin-top: 24px; text-align: center; font-size: 14px; color: var(--text-secondary);">
-        New college? <a href="{% url 'register_college' %}" style="color: var(--highlight); font-weight: 600;">Register here</a>
+      <p class="bottom-link">
+        New college? <a href="{% url 'register_college' %}">Register here</a>
       </p>
     </div>
   </div>
