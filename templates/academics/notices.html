@@ -42,10 +42,10 @@
         <!-- Action Buttons for Admins/Creators -->
         {% if request.user.role == 'college' or request.user.role == 'teacher' and notice.created_by == request.user %}
         <div style="display: flex; gap: 8px; align-items: center; background: var(--surface-1); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border);">
-          <a href="{% url 'edit_notice' college_slug=college_slug notice.pk %}" class="btn btn-sm btn-outline" style="border: none; padding: 6px 10px; color: var(--text-secondary);" title="Edit Notice">
+          <a href="{% url 'edit_notice' college_slug=college_slug pk=notice.pk %}" class="btn btn-sm btn-outline" style="border: none; padding: 6px 10px; color: var(--text-secondary);" title="Edit Notice">
             <i class="fas fa-edit"></i>
           </a>
-          <a href="{% url 'delete_notice' college_slug=college_slug notice.pk %}" class="btn btn-sm btn-outline" style="border: none; padding: 6px 10px; color: var(--red); background: rgba(239,68,68,0.1);" title="Delete Notice">
+          <a href="{% url 'delete_notice' college_slug=college_slug pk=notice.pk %}" class="btn btn-sm btn-outline" style="border: none; padding: 6px 10px; color: var(--red); background: rgba(239,68,68,0.1);" title="Delete Notice">
             <i class="fas fa-trash-alt"></i>
           </a>
         </div>
