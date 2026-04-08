@@ -140,6 +140,7 @@ def dashboard(request, college_slug):
         attendance = Attendance.objects.filter(student=student)
         total = attendance.count()
         present = attendance.filter(status='present').count()
+        absent=attendance.filter(status='absent').count()
         att_percent = round((present / total * 100), 1) if total > 0 else 0
 
         upcoming_exams = Exam.objects.filter(
@@ -435,6 +436,7 @@ def edit_student(request, college_slug, pk):
             student.user.first_name = cd['first_name']
             student.user.last_name = cd['last_name']
             student.user.email = cd['email']
+            student.date_of_birth = cd['date_of_birth']
             student.user.save()
             form.save()
             messages.success(request, 'Student updated successfully!')
@@ -444,6 +446,8 @@ def edit_student(request, college_slug, pk):
             'first_name': student.user.first_name,
             'last_name': student.user.last_name,
             'email': student.user.email,
+            'date_of_birth': student.date_of_birth,
+            
         })
     return render(request, 'college/edit_student.html', {'form': form, 'student': student})
 
