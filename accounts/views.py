@@ -460,15 +460,24 @@ def delete_student(request, college_slug, pk):
     return render(request, 'college/confirm_delete.html', {'object': student, 'type': 'Student'})
 
 
-
 def auto_update_semesters(college):
     today = date_today.today()
+
     # Jan-Jun = first half, Jul-Dec = second half
     current_period_start = date_today(today.year, 7 if today.month >= 7 else 1, 1)
+
     students = StudentProfile.objects.filter(college=college, semester__lt=8)
+
     for student in students:
-        if (student.last_semester_update is None or
-                student.last_semester_update < current_period_start):
+
+        # 🟢 FIX: handle old records (None) without increment
+        if student.last_semester_update is None:
+            student.last_semester_update = current_period_start
+            student.save(update_fields=['last_semester_update'])
+            continue
+
+        # 🟢 increment only when new semester period starts
+        if student.last_semester_update < current_period_start:
             student.semester += 1
-            student.last_semester_update = today
+            student.last_semester_update = current_period_start
             student.save(update_fields=['semester', 'last_semester_update'])
